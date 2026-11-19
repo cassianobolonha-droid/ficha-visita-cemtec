@@ -159,17 +159,16 @@
     .fs-sig-bottom { padding: 12px 16px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 10px; }
 
     .a4-sheet { background: #fff; max-width: 794px; margin: 0 auto; padding: 34px 44px 24px; border: 1px solid #cbd5e1; font-family: 'Times New Roman', Georgia, serif; }
-    .a4-header { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 22px; }
-    .a4-header-line { flex: 1; height: 1.5px; background: var(--blue-dark); }
-    .a4-logos { display: flex; align-items: center; gap: 12px; }
-    .a4-logos img { height: 50px; object-fit: contain; }
-    .a4-title { text-align: center; font-size: 20px; font-weight: 700; margin-bottom: 22px; }
-    .a4-field { display: flex; gap: 8px; margin-bottom: 14px; font-size: 16px; }
-    .a4-field-value { flex: 1; border-bottom: 1px solid #1f2937; padding: 0 6px 2px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; }
-    .a4-objective-box { margin: 10px 0 20px; min-height: 130px; line-height: 28px; font-family: 'Inter', sans-serif; font-size: 14px; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 27px, #374151 27px, #374151 28px); white-space: pre-wrap; }
-    .a4-sig-block { text-align: center; max-width: 340px; margin: 24px auto; }
-    .a4-sig-block img { max-height: 80px; margin-bottom: -8px; }
-    .a4-sig-line { border-top: 1px solid #1f2937; padding-top: 6px; font-size: 14px; }
+    .a4-header { border-bottom: 2px solid var(--blue-dark); padding-bottom: 10px; margin-bottom: 18px; text-align: center; }
+    .a4-logos { font-family: Arial, sans-serif; font-weight: 800; color: var(--blue-dark); font-size: 14px; }
+    .a4-logos-sub { font-family: Arial, sans-serif; font-weight: 700; color: var(--blue-light); font-size: 12px; margin-top: 2px; }
+    .a4-title { text-align: center; font-size: 18px; font-weight: bold; color: var(--blue-dark); margin-bottom: 4px; }
+    .a4-field { display: flex; gap: 8px; margin-bottom: 12px; font-size: 14px; }
+    .a4-field-value { flex: 1; border-bottom: 1px solid #1f2937; padding: 0 6px 2px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; }
+    .a4-objective-box { margin: 8px 0 16px; min-height: 90px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 13px; background: #fafafa; white-space: pre-wrap; }
+    .a4-sig-block { text-align: center; max-width: 320px; margin: 20px auto; }
+    .a4-sig-block img { max-height: 75px; margin-bottom: -6px; }
+    .a4-sig-line { border-top: 1px solid #1f2937; padding-top: 6px; font-size: 13px; }
 
     .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all 0.25s; z-index: 600; }
     .toast.show { transform: translateY(0); opacity: 1; }
@@ -411,7 +410,7 @@
             <button class="btn btn-primary" onclick="syncFromGoogleSheets()">🔄 Atualizar Listas da Planilha</button>
             <button class="btn btn-outline" onclick="syncVisitsFromCloud()">📥 Puxar Fichas da Planilha</button>
             <a href="https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit" target="_blank" class="btn btn-outline">Abrir Planilha ↗</a>
-            <a href="https://drive.google.com/drive/folders/1hugA5K2eknsw7tznPtNCzin9g6NvIJSj" target="_blank" class="btn btn-outline">Abrir Pasta de PDFs no Drive ↗</a>
+            <a href="https://drive.google.com/drive/folders/1WyXDmpA_PBzXrrHUxr5yOByyq0ofLmlK" target="_blank" class="btn btn-outline">Abrir Pasta de PDFs no Drive ↗</a>
           </div>
         </div>
       </section>
@@ -452,9 +451,6 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // =========================================================================
-    // CONFIGURAÇÃO PRINCIPAL
-    // =========================================================================
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec';
     const COORDINATOR_PIN = '2026';
     const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit';
@@ -472,7 +468,6 @@
     let lists = JSON.parse(localStorage.getItem('cemtec_lists_v3') || 'null') || structuredClone(DEFAULT_LISTS);
     let padUnit, padFs, capturedUnit = '', charts = {};
 
-    // ===== ACCESS CONTROL (MODO PROFESSOR vs COORDENADOR) =====
     const params = new URLSearchParams(window.location.search);
     const isProfessorMode = params.get('modo') === 'ficha';
 
@@ -523,7 +518,6 @@
       navigator.clipboard.writeText(link).then(() => showToast('Link dos Professores copiado! Cole no WhatsApp.'));
     }
 
-    // ===== SIGNATURE PAD =====
     class SignaturePad {
       constructor(canvas) {
         this.canvas = canvas; this.ctx = canvas.getContext('2d'); this.color = '#003580';
@@ -584,7 +578,6 @@
       document.getElementById('fsSigModal').classList.remove('open');
     }
 
-    // ===== SAVE & CLOUD SYNC =====
     async function saveVisit(mode) {
       const servidor = document.getElementById('fServidor').value.trim();
       const departamento = document.getElementById('fDepartamento').value.trim();
@@ -650,7 +643,7 @@
     async function syncVisitsFromCloud(silent = false) {
       const lbl = document.getElementById('cloudStatusLabel');
       if (!APPS_SCRIPT_URL) {
-        lbl.textContent = 'Não configurada (cole a URL do Apps Script no código)';
+        lbl.textContent = 'Não configurada';
         return;
       }
       lbl.textContent = 'Conectada (Planilha + Pasta PDF no Drive)';
@@ -688,7 +681,6 @@
       } catch (e) {}
     }
 
-    // ===== UI RENDERING =====
     function switchView(v) {
       document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
       document.getElementById('view-' + v).classList.add('active');
@@ -775,23 +767,28 @@
       document.getElementById('a4ModalBody').innerHTML = `
         <div class="a4-sheet">
           <div class="a4-header">
-            <div class="a4-header-line"></div>
-            <div class="a4-logos"><img src="${LOGO_URL}" alt="CEMTEC" /><strong>SEMED SORRISO</strong></div>
-            <div class="a4-header-line"></div>
+            <div class="a4-logos">CEMTEC — CENTRO MUNICIPAL DE TECNOLOGIA E ROBÓTICA EDUCACIONAL</div>
+            <div class="a4-logos-sub">SEMED — SECRETARIA MUNICIPAL DE EDUCAÇÃO • PREFEITURA DE SORRISO - MT</div>
           </div>
           <div class="a4-title">FICHA DE VISITA</div>
+          <div style="text-align:center;font-size:12px;color:#64748b;margin-bottom:16px;">Protocolo: <strong>${esc(v.protocolo)}</strong></div>
           <div class="a4-field"><span>Nome do Servidor:</span><span class="a4-field-value">${esc(v.servidor)}</span></div>
-          <div class="a4-field"><span>Departamento:</span><span class="a4-field-value">${esc(v.departamento)}</span></div>
+          <div class="a4-field"><span>Departamento / Setor:</span><span class="a4-field-value">${esc(v.departamento)}</span></div>
           <div class="a4-field"><span>Unidade / Escola / Destino:</span><span class="a4-field-value">${esc(v.unidade)}</span></div>
-          <div class="a4-field"><span>Data:</span><span class="a4-field-value">${d}/${m}/${y}</span></div>
-          <div>Objetivo da visita:</div>
+          <div class="a4-field"><span>Data da Visita:</span><span class="a4-field-value">${d}/${m}/${y}</span></div>
+          <div style="font-size:14px;font-weight:600;margin-top:10px;">Objetivo da Visita:</div>
           <div class="a4-objective-box">${esc(v.objetivo)}</div>
-          <div style="margin-bottom:24px;">Horário de Entrada: <strong>${esc(v.entrada)}</strong> &nbsp;|&nbsp; Horário de Saída: <strong>${esc(v.saida||'—')}</strong></div>
+          <div style="margin-bottom:20px;font-size:14px;">
+            Horário de Entrada: <strong>${esc(v.entrada)}</strong> &nbsp;|&nbsp; Horário de Saída: <strong>${esc(v.saida||'—')}</strong> &nbsp;|&nbsp; Duração: <strong>${esc(v.duracao||'—')}</strong>
+          </div>
           <div class="a4-sig-block">
             ${v.sigUnit ? `<img src="${v.sigUnit}" />` : '<div style="height:40px;color:#d97706;">[ Pendente ]</div>'}
-            <div class="a4-sig-line">Assinatura do responsável pela unidade${v.responsavel ? '<br/><small>'+esc(v.responsavel)+'</small>' : ''}</div>
+            <div class="a4-sig-line">Assinatura do Responsável pela Unidade${v.responsavel ? '<br/><small>'+esc(v.responsavel)+'</small>' : ''}</div>
           </div>
-          <div style="font-family:Inter,sans-serif;font-size:11px;color:#475569;text-align:center;">Protocolo: <strong>${esc(v.protocolo)}</strong></div>
+          <div style="font-family:Arial,sans-serif;font-size:9px;color:#475569;text-align:center;border-top:2px solid #003580;padding-top:6px;margin-top:20px;">
+            Status: ${v.status === 'signed' ? 'Assinada digitalmente' : 'Aguardando assinatura'} | Registrado em: ${new Date().toLocaleDateString('pt-BR')}<br/>
+            Avenida Tancredo Neves, nº 124, Centro Sul • Sorriso - MT • (66) 3545-8100 • educacao@sorriso.mt.gov.br
+          </div>
         </div>`;
       document.getElementById('a4Modal').classList.add('open');
     }
@@ -806,7 +803,6 @@
       a.download = `fichas-cemtec-${todayISO()}.csv`; a.click();
     }
 
-    // ===== UTILS =====
     function todayISO() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
     function formatDateBR(iso) { if (!iso || !iso.includes('-')) return iso || '—'; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; }
     function setNowTime(id) { const d = new Date(); document.getElementById(id).value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
@@ -817,7 +813,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.dynamic-logo').forEach(img => { img.src = LOGO_URL; });
-      padUnit = new SignaturePad(document.getElementById('sigCanvasUnit'));
+      padUnit = new SignaturePad(document.getElementById('sigCanvasWord') || document.getElementById('sigCanvasUnit'));
       padFs = new SignaturePad(document.getElementById('fsSigCanvas'));
       document.getElementById('fData').value = todayISO();
       setNowTime('fEntrada');
