@@ -33,6 +33,7 @@
     body.mode-professor .prof-topbar { display: flex; }
     body.mode-professor .sidebar, body.mode-professor .mobile-header { display: none !important; }
     body.mode-professor .main-content { max-width: 900px; }
+    .prof-acoes { display: flex; gap: 8px; flex-wrap: wrap; }
     .app-shell { display: flex; flex: 1; min-height: calc(100vh - 5px); }
     .sidebar { width: 270px; background: linear-gradient(180deg, var(--blue-dark) 0%, #002359 100%); color: #fff; display: flex; flex-direction: column; padding: 20px 16px; position: sticky; top: 0; height: calc(100vh - 5px); z-index: 40; transition: transform 0.25s ease; }
     .brand-box { background: #fff; border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 16px; }
@@ -161,7 +162,7 @@
     .a4-title { text-align: center; font-size: 18px; font-weight: bold; color: var(--blue-dark); margin-bottom: 4px; }
     .a4-field { display: flex; gap: 8px; margin-bottom: 12px; font-size: 14px; }
     .a4-field-value { flex: 1; border-bottom: 1px solid #1f2937; padding: 0 6px 2px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; }
-    .a4-objective-box { margin: 8px 0 16px; min-height: 90px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 13px; background: #fafafa; white-space: pre-wrap; }
+    .a4-objective-box { margin: 8px 0 16px; min-height: 90px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 13px; background: #fafafa; white-space: pre-wrap; color: #000; }
     .a4-sig-block { text-align: center; max-width: 320px; margin: 20px auto; }
     .a4-sig-block img { max-height: 75px; margin-bottom: -6px; }
     .a4-sig-line { border-top: 1px solid #1f2937; padding-top: 6px; font-size: 13px; }
@@ -212,7 +213,10 @@
         <div style="font-size:11px;opacity:.85;">Modo Professor (Envio direto para a Coordenação)</div>
       </div>
     </div>
-    <button class="btn btn-outline btn-sm" onclick="requestCoordinatorAccess()">🔒 Coordenador</button>
+    <div class="prof-acoes">
+      <button class="btn btn-outline btn-sm" onclick="requestCoordinatorAccess()">🔒 Coordenador</button>
+      <button class="btn btn-outline btn-sm" onclick="sairSistema()">🚪 Sair</button>
+    </div>
   </div>
 
   <header class="mobile-header">
@@ -236,7 +240,8 @@
         <button class="nav-btn" data-view="lists" onclick="switchView('lists')">⚙️ Planilha &amp; Links</button>
       </nav>
       <div class="sidebar-footer">
-        <button class="btn btn-accent btn-sm" style="width:100%;margin-bottom:10px;" onclick="copyProfessorLink()">🔗 Link p/ Professores</button>
+        <button class="btn btn-accent btn-sm" style="width:100%;margin-bottom:8px;" onclick="copyProfessorLink()">🔗 Link p/ Professores</button>
+        <button class="btn btn-outline btn-sm" style="width:100%;margin-bottom:10px;" onclick="sairSistema()">🚪 Sair do Sistema</button>
         <strong>Prefeitura de Sorriso - MT</strong><br/>CEMTEC • Robótica e Tecnologia
       </div>
     </aside>
@@ -252,6 +257,7 @@
             <button class="btn btn-outline" onclick="syncVisitsFromCloud()">🔄 Atualizar da Planilha</button>
             <button class="btn btn-accent" onclick="copyProfessorLink()">🔗 Link dos Professores</button>
             <button class="btn btn-primary" onclick="switchView('new')">+ Nova Ficha</button>
+            <button class="btn btn-danger" onclick="sairSistema()">🚪 Sair</button>
           </div>
         </div>
         <div class="kpi-grid">
@@ -372,8 +378,8 @@
               <div class="sig-toolbar">
                 <div class="sig-group">
                   <span class="sig-label">Cor</span>
-                  <button type="button" class="color-dot active" style="background:#003580;" title="Azul" onclick="setPenColor('#003580', this, 'unit')"></button>
-                  <button type="button" class="color-dot" style="background:#0f172a;" title="Preto" onclick="setPenColor('#0f172a', this, 'unit')"></button>
+                  <button type="button" class="color-dot" style="background:#003580;" title="Azul" onclick="setPenColor('#003580', this, 'unit')"></button>
+                  <button type="button" class="color-dot active" style="background:#000000;" title="Preto" onclick="setPenColor('#000000', this, 'unit')"></button>
                 </div>
                 <div class="sig-group">
                   <span class="sig-label">Ponta</span>
@@ -404,6 +410,7 @@
           <div class="header-actions">
             <button class="btn btn-outline" onclick="syncVisitsFromCloud()">🔄 Atualizar</button>
             <button class="btn btn-primary" onclick="exportCSV()">📥 Exportar CSV</button>
+            <button class="btn btn-danger" onclick="sairSistema()">🚪 Sair</button>
           </div>
         </div>
         <div class="card">
@@ -427,7 +434,6 @@
               <button type="button" class="btn btn-outline" id="btHoje" onclick="setPeriodo('hoje')">Hoje</button>
               <button type="button" class="btn btn-outline" id="bt7" onclick="setPeriodo('7')">7 dias</button>
               <button type="button" class="btn btn-outline" id="btMes" onclick="setPeriodo('mes')">Este mês</button>
-              <button type="button" class="btn btn-outline" onclick="setPeriodo('limpar')">Limpar</button>
             </div>
           </div>
 
@@ -446,7 +452,12 @@
       </section>
 
       <section class="view-section" id="view-lists">
-        <div class="page-header"><div class="page-title"><h1>Planilha, Drive &amp; Links de Acesso</h1><p>Gerencie a integração com o Google Drive e compartilhe o link exclusivo dos professores.</p></div></div>
+        <div class="page-header">
+          <div class="page-title"><h1>Planilha, Drive &amp; Links de Acesso</h1><p>Gerencie a integração com o Google Drive e compartilhe o link exclusivo dos professores.</p></div>
+          <div class="header-actions">
+            <button class="btn btn-danger" onclick="sairSistema()">🚪 Sair</button>
+          </div>
+        </div>
         <div class="card">
           <div class="card-title" style="margin-bottom:10px;">🔗 Link Exclusivo para Professores (somente a ficha)</div>
           <div class="input-row">
@@ -490,8 +501,8 @@
     <div class="fs-sig-tools">
       <div class="sig-group">
         <span class="sig-label">Cor</span>
-        <button type="button" class="color-dot active" style="background:#003580;" title="Azul" onclick="setPenColor('#003580', this, 'fs')"></button>
-        <button type="button" class="color-dot" style="background:#0f172a;" title="Preto" onclick="setPenColor('#0f172a', this, 'fs')"></button>
+        <button type="button" class="color-dot" style="background:#003580;" title="Azul" onclick="setPenColor('#003580', this, 'fs')"></button>
+        <button type="button" class="color-dot active" style="background:#000000;" title="Preto" onclick="setPenColor('#000000', this, 'fs')"></button>
       </div>
       <div class="sig-group">
         <span class="sig-label">Ponta</span>
@@ -522,11 +533,7 @@
     const OBJETIVO_MIN_CHARS = 25;
 
     const DEFAULT_LISTS = {
-      servidores: [],
-      departamentos: [],
-      unidades: [],
-      objetivos: [],
-      responsaveis: []
+      servidores: [], departamentos: [], unidades: [], objetivos: [], responsaveis: []
     };
 
     let visits = JSON.parse(localStorage.getItem('cemtec_visits_v5') || '[]').map(function (v) {
@@ -535,6 +542,8 @@
 
     let lists = JSON.parse(localStorage.getItem('cemtec_lists_v5') || 'null') || JSON.parse(JSON.stringify(DEFAULT_LISTS));
     if (!Array.isArray(lists.responsaveis)) lists.responsaveis = [];
+    if (!Array.isArray(lists.paresServidor)) lists.paresServidor = [];
+    if (!Array.isArray(lists.paresUnidade)) lists.paresUnidade = [];
 
     let mapaServidorDepto = {};
     let mapaUnidadeResp = {};
@@ -546,6 +555,37 @@
     const isProfessorMode = params.get('modo') === 'ficha';
 
     /* ============================================================
+       SESSÃO / MODO
+       ============================================================ */
+
+    function getModoSalvo() {
+      try { return sessionStorage.getItem('cemtec_modo') || ''; } catch (e) { return ''; }
+    }
+
+    function setModoSalvo(m) {
+      try { sessionStorage.setItem('cemtec_modo', m); } catch (e) {}
+    }
+
+    function sairSistema() {
+      try {
+        sessionStorage.removeItem('cemtec_coord_auth');
+        sessionStorage.removeItem('cemtec_modo');
+      } catch (e) {}
+      document.body.classList.remove('mode-professor');
+      var base = window.location.href.split('?')[0];
+      if (window.location.search) {
+        window.location.replace(base);
+        return;
+      }
+      var gate = document.getElementById('pinGate');
+      if (gate) gate.classList.add('open');
+      var pin = document.getElementById('pinInput');
+      var err = document.getElementById('pinError');
+      if (err) err.textContent = '';
+      if (pin) { pin.value = ''; setTimeout(function () { pin.focus(); }, 100); }
+    }
+
+    /* ============================================================
        ASSINATURA
        ============================================================ */
 
@@ -553,8 +593,8 @@
       constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
-        this.color = '#003580';
-        this.width = 3.5;
+        this.color = '#000000';
+        this.width = 2;
         this.strokes = [];
         this.drawing = false;
         this.w = 0;
@@ -731,7 +771,7 @@
     }
 
     function confirmFullscreenSig() {
-      if (padFs.isEmpty()) { showToast('Faça a assinatura primeiro.'); return; }
+      if (!padFs || padFs.isEmpty()) { showToast('Faça a assinatura primeiro.'); return; }
       padUnit.copyFrom(padFs);
       document.getElementById('fsSigModal').classList.remove('open');
       showToast('Assinatura aplicada na ficha.');
@@ -759,7 +799,7 @@
 
     function renderObjLista() {
       var filtro = (document.getElementById('objSearch').value || '').toLowerCase();
-      var lista = lists.objetivos.filter(function (o) {
+      var lista = (lists.objetivos || []).filter(function (o) {
         return !filtro || o.toLowerCase().indexOf(filtro) !== -1;
       });
       var el = document.getElementById('objLista');
@@ -951,11 +991,20 @@
 
     function initAccessMode() {
       var baseUrl = window.location.href.split('?')[0];
-      document.getElementById('profLinkDisplay').value = baseUrl + '?modo=ficha';
-      if (isProfessorMode) {
+      var profLink = document.getElementById('profLinkDisplay');
+      if (profLink) profLink.value = baseUrl + '?modo=ficha';
+
+      var modo = getModoSalvo();
+      var autenticado = false;
+      try { autenticado = sessionStorage.getItem('cemtec_coord_auth') === '1'; } catch (e) {}
+
+      if (isProfessorMode || modo === 'ficha') {
         document.body.classList.add('mode-professor');
         switchView('new');
-      } else if (sessionStorage.getItem('cemtec_coord_auth') !== '1') {
+        return;
+      }
+
+      if (!autenticado) {
         document.getElementById('pinGate').classList.add('open');
         setTimeout(function () { document.getElementById('pinInput').focus(); }, 100);
       } else {
@@ -966,7 +1015,8 @@
     function verifyPin() {
       var val = document.getElementById('pinInput').value.trim();
       if (val === COORDINATOR_PIN) {
-        sessionStorage.setItem('cemtec_coord_auth', '1');
+        try { sessionStorage.setItem('cemtec_coord_auth', '1'); } catch (e) {}
+        setModoSalvo('coordenador');
         document.getElementById('pinGate').classList.remove('open');
         document.body.classList.remove('mode-professor');
         switchView('dashboard');
@@ -978,6 +1028,7 @@
     }
 
     function enterProfessorMode() {
+      setModoSalvo('ficha');
       document.getElementById('pinGate').classList.remove('open');
       document.body.classList.add('mode-professor');
       switchView('new');
@@ -1199,7 +1250,7 @@
               });
             }
 
-            if (lbl) lbl.textContent = 'Conectada — ' + visits.length + ' ficha(s) | ' + lists.objetivos.length + ' objetivo(s)';
+            if (lbl) lbl.textContent = 'Conectada — ' + visits.length + ' ficha(s) | ' + (lists.objetivos || []).length + ' objetivo(s)';
           } else {
             if (lbl) lbl.textContent = 'Erro: ' + (json.message || 'desconhecido');
           }
@@ -1218,7 +1269,7 @@
       renderDashboard();
       renderReportsTable();
 
-      if (!silent) showToast('Sincronizado! ' + visits.length + ' ficha(s) e ' + lists.objetivos.length + ' objetivo(s).');
+      if (!silent) showToast('Sincronizado! ' + visits.length + ' ficha(s) e ' + (lists.objetivos || []).length + ' objetivo(s).');
     }
 
     function syncVisitsFromCloud(silent) { return syncTudo(silent); }
@@ -1229,11 +1280,13 @@
 
     function switchView(v) {
       document.querySelectorAll('.view-section').forEach(function (s) { s.classList.remove('active'); });
-      document.getElementById('view-' + v).classList.add('active');
+      var alvo = document.getElementById('view-' + v);
+      if (alvo) alvo.classList.add('active');
       document.querySelectorAll('.nav-btn').forEach(function (b) {
         b.classList.toggle('active', b.dataset.view === v);
       });
-      document.getElementById('sidebar').classList.remove('open');
+      var sb = document.getElementById('sidebar');
+      if (sb) sb.classList.remove('open');
       if (v === 'new') {
         setTimeout(function () { if (padUnit) { padUnit.resize(); padUnit.redraw(); } }, 110);
       }
@@ -1242,42 +1295,51 @@
     }
 
     function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('open');
+      var sb = document.getElementById('sidebar');
+      if (sb) sb.classList.toggle('open');
     }
 
     function populateDatalists() {
-      document.getElementById('dlServidores').innerHTML = lists.servidores.map(function (v) {
+      var el = document.getElementById('dlServidores');
+      if (el) el.innerHTML = (lists.servidores || []).map(function (v) {
         return '<option value="' + esc(v) + '">';
       }).join('');
 
-      document.getElementById('dlDepartamentos').innerHTML = lists.departamentos.map(function (v) {
+      el = document.getElementById('dlDepartamentos');
+      if (el) el.innerHTML = (lists.departamentos || []).map(function (v) {
         return '<option value="' + esc(v) + '">';
       }).join('');
 
-      document.getElementById('dlUnidades').innerHTML = lists.unidades.map(function (v) {
+      el = document.getElementById('dlUnidades');
+      if (el) el.innerHTML = (lists.unidades || []).map(function (v) {
         return '<option value="' + esc(v) + '">';
       }).join('');
 
-      document.getElementById('dlResponsaveis').innerHTML = lists.responsaveis.map(function (v) {
+      el = document.getElementById('dlResponsaveis');
+      if (el) el.innerHTML = (lists.responsaveis || []).map(function (v) {
         return '<option value="' + esc(v) + '">';
       }).join('');
 
-      var units = Array.from(new Set(lists.unidades.concat(visits.map(function (v) { return v.unidade; })))).filter(Boolean).sort();
-      var depts = Array.from(new Set(lists.departamentos.concat(visits.map(function (v) { return v.departamento; })))).filter(Boolean).sort();
+      var units = Array.from(new Set((lists.unidades || []).concat(visits.map(function (v) { return v.unidade; })))).filter(Boolean).sort();
+      var depts = Array.from(new Set((lists.departamentos || []).concat(visits.map(function (v) { return v.departamento; })))).filter(Boolean).sort();
 
       var selU = document.getElementById('filterUnit');
-      var atualU = selU.value;
-      selU.innerHTML = '<option value="">Todas as Unidades</option>' + units.map(function (u) {
-        return '<option value="' + esc(u) + '">' + esc(u) + '</option>';
-      }).join('');
-      selU.value = atualU;
+      if (selU) {
+        var atualU = selU.value;
+        selU.innerHTML = '<option value="">Todas as Unidades</option>' + units.map(function (u) {
+          return '<option value="' + esc(u) + '">' + esc(u) + '</option>';
+        }).join('');
+        selU.value = atualU;
+      }
 
       var selD = document.getElementById('filterDept');
-      var atualD = selD.value;
-      selD.innerHTML = '<option value="">Todos os Departamentos</option>' + depts.map(function (d) {
-        return '<option value="' + esc(d) + '">' + esc(d) + '</option>';
-      }).join('');
-      selD.value = atualD;
+      if (selD) {
+        var atualD = selD.value;
+        selD.innerHTML = '<option value="">Todos os Departamentos</option>' + depts.map(function (d) {
+          return '<option value="' + esc(d) + '">' + esc(d) + '</option>';
+        }).join('');
+        selD.value = atualD;
+      }
     }
 
     function respCell(nome) {
@@ -1298,14 +1360,20 @@
       var durs = visits.map(function (v) { return calcDurationMinutes(v.entrada, v.saida); }).filter(function (x) { return x !== null; });
       var avg = durs.length ? Math.round(durs.reduce(function (a, b) { return a + b; }, 0) / durs.length) : 0;
 
-      document.getElementById('kpiTotal').textContent = total;
-      document.getElementById('kpiToday').textContent = visits.filter(function (v) { return v.data === today; }).length;
-      document.getElementById('kpiTodayDate').textContent = formatDateBR(today);
-      document.getElementById('kpiUnits').textContent = new Set(visits.map(function (v) { return v.unidade; })).size;
-      document.getElementById('kpiSignedRate').textContent = (total ? Math.round(signed / total * 100) : 0) + '%';
-      document.getElementById('kpiPendingText').textContent = pending + ' pendente(s)';
-      document.getElementById('kpiAvgTime').textContent = formatMinutes(avg);
-      document.getElementById('navPendingBadge').textContent = total;
+      var set = function (id, txt) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = txt;
+      };
+
+      set('kpiTotal', total);
+      set('kpiToday', visits.filter(function (v) { return v.data === today; }).length);
+      set('kpiTodayDate', formatDateBR(today));
+      set('kpiUnits', new Set(visits.map(function (v) { return v.unidade; })).size);
+      set('kpiSignedRate', (total ? Math.round(signed / total * 100) : 0) + '%');
+      set('kpiPendingText', pending + ' pendente(s)');
+      set('kpiAvgTime', formatMinutes(avg));
+      var badge = document.getElementById('navPendingBadge');
+      if (badge) badge.textContent = total;
 
       var countBy = function (k) {
         var m = {};
@@ -1314,8 +1382,10 @@
       };
 
       var mk = function (id, cfg) {
+        var canvas = document.getElementById(id);
+        if (!canvas || typeof Chart === 'undefined') return;
         if (charts[id]) charts[id].destroy();
-        charts[id] = new Chart(document.getElementById(id), cfg);
+        charts[id] = new Chart(canvas, cfg);
       };
 
       var uD = countBy('unidade');
@@ -1323,7 +1393,7 @@
 
       mk('chartUnits', {
         type: 'bar',
-        data: { labels: uD.map(function (x) { return x[0].slice(0, 22); }), datasets: [{ data: uD.map(function (x) { return x[1]; }), backgroundColor: '#003580', borderRadius: 6 }] },
+        data: { labels: uD.map(function (x) { return String(x[0]).slice(0, 22); }), datasets: [{ data: uD.map(function (x) { return x[1]; }), backgroundColor: '#003580', borderRadius: 6 }] },
         options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
@@ -1335,14 +1405,15 @@
 
       mk('chartDepts', {
         type: 'bar',
-        data: { labels: dD.map(function (x) { return x[0].split('—')[0]; }), datasets: [{ data: dD.map(function (x) { return x[1]; }), backgroundColor: '#009FE3', borderRadius: 6 }] },
+        data: { labels: dD.map(function (x) { return String(x[0]).split('—')[0]; }), datasets: [{ data: dD.map(function (x) { return x[1]; }), backgroundColor: '#009FE3', borderRadius: 6 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
       var recentes = visits.slice(0, 6);
       window._dashList = recentes;
 
-      document.getElementById('recentVisitsBody').innerHTML = recentes.map(function (v, i) {
+      var tb = document.getElementById('recentVisitsBody');
+      if (tb) tb.innerHTML = recentes.map(function (v, i) {
         return '<tr>' +
           '<td><strong>' + esc(v.protocolo) + '</strong></td>' +
           '<td>' + formatDateBR(v.data) + '</td>' +
@@ -1358,7 +1429,7 @@
     }
 
     /* ============================================================
-       RELATÓRIOS — filtros + período
+       RELATÓRIOS
        ============================================================ */
 
     function dataISO(d) {
@@ -1368,6 +1439,7 @@
     function setPeriodo(modo) {
       var de = document.getElementById('filterDe');
       var ate = document.getElementById('filterAte');
+      if (!de || !ate) return;
       var hoje = new Date();
 
       if (modo === 'hoje') {
@@ -1401,12 +1473,19 @@
     }
 
     function listaFiltrada() {
-      var q = (document.getElementById('filterSearch').value || '').toLowerCase();
-      var u = document.getElementById('filterUnit').value;
-      var d = document.getElementById('filterDept').value;
-      var s = document.getElementById('filterStatus').value;
-      var de = document.getElementById('filterDe').value;
-      var ate = document.getElementById('filterAte').value;
+      var elQ = document.getElementById('filterSearch');
+      var elU = document.getElementById('filterUnit');
+      var elD = document.getElementById('filterDept');
+      var elS = document.getElementById('filterStatus');
+      var elDe = document.getElementById('filterDe');
+      var elAte = document.getElementById('filterAte');
+
+      var q = (elQ ? elQ.value : '').toLowerCase();
+      var u = elU ? elU.value : '';
+      var d = elD ? elD.value : '';
+      var s = elS ? elS.value : '';
+      var de = elDe ? elDe.value : '';
+      var ate = elAte ? elAte.value : '';
 
       return visits.filter(function (v) {
         var hay = (v.protocolo + ' ' + v.servidor + ' ' + v.unidade + ' ' + (v.responsavel || '') + ' ' + v.objetivo).toLowerCase();
@@ -1424,7 +1503,8 @@
       var list = listaFiltrada();
       window._reportList = list;
 
-      document.getElementById('reportsTableBody').innerHTML = list.map(function (v, i) {
+      var tb = document.getElementById('reportsTableBody');
+      if (tb) tb.innerHTML = list.map(function (v, i) {
         return '<tr>' +
           '<td><strong>' + esc(v.protocolo) + '</strong></td>' +
           '<td>' + formatDateBR(v.data) + '</td>' +
@@ -1448,7 +1528,8 @@
                 '<strong>' + pendentes + '</strong> pendente(s)';
       if (mins.length) txt += ' · ' + formatMinutes(totalMin) + ' de permanência';
 
-      document.getElementById('filtrosResumo').innerHTML = txt;
+      var resumo = document.getElementById('filtrosResumo');
+      if (resumo) resumo.innerHTML = txt;
     }
 
     /* ============================================================
@@ -1527,7 +1608,7 @@
     }
 
     /* ============================================================
-       CSV — respeita os filtros da tela
+       CSV
        ============================================================ */
 
     function exportCSV() {
@@ -1579,7 +1660,8 @@
 
     function setNowTime(id) {
       var d = new Date();
-      document.getElementById(id).value = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+      var el = document.getElementById(id);
+      if (el) el.value = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
     }
 
     function calcDurationMinutes(a, b) {
@@ -1603,6 +1685,7 @@
 
     function showToast(msg) {
       var t = document.getElementById('toast');
+      if (!t) return;
       t.textContent = msg;
       t.classList.add('show');
       clearTimeout(window._tt);
@@ -1617,7 +1700,7 @@
       var menu = document.getElementById('objMenu');
       var btn = document.getElementById('objMultiBtn');
       if (!menu || !menu.classList.contains('open')) return;
-      if (menu.contains(e.target) || btn.contains(e.target)) return;
+      if (menu.contains(e.target) || (btn && btn.contains(e.target))) return;
       menu.classList.remove('open');
     });
 
@@ -1633,37 +1716,59 @@
       }, 350);
     });
 
+    /* ============================================================
+       INICIALIZAÇÃO
+       ============================================================ */
+
     window.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('.dynamic-logo').forEach(function (img) { img.src = LOGO_URL; });
+      function tentar(nome, fn) {
+        try { fn(); } catch (e) { console.error('Falha em ' + nome + ':', e); }
+      }
 
-      padUnit = new SignaturePad(document.getElementById('sigCanvasUnit'));
-      padFs = new SignaturePad(document.getElementById('fsSigCanvas'));
+      tentar('logos', function () {
+        document.querySelectorAll('.dynamic-logo').forEach(function (img) { img.src = LOGO_URL; });
+      });
 
-      document.getElementById('fData').value = todayISO();
-      setNowTime('fEntrada');
+      tentar('assinatura', function () {
+        padUnit = new SignaturePad(document.getElementById('sigCanvasUnit'));
+        padFs = new SignaturePad(document.getElementById('fsSigCanvas'));
+      });
 
-      var elServ = document.getElementById('fServidor');
-      elServ.addEventListener('change', function () { aplicarAutoDepto(false); });
-      elServ.addEventListener('blur', function () { aplicarAutoDepto(false); });
+      tentar('data/hora', function () {
+        document.getElementById('fData').value = todayISO();
+        setNowTime('fEntrada');
+      });
 
-      var elUnid = document.getElementById('fUnidade');
-      elUnid.addEventListener('change', function () { aplicarAutoResp(false); });
-      elUnid.addEventListener('blur', function () { aplicarAutoResp(false); });
+      tentar('eventos', function () {
+        var elServ = document.getElementById('fServidor');
+        if (elServ) {
+          elServ.addEventListener('change', function () { aplicarAutoDepto(false); });
+          elServ.addEventListener('blur', function () { aplicarAutoDepto(false); });
+        }
+        var elUnid = document.getElementById('fUnidade');
+        if (elUnid) {
+          elUnid.addEventListener('change', function () { aplicarAutoResp(false); });
+          elUnid.addEventListener('blur', function () { aplicarAutoResp(false); });
+        }
+      });
 
-      lists.paresServidor = lists.paresServidor || [];
-      lists.paresUnidade = lists.paresUnidade || [];
+      tentar('listas', function () {
+        lists.paresServidor = lists.paresServidor || [];
+        lists.paresUnidade = lists.paresUnidade || [];
+      });
 
-      montarMapas();
-      populateDatalists();
-      renderObjPills();
-      renderObjLista();
-      atualizarContadorObjeto || atualizarContadorObjetivo();
-      renderReportsTable();
-      initAccessMode();
+      tentar('mapas', montarMapas);
+      tentar('datalists', populateDatalists);
+      tentar('pills', renderObjPills);
+      tentar('objetivos', renderObjLista);
+      tentar('contador', atualizarContadorObjetivo);
+      tentar('relatorios', renderReportsTable);
+      tentar('acesso', initAccessMode);
+      tentar('sync', function () { syncTudo(true); });
 
-      setTimeout(function () { if (padUnit) { padUnit.resize(); padUnit.redraw(); } }, 250);
-
-      syncTudo(true);
+      setTimeout(function () {
+        tentar('resize', function () { if (padUnit) { padUnit.resize(); padUnit.redraw(); } });
+      }, 250);
     });
   </script>
 </body>
