@@ -768,44 +768,64 @@
     }
 
     function openA4Modal(v) {
-  const btnPdf = document.getElementById('modalDrivePdfBtn');
-  if (v.pdfUrl) { btnPdf.href = v.pdfUrl; btnPdf.style.display = 'inline-flex'; }
-  else { btnPdf.style.display = 'none'; }
-  const [y,m,d] = (v.data||'----/--/--').split('-');
-  document.getElementById('a4ModalBody').innerHTML = `
-    <div class="a4-sheet" style="border: 1px solid #cbd5e1; padding: 30px; background: #fff; font-family: 'Times New Roman', serif;">
-      <div style="text-align: center; border-bottom: 2px solid #003580; padding-bottom: 12px; margin-bottom: 20px;">
-        <div style="font-family: Arial, sans-serif; font-weight: 800; color: #003580; font-size: 15px;">CEMTEC — CENTRO MUNICIPAL DE TECNOLOGIA E ROBÓTICA EDUCACIONAL</div>
-        <div style="font-family: Arial, sans-serif; font-weight: 700; color: #009FE3; font-size: 13px; margin-top: 2px;">SEMED — SECRETARIA MUNICIPAL DE EDUCAÇÃO</div>
-        <div style="font-family: Arial, sans-serif; font-size: 10px; color: #475569; margin-top: 2px;">Prefeitura Municipal de Sorriso - MT</div>
-      </div>
-      <div style="text-align: center; font-size: 18px; font-weight: bold; color: #003580; margin-bottom: 6px;">FICHA DE VISITA</div>
-      <div style="text-align: center; font-size: 11px; color: #475569; margin-bottom: 20px;">Protocolo: <strong>${esc(v.protocolo)}</strong></div>
-      
-      <div style="margin-bottom: 12px; font-size: 14px;"><strong>Nome do Servidor:</strong> ${esc(v.servidor)}</div>
-      <div style="margin-bottom: 12px; font-size: 14px;"><strong>Departamento / Setor:</strong> ${esc(v.departamento)}</div>
-      <div style="margin-bottom: 12px; font-size: 14px;"><strong>Unidade / Escola / Destino:</strong> ${esc(v.unidade)}</div>
-      <div style="margin-bottom: 12px; font-size: 14px;"><strong>Data da Visita:</strong> ${d}/${m}/${y}</div>
-      
-      <div style="margin-top: 16px; font-size: 14px;"><strong>Objetivo da Visita:</strong></div>
-      <div style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; min-height: 90px; margin: 6px 0 16px; font-family: Arial, sans-serif; font-size: 13px; white-space: pre-wrap; background: #fafafa;">${esc(v.objetivo)}</div>
-      
-      <div style="margin-bottom: 24px; font-size: 14px;">
-        Horário de Entrada: <strong>${esc(v.entrada)}</strong> &nbsp;|&nbsp; Horário de Saída: <strong>${esc(v.saida||'—')}</strong> &nbsp;|&nbsp; Duração: <strong>${esc(v.duracao||'—')}</strong>
-      </div>
-      
-      <div style="text-align: center; max-width: 320px; margin: 30px auto 20px;">
-        ${v.sigUnit ? `<img src="${v.sigUnit}" style="max-height: 75px; display: block; margin: 0 auto -6px;" />` : '<div style="height: 40px; color: #d97706; font-size: 12px;">[ Aguardando assinatura digital ]</div>'}
-        <div style="border-top: 1px solid #1f2937; padding-top: 6px; font-size: 13px;">
-          <strong>Assinatura do Responsável pela Unidade</strong><br/>
-          <small>${v.responsavel ? esc(v.responsavel) : ''}</small>
-        </div>
-      </div>
-      
-      <div style="font-family: Arial, sans-serif; font-size: 9px; color: #475569; text-align: center; border-top: 3px solid #003580; padding-top: 8px; margin-top: 30px;">
-        Status: ${v.status === 'signed' ? 'Assinada digitalmente' : 'Aguardando assinatura'} | Registrado em: ${new Date().toLocaleDateString('pt-BR')}<br/>
-        Avenida Tancredo Neves, nº 124, Centro Sul • Sorriso - MT • (66) 3545-8100 • educacao@sorriso.mt.gov.br
-      </div>
-    </div>`;
-  document.getElementById('a4Modal').classList.add('open');
-}
+      const btnPdf = document.getElementById('modalDrivePdfBtn');
+      if (v.pdfUrl) { btnPdf.href = v.pdfUrl; btnPdf.style.display = 'inline-flex'; }
+      else { btnPdf.style.display = 'none'; }
+      const [y,m,d] = (v.data||'----/--/--').split('-');
+      document.getElementById('a4ModalBody').innerHTML = `
+        <div class="a4-sheet">
+          <div class="a4-header">
+            <div class="a4-header-line"></div>
+            <div class="a4-logos"><img src="${LOGO_URL}" alt="CEMTEC" /><strong>SEMED SORRISO</strong></div>
+            <div class="a4-header-line"></div>
+          </div>
+          <div class="a4-title">FICHA DE VISITA</div>
+          <div class="a4-field"><span>Nome do Servidor:</span><span class="a4-field-value">${esc(v.servidor)}</span></div>
+          <div class="a4-field"><span>Departamento:</span><span class="a4-field-value">${esc(v.departamento)}</span></div>
+          <div class="a4-field"><span>Unidade / Escola / Destino:</span><span class="a4-field-value">${esc(v.unidade)}</span></div>
+          <div class="a4-field"><span>Data:</span><span class="a4-field-value">${d}/${m}/${y}</span></div>
+          <div>Objetivo da visita:</div>
+          <div class="a4-objective-box">${esc(v.objetivo)}</div>
+          <div style="margin-bottom:24px;">Horário de Entrada: <strong>${esc(v.entrada)}</strong> &nbsp;|&nbsp; Horário de Saída: <strong>${esc(v.saida||'—')}</strong></div>
+          <div class="a4-sig-block">
+            ${v.sigUnit ? `<img src="${v.sigUnit}" />` : '<div style="height:40px;color:#d97706;">[ Pendente ]</div>'}
+            <div class="a4-sig-line">Assinatura do responsável pela unidade${v.responsavel ? '<br/><small>'+esc(v.responsavel)+'</small>' : ''}</div>
+          </div>
+          <div style="font-family:Inter,sans-serif;font-size:11px;color:#475569;text-align:center;">Protocolo: <strong>${esc(v.protocolo)}</strong></div>
+        </div>`;
+      document.getElementById('a4Modal').classList.add('open');
+    }
+
+    function exportCSV() {
+      const headers = ['Protocolo','Data','Servidor','Departamento','Unidade','Objetivo','Entrada','Saida','Status','Link PDF'];
+      const escCsv = v => `"${String(v||'').replace(/"/g,'""')}"`;
+      const lines = [headers.map(escCsv).join(';')];
+      visits.forEach(v => lines.push([v.protocolo, formatDateBR(v.data), v.servidor, v.departamento, v.unidade, v.objetivo, v.entrada, v.saida, v.status, v.pdfUrl].map(escCsv).join(';')));
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob(['\uFEFF'+lines.join('\n')], { type:'text/csv;charset=utf-8;' }));
+      a.download = `fichas-cemtec-${todayISO()}.csv`; a.click();
+    }
+
+    // ===== UTILS =====
+    function todayISO() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function formatDateBR(iso) { if (!iso || !iso.includes('-')) return iso || '—'; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; }
+    function setNowTime(id) { const d = new Date(); document.getElementById(id).value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+    function calcDurationMinutes(a, b) { if (!a || !b) return null; const [h1,m1]=a.split(':').map(Number), [h2,m2]=b.split(':').map(Number); return (h2*60+m2)-(h1*60+m1) >= 0 ? (h2*60+m2)-(h1*60+m1) : null; }
+    function formatMinutes(m) { if (m === null || m === undefined) return '—'; return m < 60 ? `${m} min` : `${Math.floor(m/60)}h ${m%60}min`; }
+    function esc(s) { return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(window._tt); window._tt = setTimeout(()=>t.classList.remove('show'), 3500); }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.dynamic-logo').forEach(img => { img.src = LOGO_URL; });
+      padUnit = new SignaturePad(document.getElementById('sigCanvasUnit'));
+      padFs = new SignaturePad(document.getElementById('fsSigCanvas'));
+      document.getElementById('fData').value = todayISO();
+      setNowTime('fEntrada');
+      populateDatalists();
+      initAccessMode();
+      syncFromGoogleSheets(true);
+      if (!isProfessorMode) syncVisitsFromCloud(true);
+    });
+  </script>
+</body>
+</html>
