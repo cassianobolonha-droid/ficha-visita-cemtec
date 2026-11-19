@@ -453,9 +453,9 @@
 
   <script>
     // =========================================================================
-    // CONFIGURAÇÃO PRINCIPAL — COLE AQUI A URL DO APPS SCRIPT E DEFINA SEU PIN
+    // CONFIGURAÇÃO PRINCIPAL
     // =========================================================================
-    const APPS_SCRIPT_URL = ''; // Ex: 'https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec'
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec';
     const COORDINATOR_PIN = '2026';
     const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit';
     const DRIVE_LOGO_ID = '1Wr0oaQn3PFDETlL2jskRZJlaZdeVxRCW';
@@ -618,15 +618,19 @@
         try {
           const res = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
+            redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(visit)
           });
           const json = await res.json();
           if (json.status === 'ok' && json.pdfUrl) {
             visit.pdfUrl = json.pdfUrl;
             showToast('✅ Ficha salva na Planilha e PDF gerado no Drive!');
+          } else {
+            showToast('⚠️ Erro no script: ' + (json.message || 'tente novamente'));
           }
         } catch (err) {
-          showToast('⚠️ Salvo localmente (verifique a URL do Apps Script).');
+          showToast('⚠️ Salvo localmente (verifique a permissão do Apps Script).');
         }
       } else {
         showToast('Ficha salva localmente (configure APPS_SCRIPT_URL para enviar ao Drive).');
@@ -651,7 +655,7 @@
       }
       lbl.textContent = 'Conectada (Planilha + Pasta PDF no Drive)';
       try {
-        const res = await fetch(APPS_SCRIPT_URL);
+        const res = await fetch(APPS_SCRIPT_URL, { redirect: 'follow' });
         const json = await res.json();
         if (json.status === 'ok' && Array.isArray(json.visits)) {
           visits = json.visits;
