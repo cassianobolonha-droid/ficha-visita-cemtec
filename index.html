@@ -22,7 +22,6 @@
     .tricolor-bar .c2 { flex: 3; background: var(--blue-light); }
     .tricolor-bar .c3 { flex: 2; background: var(--yellow); }
 
-    /* PIN Gate */
     .pin-gate {
       position: fixed; inset: 0; background: linear-gradient(135deg, #003580 0%, #001f4d 100%);
       display: none; align-items: center; justify-content: center; padding: 20px; z-index: 500;
@@ -41,7 +40,6 @@
     }
     .pin-error { color: var(--danger); font-size: 12px; font-weight: 600; min-height: 18px; margin-bottom: 8px; }
 
-    /* Professor Mode Header */
     .prof-topbar {
       display: none; background: var(--blue-dark); color: #fff; padding: 12px 18px;
       align-items: center; justify-content: space-between; gap: 12px;
@@ -193,7 +191,6 @@
 <body>
   <div class="tricolor-bar"><div class="c1"></div><div class="c2"></div><div class="c3"></div></div>
 
-  <!-- TELA DE PIN DO COORDENADOR -->
   <div class="pin-gate" id="pinGate">
     <div class="pin-card">
       <img class="dynamic-logo" alt="CEMTEC" />
@@ -206,7 +203,6 @@
     </div>
   </div>
 
-  <!-- BARRA SUPERIOR DO MODO PROFESSOR -->
   <div class="prof-topbar">
     <div style="display:flex;align-items:center;gap:10px;">
       <img class="dynamic-logo" style="height:34px;background:#fff;padding:3px 6px;border-radius:6px;" alt="CEMTEC" />
@@ -245,7 +241,6 @@
     </aside>
 
     <main class="main-content">
-      <!-- DASHBOARD -->
       <section class="view-section active" id="view-dashboard">
         <div class="page-header">
           <div class="page-title">
@@ -284,7 +279,6 @@
         </div>
       </section>
 
-      <!-- NOVA FICHA -->
       <section class="view-section" id="view-new">
         <div class="page-header">
           <div class="page-title">
@@ -368,7 +362,6 @@
         </form>
       </section>
 
-      <!-- RELATÓRIOS -->
       <section class="view-section" id="view-reports">
         <div class="page-header">
           <div class="page-title"><h1>Relatórios & PDFs no Drive</h1><p>Todas as fichas sincronizadas com link direto para o PDF oficial.</p></div>
@@ -393,7 +386,6 @@
         </div>
       </section>
 
-      <!-- CONFIGURAÇÕES -->
       <section class="view-section" id="view-lists">
         <div class="page-header"><div class="page-title"><h1>Planilha, Drive & Links de Acesso</h1><p>Gerencie a integração com o Google Drive e compartilhe o link exclusivo dos professores.</p></div></div>
         <div class="card">
@@ -417,7 +409,6 @@
     </main>
   </div>
 
-  <!-- MODAL A4 -->
   <div class="modal-backdrop" id="a4Modal">
     <div class="modal-card">
       <div class="modal-header no-print">
@@ -432,7 +423,6 @@
     </div>
   </div>
 
-  <!-- MODAL TELA CHEIA -->
   <div class="fs-sig-modal" id="fsSigModal">
     <div class="fs-sig-top">
       <strong>Assinatura Digital (Tela Cheia)</strong>
@@ -626,7 +616,7 @@
           showToast('⚠️ Salvo localmente (verifique a permissão do Apps Script).');
         }
       } else {
-        showToast('Ficha salva localmente (configure APPS_SCRIPT_URL para enviar ao Drive).');
+        showToast('Ficha salva localmente.');
       }
 
       btn.disabled = false; btn.textContent = origText;
@@ -643,10 +633,10 @@
     async function syncVisitsFromCloud(silent = false) {
       const lbl = document.getElementById('cloudStatusLabel');
       if (!APPS_SCRIPT_URL) {
-        lbl.textContent = 'Não configurada';
+        if (lbl) lbl.textContent = 'Não configurada';
         return;
       }
-      lbl.textContent = 'Conectada (Planilha + Pasta PDF no Drive)';
+      if (lbl) lbl.textContent = 'Conectada (Planilha + Pasta PDF no Drive)';
       try {
         const res = await fetch(APPS_SCRIPT_URL, { redirect: 'follow' });
         const json = await res.json();
@@ -813,7 +803,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.dynamic-logo').forEach(img => { img.src = LOGO_URL; });
-      padUnit = new SignaturePad(document.getElementById('sigCanvasWord') || document.getElementById('sigCanvasUnit'));
+      padUnit = new SignaturePad(document.getElementById('sigCanvasUnit'));
       padFs = new SignaturePad(document.getElementById('fsSigCanvas'));
       document.getElementById('fData').value = todayISO();
       setNowTime('fEntrada');
