@@ -613,10 +613,8 @@
             showToast('⚠️ Erro no script: ' + (json.message || 'tente novamente'));
           }
         } catch (err) {
-          showToast('⚠️ Salvo localmente (verifique a permissão do Apps Script).');
+          showToast('⚠️ Salvo localmente.');
         }
-      } else {
-        showToast('Ficha salva localmente.');
       }
 
       btn.disabled = false; btn.textContent = origText;
