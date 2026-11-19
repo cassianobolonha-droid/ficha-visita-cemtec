@@ -85,24 +85,34 @@
     .linha-tripla .input-row .btn { white-space: nowrap; padding: 6px 8px; }
     label { font-size: 13px; font-weight: 600; color: #334155; display: flex; justify-content: space-between; }
     input[type="text"], input[type="date"], input[type="time"], input[type="url"], input[type="password"], select, textarea { width: 100%; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-family: inherit; background: #fff; }
-    textarea { min-height: 105px; resize: vertical; }
+    textarea { min-height: 92px; resize: vertical; }
     .input-row { display: flex; gap: 8px; }
     .input-row input { flex: 1; }
-    .chips-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
-    .chip { background: #eff6ff; color: var(--blue-dark); border: 1px solid #bfdbfe; padding: 6px 10px; border-radius: 999px; font-size: 12px; cursor: pointer; }
-    .modelo-box { background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
-    .modelo-titulo { font-size: 13px; font-weight: 800; color: var(--blue-dark); margin-bottom: 8px; }
-    .modelo-linha { font-size: 12px; color: #334155; margin-bottom: 6px; }
-    .modelo-errado { color: #dc2626; font-weight: 800; }
-    .modelo-certo { color: #16a34a; font-weight: 800; }
-    .modelo-regra { font-size: 12px; color: #475569; margin: 8px 0 10px; }
-    .modelo-acoes { display: flex; flex-wrap: wrap; gap: 8px; }
-    #maisExemplos { display: none; margin-top: 10px; font-size: 12px; color: #334155; line-height: 1.9; }
+    .auto-hint { font-size: 11px; margin-top: 2px; color: var(--success); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .auto-hint a { color: var(--blue-mid); font-weight: 700; cursor: pointer; text-decoration: underline; }
+    .auto-hint.pend { color: var(--muted); }
+    .obj-multi { position: relative; }
+    .obj-multi-btn { width: 100%; display: flex; align-items: center; gap: 8px; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; font-size: 14px; font-family: inherit; cursor: pointer; text-align: left; color: #475569; }
+    .obj-multi-btn .obj-caret { margin-left: auto; color: #94a3b8; }
+    .obj-count { background: var(--blue-dark); color: #fff; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+    .obj-menu { display: none; position: absolute; z-index: 60; left: 0; right: 0; top: calc(100% + 4px); background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 32px rgba(15,23,42,.18); overflow: hidden; }
+    .obj-menu.open { display: block; }
+    .obj-menu-top { padding: 8px; border-bottom: 1px solid var(--border); }
+    .obj-menu-top input { padding: 8px 10px; font-size: 13px; }
+    .obj-list { max-height: 260px; overflow-y: auto; padding: 6px; }
+    .obj-opt { display: flex; align-items: flex-start; gap: 9px; padding: 8px 9px; border-radius: 8px; cursor: pointer; font-size: 12.5px; line-height: 1.45; color: #334155; }
+    .obj-opt:hover { background: #f1f5f9; }
+    .obj-opt.sel { background: #eff6ff; }
+    .obj-opt input { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 2px; accent-color: var(--blue-dark); }
+    .obj-menu-foot { display: flex; justify-content: space-between; gap: 8px; padding: 8px; border-top: 1px solid var(--border); background: #f8fafc; }
+    .obj-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .obj-pill { display: inline-flex; align-items: center; gap: 6px; background: #e8f1fb; color: var(--blue-dark); border: 1px solid #bfdbfe; padding: 5px 6px 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; line-height: 1.35; }
+    .obj-pill button { border: none; background: transparent; color: #64748b; cursor: pointer; font-size: 15px; line-height: 1; padding: 0 3px; }
     .dica-objetivo { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .sig-box { border: 2px dashed #94a3b8; border-radius: 12px; background: #fff; overflow: hidden; position: relative; }
     .sig-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; background: #f8fafc; border-bottom: 1px solid var(--border); }
     .sig-group { display: flex; align-items: center; gap: 6px; }
-    .sig-label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 2px; }
+    .sig-label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; }
     .color-dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
     .color-dot.active { border-color: var(--yellow); transform: scale(1.12); }
     .pen-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 8px; border: 1px solid var(--border); background: #fff; font-size: 11px; font-weight: 700; color: #475569; cursor: pointer; font-family: inherit; }
@@ -146,7 +156,7 @@
     .a4-sig-block { text-align: center; max-width: 320px; margin: 20px auto; }
     .a4-sig-block img { max-height: 75px; margin-bottom: -6px; }
     .a4-sig-line { border-top: 1px solid #1f2937; padding-top: 6px; font-size: 13px; }
-    .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all 0.25s; z-index: 600; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all .25s; z-index: 600; }
     .toast.show { transform: translateY(0); opacity: 1; }
     @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } .charts-grid { grid-template-columns: 1fr; } }
     @media (max-width: 860px) {
@@ -157,6 +167,7 @@
       .kpi-grid { grid-template-columns: repeat(2, 1fr); }
       .form-grid, .filters-bar { grid-template-columns: 1fr; }
       .linha-tripla { grid-template-columns: 1fr; }
+      .obj-list { max-height: 210px; }
     }
     @media print {
       .tricolor-bar, .sidebar, .mobile-header, .prof-topbar, .main-content, .modal-header, .no-print, .toast { display: none !important; }
@@ -267,24 +278,26 @@
             <div class="form-grid">
               <div class="form-group">
                 <label>Nome do Servidor *</label>
-                <input type="text" id="fServidor" list="dlServidores" placeholder="Selecione ou digite..." required />
+                <input type="text" id="fServidor" list="dlServidores" placeholder="Selecione ou digite..." autocomplete="off" required />
                 <datalist id="dlServidores"></datalist>
               </div>
               <div class="form-group">
                 <label>Departamento *</label>
-                <input type="text" id="fDepartamento" list="dlDepartamentos" placeholder="Selecione ou digite..." required />
+                <input type="text" id="fDepartamento" list="dlDepartamentos" placeholder="Selecione ou digite..." autocomplete="off" required />
                 <datalist id="dlDepartamentos"></datalist>
+                <div class="auto-hint pend" id="hintDepto" hidden></div>
               </div>
               <div class="form-group">
                 <label>Unidade / Escola / Destino *</label>
-                <input type="text" id="fUnidade" list="dlUnidades" placeholder="Selecione ou digite..." required />
+                <input type="text" id="fUnidade" list="dlUnidades" placeholder="Selecione ou digite..." autocomplete="off" required />
                 <datalist id="dlUnidades"></datalist>
               </div>
               <div class="form-group">
                 <label>Responsável pela Escola</label>
                 <input type="text" id="fResponsavel" list="dlResponsaveis" placeholder="Selecione na lista ou digite o nome..." autocomplete="off" />
                 <datalist id="dlResponsaveis"></datalist>
-                <div class="dica-objetivo">Escolha um nome da lista ou digite um novo.</div>
+                <div class="auto-hint pend" id="hintResp" hidden></div>
+                <div class="dica-objetivo">O automático só sugere — você pode trocar quando outro responsável assinar.</div>
               </div>
 
               <div class="linha-tripla">
@@ -311,28 +324,28 @@
               <div class="form-group full">
                 <label>Objetivo da Visita * <span id="objCounter" style="font-weight:500;color:var(--muted);">0 caracteres</span></label>
 
-                <div class="modelo-box">
-                  <div class="modelo-titulo">📝 Como escrever um bom objetivo</div>
-                  <div class="modelo-linha"><span class="modelo-errado">✗ Evite:</span> <span style="color:#64748b;">fui na escola ver o computador</span></div>
-                  <div class="modelo-linha"><span class="modelo-certo">✓ Escreva:</span> Suporte técnico no laboratório de informática — verificação da rede e manutenção dos computadores.</div>
-                  <div class="modelo-regra"><strong>Regra:</strong> o QUE foi feito + ONDE + o MOTIVO. Frase completa, maiúscula no início, ponto no fim.</div>
-                  <div class="modelo-acoes">
-                    <button type="button" class="btn btn-accent btn-sm" onclick="usarModeloObjetivo()">✍️ Usar este modelo</button>
-                    <button type="button" class="btn btn-outline btn-sm" onclick="toggleMaisExemplos()">Ver mais exemplos</button>
-                  </div>
-                  <div id="maisExemplos">
-                    <div><span style="color:#dc2626;">✗</span> aula de robotica</div>
-                    <div><span style="color:#16a34a;">✓</span> Acompanhamento da oficina de Robótica Educacional com as turmas do 5º ano — apoio ao professor e conferência dos kits.</div>
-                    <div style="margin-top:6px;"><span style="color:#dc2626;">✗</span> entregar material</div>
-                    <div><span style="color:#16a34a;">✓</span> Entrega e conferência dos kits de tecnologia educacional na unidade — orientação à direção sobre o uso dos equipamentos.</div>
-                    <div style="margin-top:6px;"><span style="color:#dc2626;">✗</span> ver wifi</div>
-                    <div><span style="color:#16a34a;">✓</span> Verificação da rede Wi-Fi da unidade — teste de sinal nas salas e ajuste do roteador da secretaria.</div>
+                <div class="obj-multi">
+                  <button type="button" class="obj-multi-btn" id="objMultiBtn" onclick="toggleObjMenu(event)">
+                    <span>☑️ Selecionar objetivos da lista</span>
+                    <span class="obj-count" id="objCount" hidden>0</span>
+                    <span class="obj-caret">▾</span>
+                  </button>
+                  <div class="obj-menu" id="objMenu">
+                    <div class="obj-menu-top">
+                      <input type="text" id="objSearch" placeholder="🔍 Buscar objetivo..." oninput="renderObjLista()" />
+                    </div>
+                    <div class="obj-list" id="objLista"></div>
+                    <div class="obj-menu-foot">
+                      <button type="button" class="btn btn-outline btn-sm" onclick="limparObjetivos()">Limpar seleção</button>
+                      <button type="button" class="btn btn-primary btn-sm" onclick="fecharObjMenu()">Concluir</button>
+                    </div>
                   </div>
                 </div>
 
-                <div class="chips-wrap" id="objectiveChips"></div>
-                <textarea id="fObjetivo" placeholder="Escreva uma frase completa: o que foi feito, onde e por quê..." required oninput="atualizarContadorObjetivo()"></textarea>
-                <div class="dica-objetivo">💡 Uma linha por item, se quiser listar.</div>
+                <div class="obj-pills" id="objPills"></div>
+
+                <textarea id="fObjetivo" placeholder="Detalhes adicionais (opcional): escreva o que mais foi feito nesta visita..." oninput="atualizarContadorObjetivo()"></textarea>
+                <div class="dica-objetivo">💡 Marque os objetivos na lista. Se precisar de algo diferente, escreva no campo acima.</div>
               </div>
             </div>
           </div>
@@ -409,8 +422,9 @@
         <div class="card">
           <div class="card-title" style="margin-bottom:10px;">☁️ Sincronização com Google Sheets &amp; Drive</div>
           <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Status da integração: <strong id="cloudStatusLabel">Verificando...</strong></p>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Preenchimentos automáticos: <strong id="autoFillLabel">Verificando...</strong></p>
           <div style="display:flex;flex-wrap:wrap;gap:10px;">
-            <button class="btn btn-primary" onclick="syncVisitsFromCloud()">🔄 Sincronizar Listas &amp; Fichas</button>
+            <button class="btn btn-primary" onclick="syncTudo()">🔄 Sincronizar Listas &amp; Fichas</button>
             <a href="https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit" target="_blank" class="btn btn-outline">Abrir Planilha ↗</a>
             <a href="https://drive.google.com/drive/folders/1WyXDmpA_PBzXrrHUxr5yOByyq0ofLmlK" target="_blank" class="btn btn-outline">Abrir Pasta de PDFs no Drive ↗</a>
           </div>
@@ -465,38 +479,39 @@
 
   <script>
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec';
+    const SHEET_ID = '1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU';
     const COORDINATOR_PIN = '2026';
     const DRIVE_LOGO_ID = '1Wr0oaQn3PFDETlL2jskRZJlaZdeVxRCW';
     const LOGO_URL = 'https://lh3.googleusercontent.com/d/' + DRIVE_LOGO_ID;
 
     const OBJETIVO_MIN_CHARS = 25;
-    const MODELO_OBJETIVO = 'Suporte técnico no laboratório de informática da unidade — verificação da rede Wi-Fi, manutenção dos computadores e orientação aos professores sobre o uso dos equipamentos.';
 
     const DEFAULT_LISTS = {
       servidores: ['Cassiano Gonsalves', 'Prof. Carlos Eduardo Mendes', 'Profa. Ana Paula Ferreira', 'Lucas Henrique Oliveira', 'Mariana Costa Silva'],
       departamentos: ['CEMTEC — Centro Municipal de Tecnologia e Robótica Educacional', 'SEMED — Coordenação Pedagógica', 'SEMED — Tecnologia Educacional / TI', 'SEMED — Manutenção e Infraestrutura'],
       unidades: ['CEMTEC Sorriso', 'E.M. Aureliano Pereira da Silva', 'E.M. Caravagio', 'E.M. Ivete Lourdes Arenhardt', 'E.M. Jardim Amazônico', 'E.M. Papa João Paulo II', 'E.M. Rui Barbosa', 'CEMEIS Caminhos do Saber'],
-      objetivos: ['Suporte técnico em laboratório de informática e rede Wi-Fi', 'Acompanhamento de oficina de Robótica Educacional', 'Formação continuada de professores em ferramentas digitais', 'Manutenção preventiva/corretiva de equipamentos', 'Entrega e instalação de kits de tecnologia educacional'],
+      objetivos: ['Suporte técnico em laboratório de informática e rede Wi-Fi', 'Acompanhamento de oficina de Robótica Educacional'],
       responsaveis: []
     };
 
-    let visits = JSON.parse(localStorage.getItem('cemtec_visits_v4') || '[]').map(function (v) {
-      return Object.assign({}, v, {
-        entrada: formatTimeClean(v.entrada),
-        saida: formatTimeClean(v.saida)
-      });
+    let visits = JSON.parse(localStorage.getItem('cemtec_visits_v5') || '[]').map(function (v) {
+      return Object.assign({}, v, { entrada: formatTimeClean(v.entrada), saida: formatTimeClean(v.saida) });
     });
 
-    let lists = JSON.parse(localStorage.getItem('cemtec_lists_v4') || 'null') || JSON.parse(JSON.stringify(DEFAULT_LISTS));
+    let lists = JSON.parse(localStorage.getItem('cemtec_lists_v5') || 'null') || JSON.parse(JSON.stringify(DEFAULT_LISTS));
     if (!Array.isArray(lists.responsaveis)) lists.responsaveis = [];
 
+    let mapaServidorDepto = {};
+    let mapaUnidadeResp = {};
+
+    let selectedObjetivos = [];
     let padUnit, padFs, charts = {};
 
     const params = new URLSearchParams(window.location.search);
     const isProfessorMode = params.get('modo') === 'ficha';
 
     /* ============================================================
-       ASSINATURA — coordenadas relativas (0 a 1)
+       ASSINATURA — coordenadas relativas
        ============================================================ */
 
     class SignaturePad {
@@ -511,14 +526,12 @@
         this.h = 0;
         this.bind();
         this.resize();
-
         if (window.ResizeObserver) {
           var self = this;
           this._ro = new ResizeObserver(function () { self.resize(); });
           this._ro.observe(canvas);
         }
       }
-
       resize() {
         var r = this.canvas.getBoundingClientRect();
         var w = Math.round(r.width || this.canvas.clientWidth || 0);
@@ -527,24 +540,19 @@
         var dpr = Math.min(window.devicePixelRatio || 1, 3);
         this.canvas.width = Math.round(w * dpr);
         this.canvas.height = Math.round(h * dpr);
-        this.w = w;
-        this.h = h;
+        this.w = w; this.h = h;
         this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         this.redraw();
       }
-
       pt(e) {
         var r = this.canvas.getBoundingClientRect();
-        var bw = r.width || 1;
-        var bh = r.height || 1;
+        var bw = r.width || 1, bh = r.height || 1;
         var x = (e.clientX - r.left) / bw;
         var y = (e.clientY - r.top) / bh;
         return { x: Math.min(Math.max(x, 0), 1), y: Math.min(Math.max(y, 0), 1) };
       }
-
       bind() {
         var self = this;
-
         this.canvas.addEventListener('pointerdown', function (e) {
           e.preventDefault();
           try { self.canvas.setPointerCapture(e.pointerId); } catch (err) {}
@@ -553,7 +561,6 @@
           self.strokes.push({ color: self.color, width: self.width, points: [self.pt(e)] });
           self.redraw();
         });
-
         this.canvas.addEventListener('pointermove', function (e) {
           if (!self.drawing) return;
           e.preventDefault();
@@ -562,13 +569,11 @@
           for (var i = 0; i < evts.length; i++) s.points.push(self.pt(evts[i]));
           self.redraw();
         });
-
         var stop = function () { self.drawing = false; };
         this.canvas.addEventListener('pointerup', stop);
         this.canvas.addEventListener('pointercancel', stop);
         this.canvas.addEventListener('pointerleave', stop);
       }
-
       redraw() {
         var w = this.w || this.canvas.clientWidth || 0;
         var h = this.h || this.canvas.clientHeight || 0;
@@ -576,14 +581,12 @@
         this.ctx.clearRect(0, 0, w, h);
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
-
         for (var i = 0; i < this.strokes.length; i++) {
           var s = this.strokes[i];
           var lw = s.width || this.width;
           this.ctx.strokeStyle = s.color || this.color;
           this.ctx.fillStyle = s.color || this.color;
           this.ctx.lineWidth = lw;
-
           if (s.points.length === 1) {
             var p = s.points[0];
             this.ctx.beginPath();
@@ -591,7 +594,6 @@
             this.ctx.fill();
             continue;
           }
-
           this.ctx.beginPath();
           this.ctx.moveTo(s.points[0].x * w, s.points[0].y * h);
           for (var j = 1; j < s.points.length; j++) {
@@ -600,11 +602,9 @@
           this.ctx.stroke();
         }
       }
-
       undo() { this.strokes.pop(); this.redraw(); }
       clear() { this.strokes = []; this.redraw(); }
       isEmpty() { return this.strokes.length === 0; }
-
       copyFrom(other) {
         this.clear();
         for (var i = 0; i < other.strokes.length; i++) {
@@ -617,13 +617,10 @@
         if (!this.w || !this.h) this.resize();
         this.redraw();
       }
-
       toDataURL() {
         if (this.isEmpty()) return '';
-
         var padW = this.w || this.canvas.clientWidth || 600;
         var padH = this.h || this.canvas.clientHeight || 200;
-
         var minX = 1, minY = 1, maxX = 0, maxY = 0;
         for (var i = 0; i < this.strokes.length; i++) {
           var pts = this.strokes[i].points;
@@ -634,40 +631,30 @@
             if (pts[j].y > maxY) maxY = pts[j].y;
           }
         }
-
         var m = 0.04;
         minX = Math.max(0, minX - m); maxX = Math.min(1, maxX + m);
         minY = Math.max(0, minY - m); maxY = Math.min(1, maxY + m);
-
         var bwRatio = Math.max(maxX - minX, 0.05);
         var bhRatio = Math.max(maxY - minY, 0.05);
-
-        var srcW = bwRatio * padW;
-        var srcH = bhRatio * padH;
-
+        var srcW = bwRatio * padW, srcH = bhRatio * padH;
         var OUT_H = 260;
         var OUT_W = Math.round(OUT_H * (srcW / srcH));
         OUT_W = Math.max(170, Math.min(OUT_W, 900));
-
         var tmp = document.createElement('canvas');
         tmp.width = OUT_W * 2;
         tmp.height = OUT_H * 2;
         var c = tmp.getContext('2d');
-
         var scale = Math.min(tmp.width / srcW, tmp.height / srcH);
         var offX = (tmp.width - srcW * scale) / 2;
         var offY = (tmp.height - srcH * scale) / 2;
-
         c.lineCap = 'round';
         c.lineJoin = 'round';
-
         for (var k = 0; k < this.strokes.length; k++) {
           var st = this.strokes[k];
           var lw = Math.max(2, (st.width || this.width) * scale * 1.3);
           c.strokeStyle = st.color || this.color;
           c.fillStyle = st.color || this.color;
           c.lineWidth = lw;
-
           if (st.points.length === 1) {
             var pp = st.points[0];
             c.beginPath();
@@ -675,7 +662,6 @@
             c.fill();
             continue;
           }
-
           c.beginPath();
           for (var q = 0; q < st.points.length; q++) {
             var px = offX + ((st.points[q].x - minX) * padW) * scale;
@@ -684,7 +670,6 @@
           }
           c.stroke();
         }
-
         return tmp.toDataURL('image/png');
       }
     }
@@ -707,9 +692,7 @@
 
     function openFullscreenSig() {
       document.getElementById('fsSigModal').classList.add('open');
-      setTimeout(function () {
-        if (padFs) { padFs.resize(); padFs.redraw(); }
-      }, 120);
+      setTimeout(function () { if (padFs) { padFs.resize(); padFs.redraw(); } }, 120);
     }
 
     function confirmFullscreenSig() {
@@ -717,6 +700,214 @@
       padUnit.copyFrom(padFs);
       document.getElementById('fsSigModal').classList.remove('open');
       showToast('Assinatura aplicada na ficha.');
+    }
+
+    /* ============================================================
+       OBJETIVOS — lista suspensa com checkbox
+       ============================================================ */
+
+    function toggleObjMenu(ev) {
+      if (ev) ev.stopPropagation();
+      var m = document.getElementById('objMenu');
+      var abrir = !m.classList.contains('open');
+      m.classList.toggle('open', abrir);
+      if (abrir) {
+        document.getElementById('objSearch').value = '';
+        renderObjLista();
+        setTimeout(function () { document.getElementById('objSearch').focus(); }, 60);
+      }
+    }
+
+    function fecharObjMenu() {
+      document.getElementById('objMenu').classList.remove('open');
+    }
+
+    function renderObjLista() {
+      var filtro = (document.getElementById('objSearch').value || '').toLowerCase();
+      var lista = lists.objetivos.filter(function (o) {
+        return !filtro || o.toLowerCase().indexOf(filtro) !== -1;
+      });
+      var el = document.getElementById('objLista');
+      if (!lista.length) {
+        el.innerHTML = '<div style="padding:14px;font-size:12px;color:var(--muted);text-align:center;">Nenhum objetivo encontrado.</div>';
+        return;
+      }
+      el.innerHTML = lista.map(function (o) {
+        var sel = selectedObjetivos.indexOf(o) !== -1;
+        return '<label class="obj-opt' + (sel ? ' sel' : '') + '">' +
+          '<input type="checkbox" ' + (sel ? 'checked' : '') + ' data-obj="' + esc(o) + '">' +
+          '<span>' + esc(o) + '</span></label>';
+      }).join('');
+
+      el.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          var v = cb.getAttribute('data-obj');
+          if (cb.checked) {
+            if (selectedObjetivos.indexOf(v) === -1) selectedObjetivos.push(v);
+          } else {
+            selectedObjetivos = selectedObjetivos.filter(function (x) { return x !== v; });
+          }
+          renderObjPills();
+          renderObjLista();
+          atualizarContadorObjetivo();
+        });
+      });
+    }
+
+    function renderObjPills() {
+      var el = document.getElementById('objPills');
+      el.innerHTML = selectedObjetivos.map(function (o, i) {
+        return '<span class="obj-pill">' + esc(o) +
+          '<button type="button" title="Remover" onclick="removerObjetivo(' + i + ')">×</button></span>';
+      }).join('');
+
+      var count = document.getElementById('objCount');
+      if (selectedObjetivos.length) {
+        count.hidden = false;
+        count.textContent = selectedObjetivos.length;
+      } else {
+        count.hidden = true;
+      }
+    }
+
+    function removerObjetivo(i) {
+      selectedObjetivos.splice(i, 1);
+      renderObjPills();
+      renderObjLista();
+      atualizarContadorObjetivo();
+    }
+
+    function limparObjetivos() {
+      selectedObjetivos = [];
+      renderObjPills();
+      renderObjLista();
+      atualizarContadorObjetivo();
+    }
+
+    function montarObjetivoFinal() {
+      var partes = selectedObjetivos.slice();
+      var livre = cleanObjetivo(document.getElementById('fObjetivo').value);
+      if (livre) partes.push(livre);
+      return partes.join('\n');
+    }
+
+    function atualizarContadorObjetivo() {
+      var total = montarObjetivoFinal().replace(/\n/g, ' ').trim().length;
+      var el = document.getElementById('objCounter');
+      if (!el) return;
+      el.textContent = total + ' caracteres';
+      el.style.color = total === 0 ? 'var(--muted)' : (total < OBJETIVO_MIN_CHARS ? '#d97706' : '#16a34a');
+    }
+
+    function cleanObjetivo(texto) {
+      return String(texto || '')
+        .replace(/\r/g, '')
+        .split('\n')
+        .map(function (l) { return l.replace(/\s+/g, ' ').trim(); })
+        .filter(function (l) { return l.length > 0; })
+        .map(function (l) { return l.replace(/^[•\-*]\s*/, ''); })
+        .map(function (l) { return l.charAt(0).toUpperCase() + l.slice(1); })
+        .map(function (l) { return /[.!?]$/.test(l) ? l : l + '.'; })
+        .join('\n');
+    }
+
+    /* ============================================================
+       PREENCHIMENTO AUTOMÁTICO
+       ============================================================ */
+
+    function normaliza(s) {
+      return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    }
+
+    function aplicarAutoDepto(forcar) {
+      var servidor = document.getElementById('fServidor').value.trim();
+      var deptoEl = document.getElementById('fDepartamento');
+      var hint = document.getElementById('hintDepto');
+      hint.hidden = true;
+      if (!servidor) return;
+
+      var alvo = mapaServidorDepto[normaliza(servidor)];
+      if (!alvo) return;
+
+      if (!deptoEl.value.trim()) {
+        deptoEl.value = alvo;
+        hint.hidden = false;
+        hint.className = 'auto-hint';
+        hint.innerHTML = '✅ Departamento preenchido automaticamente.';
+        return;
+      }
+
+      if (normaliza(deptoEl.value) === normaliza(alvo)) return;
+
+      if (forcar) {
+        deptoEl.value = alvo;
+        hint.hidden = false;
+        hint.className = 'auto-hint';
+        hint.innerHTML = '✅ Departamento atualizado.';
+        return;
+      }
+
+      hint.hidden = false;
+      hint.className = 'auto-hint pend';
+      hint.innerHTML = '💡 O setor cadastrado para este servidor é outro. ' +
+        '<a href="#" onclick="aplicarAutoDepto(true);return false;">Usar "' + esc(alvo) + '"</a>';
+    }
+
+    function aplicarAutoResp(forcar) {
+      var unidade = document.getElementById('fUnidade').value.trim();
+      var respEl = document.getElementById('fResponsavel');
+      var hint = document.getElementById('hintResp');
+      hint.hidden = true;
+      if (!unidade) return;
+
+      var alvo = mapaUnidadeResp[normaliza(unidade)];
+
+      if (!alvo) {
+        hint.hidden = false;
+        hint.className = 'auto-hint pend';
+        hint.innerHTML = 'Sem responsável cadastrado para esta escola — digite o nome de quem está assinando.';
+        return;
+      }
+
+      if (!respEl.value.trim()) {
+        respEl.value = alvo;
+        hint.hidden = false;
+        hint.className = 'auto-hint';
+        hint.innerHTML = '✅ Responsável preenchido automaticamente. Pode trocar se outro assinar.';
+        return;
+      }
+
+      if (normaliza(respEl.value) === normaliza(alvo)) return;
+
+      if (forcar) {
+        respEl.value = alvo;
+        hint.hidden = false;
+        hint.className = 'auto-hint';
+        hint.innerHTML = '✅ Responsável atualizado. Pode trocar se outro assinar.';
+        return;
+      }
+
+      hint.hidden = false;
+      hint.className = 'auto-hint pend';
+      hint.innerHTML = '💡 Cadastro desta escola: "' + esc(alvo) + '". ' +
+        '<a href="#" onclick="aplicarAutoResp(true);return false;">Usar este nome</a>';
+    }
+
+    function montarMapas() {
+      mapaServidorDepto = {};
+      mapaUnidadeResp = {};
+
+      lists.paresServidor.forEach(function (p) {
+        if (p[0] && p[1]) mapaServidorDepto[normaliza(p[0])] = p[1];
+      });
+      lists.paresUnidade.forEach(function (p) {
+        if (p[0] && p[1]) mapaUnidadeResp[normaliza(p[0])] = p[1];
+      });
+
+      var s = 'Carregados: ' + Object.keys(mapaServidorDepto).length + ' servidor(es) → setor, ' +
+              Object.keys(mapaUnidadeResp).length + ' escola(s) → responsável.';
+      var lbl = document.getElementById('autoFillLabel');
+      if (lbl) lbl.textContent = s;
     }
 
     /* ============================================================
@@ -744,7 +935,7 @@
         document.getElementById('pinGate').classList.remove('open');
         document.body.classList.remove('mode-professor');
         switchView('dashboard');
-        syncVisitsFromCloud(true);
+        syncTudo(true);
       } else {
         document.getElementById('pinError').textContent = 'PIN incorreto. Tente novamente.';
         document.getElementById('pinInput').value = '';
@@ -772,45 +963,6 @@
     }
 
     /* ============================================================
-       OBJETIVO
-       ============================================================ */
-
-    function usarModeloObjetivo() {
-      var ta = document.getElementById('fObjetivo');
-      ta.value = MODELO_OBJETIVO;
-      ta.focus();
-      atualizarContadorObjetivo();
-      showToast('Modelo inserido. Ajuste para a sua visita.');
-    }
-
-    function toggleMaisExemplos() {
-      var box = document.getElementById('maisExemplos');
-      box.style.display = (box.style.display === 'block') ? 'none' : 'block';
-    }
-
-    function atualizarContadorObjetivo() {
-      var ta = document.getElementById('fObjetivo');
-      if (!ta) return;
-      var n = String(ta.value || '').trim().length;
-      var el = document.getElementById('objCounter');
-      if (!el) return;
-      el.textContent = n + ' caracteres';
-      el.style.color = n === 0 ? 'var(--muted)' : (n < OBJETIVO_MIN_CHARS ? '#d97706' : '#16a34a');
-    }
-
-    function cleanObjetivo(texto) {
-      return String(texto || '')
-        .replace(/\r/g, '')
-        .split('\n')
-        .map(function (l) { return l.replace(/\s+/g, ' ').trim(); })
-        .filter(function (l) { return l.length > 0; })
-        .map(function (l) { return l.replace(/^[•\-*]\s*/, ''); })
-        .map(function (l) { return l.charAt(0).toUpperCase() + l.slice(1); })
-        .map(function (l) { return /[.!?]$/.test(l) ? l : l + '.'; })
-        .join('\n');
-    }
-
-    /* ============================================================
        SALVAR
        ============================================================ */
 
@@ -821,17 +973,19 @@
       var data = document.getElementById('fData').value;
       var entrada = document.getElementById('fEntrada').value;
       var saida = document.getElementById('fSaida').value;
-      var objetivo = cleanObjetivo(document.getElementById('fObjetivo').value);
+      var objetivo = montarObjetivoFinal();
       var responsavel = document.getElementById('fResponsavel').value.trim();
 
-      if (!servidor || !departamento || !unidade || !data || !entrada || !objetivo) {
+      if (!servidor || !departamento || !unidade || !data || !entrada) {
         showToast('Preencha todos os campos obrigatórios (*).');
         return;
       }
-
+      if (!objetivo) {
+        showToast('Marque pelo menos um objetivo na lista ou escreva no campo de detalhes.');
+        return;
+      }
       if (objetivo.replace(/\n/g, ' ').trim().length < OBJETIVO_MIN_CHARS) {
-        showToast('Objetivo muito curto. Escreva: o que foi feito + onde + motivo.');
-        document.getElementById('fObjetivo').focus();
+        showToast('Objetivo muito curto. Detalhe melhor o que foi feito.');
         return;
       }
 
@@ -848,7 +1002,7 @@
         if (!existe) {
           lists.responsaveis.push(responsavel);
           lists.responsaveis.sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
-          localStorage.setItem('cemtec_lists_v4', JSON.stringify(lists));
+          localStorage.setItem('cemtec_lists_v5', JSON.stringify(lists));
         }
       }
 
@@ -899,9 +1053,13 @@
       btn.textContent = origText;
 
       visits.unshift(visit);
-      localStorage.setItem('cemtec_visits_v4', JSON.stringify(visits));
+      localStorage.setItem('cemtec_visits_v5', JSON.stringify(visits));
 
       document.getElementById('visitForm').reset();
+      document.getElementById('hintDepto').hidden = true;
+      document.getElementById('hintResp').hidden = true;
+      selectedObjetivos = [];
+      renderObjPills();
       document.getElementById('fData').value = todayISO();
       setNowTime('fEntrada');
       padUnit.clear();
@@ -917,61 +1075,127 @@
        SINCRONIZAÇÃO
        ============================================================ */
 
-    async function syncVisitsFromCloud(silent) {
-      var lbl = document.getElementById('cloudStatusLabel');
-      if (!APPS_SCRIPT_URL) {
-        if (lbl) lbl.textContent = 'Não configurada';
-        return;
-      }
+    async function carregarParesDaPlanilha() {
       try {
-        var res = await fetch(APPS_SCRIPT_URL, { redirect: 'follow' });
-        var json = await res.json();
+        var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Listas';
+        var res = await fetch(url, { redirect: 'follow' });
+        var texto = await res.text();
+        if (!texto || texto.trim().charAt(0) === '<') return false;
 
-        if (json.status !== 'ok') {
-          if (lbl) lbl.textContent = 'Erro: ' + (json.message || 'desconhecido');
-          return;
-        }
+        var rows = texto.split(/\r?\n/).filter(function (l) { return l.trim() !== ''; }).map(function (r) {
+          var out = [], cur = '', dentro = false;
+          for (var i = 0; i < r.length; i++) {
+            var ch = r[i];
+            if (ch === '"') {
+              if (dentro && r[i + 1] === '"') { cur += '"'; i++; }
+              else dentro = !dentro;
+            } else if (ch === ',' && !dentro) { out.push(cur.trim()); cur = ''; }
+            else cur += ch;
+          }
+          out.push(cur.trim());
+          return out;
+        });
+        if (rows.length < 2) return false;
 
-        if (json.listas) {
-          if (json.listas.servidores && json.listas.servidores.length) lists.servidores = json.listas.servidores;
-          if (json.listas.departamentos && json.listas.departamentos.length) lists.departamentos = json.listas.departamentos;
-          if (json.listas.unidades && json.listas.unidades.length) lists.unidades = json.listas.unidades;
-          if (json.listas.objetivos && json.listas.objetivos.length) lists.objetivos = json.listas.objetivos;
-          if (json.listas.responsaveis && json.listas.responsaveis.length) lists.responsaveis = json.listas.responsaveis;
-        }
-
-        if (Array.isArray(json.visits)) {
-          visits = json.visits.map(function (v) {
-            return Object.assign({}, v, {
-              entrada: formatTimeClean(v.entrada),
-              saida: formatTimeClean(v.saida)
-            });
-          });
-          localStorage.setItem('cemtec_visits_v4', JSON.stringify(visits));
-
-          json.visits.forEach(function (v) {
-            if (v.responsavel) {
-              var existe = lists.responsaveis.some(function (n) {
-                return n.toLowerCase() === String(v.responsavel).toLowerCase();
-              });
-              if (!existe) lists.responsaveis.push(String(v.responsavel));
+        var head = rows[0].map(function (h) { return normaliza(h); });
+        function idx(termos) {
+          for (var i = 0; i < head.length; i++) {
+            for (var t = 0; t < termos.length; t++) {
+              if (head[i].indexOf(termos[t]) !== -1) return i;
             }
-          });
-          lists.responsaveis.sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
+          }
+          return -1;
         }
 
-        localStorage.setItem('cemtec_lists_v4', JSON.stringify(lists));
-        populateDatalists();
-        renderDashboard();
-        renderReportsTable();
+        var cS = idx(['servidor']), cD = idx(['departamento']), cU = idx(['unidade', 'escola']), cR = idx(['respons']);
 
-        if (lbl) lbl.textContent = 'Conectada — ' + visits.length + ' ficha(s) | ' + lists.responsaveis.length + ' responsável(is)';
-        if (!silent) showToast('Sincronizado! ' + visits.length + ' ficha(s) e ' + lists.responsaveis.length + ' responsável(is).');
+        var pS = [], pU = [];
+        for (var r = 1; r < rows.length; r++) {
+          var row = rows[r];
+          if (cS > -1 && cD > -1 && row[cS] && row[cD]) pS.push([row[cS], row[cD]]);
+          if (cU > -1 && cR > -1 && row[cU] && row[cR]) pU.push([row[cU], row[cR]]);
+        }
+
+        lists.paresServidor = pS;
+        lists.paresUnidade = pU;
+        return true;
       } catch (e) {
-        if (lbl) lbl.textContent = 'Falha de conexão';
-        if (!silent) showToast('Erro ao buscar dados.');
+        return false;
       }
     }
+
+    async function syncTudo(silent) {
+      var lbl = document.getElementById('cloudStatusLabel');
+
+      var okPares = await carregarParesDaPlanilha();
+      if (!okPares) {
+        lists.paresServidor = lists.paresServidor || [];
+        lists.paresUnidade = lists.paresUnidade || [];
+        if (lbl) lbl.textContent = 'Listas vindas do Apps Script (sem vínculo automático)';
+      }
+
+      if (APPS_SCRIPT_URL) {
+        try {
+          var res = await fetch(APPS_SCRIPT_URL, { redirect: 'follow' });
+          var json = await res.json();
+
+          if (json.status === 'ok') {
+            if (json.listas) {
+              if (json.listas.servidores && json.listas.servidores.length) lists.servidores = json.listas.servidores;
+              if (json.listas.departamentos && json.listas.departamentos.length) lists.departamentos = json.listas.departamentos;
+              if (json.listas.unidades && json.listas.unidades.length) lists.unidades = json.listas.unidades;
+              if (json.listas.objetivos && json.listas.objetivos.length) lists.objetivos = json.listas.objetivos;
+              if (json.listas.responsaveis && json.listas.responsaveis.length) lists.responsaveis = json.listas.responsaveis;
+            }
+
+            if (!okPares) {
+              if (lists.servidores.length === lists.departamentos.length) {
+                lists.paresServidor = lists.servidores.map(function (s, i) { return [s, lists.departamentos[i]]; });
+              }
+              if (lists.unidades.length === lists.responsaveis.length) {
+                lists.paresUnidade = lists.unidades.map(function (u, i) { return [u, lists.responsaveis[i]]; });
+              }
+            }
+
+            if (Array.isArray(json.visits)) {
+              visits = json.visits.map(function (v) {
+                return Object.assign({}, v, { entrada: formatTimeClean(v.entrada), saida: formatTimeClean(v.saida) });
+              });
+              localStorage.setItem('cemtec_visits_v5', JSON.stringify(visits));
+
+              json.visits.forEach(function (v) {
+                if (v.responsavel) {
+                  var existe = lists.responsaveis.some(function (n) {
+                    return n.toLowerCase() === String(v.responsavel).toLowerCase();
+                  });
+                  if (!existe) lists.responsaveis.push(String(v.responsavel));
+                }
+              });
+            }
+
+            if (lbl) lbl.textContent = 'Conectada — ' + visits.length + ' ficha(s) | ' + lists.objetivos.length + ' objetivo(s)';
+          } else {
+            if (lbl) lbl.textContent = 'Erro: ' + (json.message || 'desconhecido');
+          }
+        } catch (e) {
+          if (lbl && !okPares) lbl.textContent = 'Falha de conexão';
+        }
+      }
+
+      lists.paresServidor = lists.paresServidor || [];
+      lists.paresUnidade = lists.paresUnidade || [];
+
+      localStorage.setItem('cemtec_lists_v5', JSON.stringify(lists));
+      montarMapas();
+      populateDatalists();
+      renderObjLista();
+      renderDashboard();
+      renderReportsTable();
+
+      if (!silent) showToast('Sincronizado! ' + visits.length + ' ficha(s) e ' + lists.objetivos.length + ' objetivo(s).');
+    }
+
+    function syncVisitsFromCloud(silent) { return syncTudo(silent); }
 
     /* ============================================================
        NAVEGAÇÃO
@@ -984,9 +1208,8 @@
         b.classList.toggle('active', b.dataset.view === v);
       });
       document.getElementById('sidebar').classList.remove('open');
-
       if (v === 'new') {
-        setTimeout(function () { if (padUnit) { padUnit.resize(); padUnit.redraw(); } }, 100);
+        setTimeout(function () { if (padUnit) { padUnit.resize(); padUnit.redraw(); } }, 110);
       }
       if (v === 'dashboard') renderDashboard();
       if (v === 'reports') renderReportsTable();
@@ -1013,17 +1236,6 @@
         return '<option value="' + esc(v) + '">';
       }).join('');
 
-      var chipsEl = document.getElementById('objectiveChips');
-      chipsEl.innerHTML = '';
-      lists.objetivos.forEach(function (o) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'chip';
-        b.textContent = '+ ' + o;
-        b.addEventListener('click', function () { appendObj(o); });
-        chipsEl.appendChild(b);
-      });
-
       var units = Array.from(new Set(lists.unidades.concat(visits.map(function (v) { return v.unidade; })))).filter(Boolean).sort();
       var depts = Array.from(new Set(lists.departamentos.concat(visits.map(function (v) { return v.departamento; })))).filter(Boolean).sort();
 
@@ -1036,17 +1248,10 @@
       }).join('');
     }
 
-    function appendObj(t) {
-      var ta = document.getElementById('fObjetivo');
-      ta.value = ta.value.trim() ? ta.value.trim() + '\n• ' + t : t;
-      atualizarContadorObjetivo();
-    }
-
     function respCell(nome) {
       var n = String(nome || '').trim();
-      return n
-        ? '<span class="resp-cell">' + esc(n) + '</span>'
-        : '<span class="resp-cell resp-vazio">não informado</span>';
+      return n ? '<span class="resp-cell">' + esc(n) + '</span>'
+               : '<span class="resp-cell resp-vazio">não informado</span>';
     }
 
     /* ============================================================
@@ -1132,10 +1337,7 @@
 
       var list = visits.filter(function (v) {
         var hay = (v.protocolo + ' ' + v.servidor + ' ' + v.unidade + ' ' + (v.responsavel || '') + ' ' + v.objetivo).toLowerCase();
-        return (!u || v.unidade === u) &&
-          (!d || v.departamento === d) &&
-          (!s || v.status === s) &&
-          (!q || hay.includes(q));
+        return (!u || v.unidade === u) && (!d || v.departamento === d) && (!s || v.status === s) && (!q || hay.indexOf(q) !== -1);
       });
 
       window._reportList = list;
@@ -1193,9 +1395,7 @@
       btnPrint.style.display = 'inline-flex';
 
       var partes = String(v.data || '').split('-');
-      var y = partes[0] || '----';
-      var m = partes[1] || '--';
-      var d = partes[2] || '--';
+      var y = partes[0] || '----', m = partes[1] || '--', d = partes[2] || '--';
       var ent = formatTimeClean(v.entrada) || '—';
       var sai = formatTimeClean(v.saida) || '—';
 
@@ -1272,7 +1472,7 @@
     }
 
     function formatDateBR(iso) {
-      if (!iso || !iso.includes('-')) return iso || '—';
+      if (!iso || iso.indexOf('-') === -1) return iso || '—';
       var p = iso.split('-');
       return p[2] + '/' + p[1] + '/' + p[0];
     }
@@ -1283,11 +1483,9 @@
     }
 
     function calcDurationMinutes(a, b) {
-      var ta = formatTimeClean(a);
-      var tb = formatTimeClean(b);
-      if (!ta || !tb || !ta.includes(':') || !tb.includes(':')) return null;
-      var p1 = ta.split(':').map(Number);
-      var p2 = tb.split(':').map(Number);
+      var ta = formatTimeClean(a), tb = formatTimeClean(b);
+      if (!ta || !tb || ta.indexOf(':') === -1 || tb.indexOf(':') === -1) return null;
+      var p1 = ta.split(':').map(Number), p2 = tb.split(':').map(Number);
       var diff = (p2[0] * 60 + p2[1]) - (p1[0] * 60 + p1[1]);
       return (!isNaN(diff) && diff >= 0) ? diff : null;
     }
@@ -1312,8 +1510,16 @@
     }
 
     /* ============================================================
-       INICIALIZAÇÃO
+       EVENTOS
        ============================================================ */
+
+    document.addEventListener('click', function (e) {
+      var menu = document.getElementById('objMenu');
+      var btn = document.getElementById('objMultiBtn');
+      if (!menu || !menu.classList.contains('open')) return;
+      if (menu.contains(e.target) || btn.contains(e.target)) return;
+      menu.classList.remove('open');
+    });
 
     window.addEventListener('resize', function () {
       if (padUnit) { padUnit.resize(); padUnit.redraw(); }
@@ -1336,15 +1542,27 @@
       document.getElementById('fData').value = todayISO();
       setNowTime('fEntrada');
 
+      var elServ = document.getElementById('fServidor');
+      elServ.addEventListener('change', function () { aplicarAutoDepto(false); });
+      elServ.addEventListener('blur', function () { aplicarAutoDepto(false); });
+
+      var elUnid = document.getElementById('fUnidade');
+      elUnid.addEventListener('change', function () { aplicarAutoResp(false); });
+      elUnid.addEventListener('blur', function () { aplicarAutoResp(false); });
+
+      lists.paresServidor = lists.paresServidor || [];
+      lists.paresUnidade = lists.paresUnidade || [];
+
+      montarMapas();
       populateDatalists();
+      renderObjPills();
+      renderObjLista();
       atualizarContadorObjetivo();
       initAccessMode();
 
-      setTimeout(function () {
-        if (padUnit) { padUnit.resize(); padUnit.redraw(); }
-      }, 250);
+      setTimeout(function () { if (padUnit) { padUnit.resize(); padUnit.redraw(); } }, 250);
 
-      syncVisitsFromCloud(true);
+      syncTudo(true);
     });
   </script>
 </body>
