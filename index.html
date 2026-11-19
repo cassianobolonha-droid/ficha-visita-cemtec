@@ -130,7 +130,15 @@
     .status-pending { background: #fef3c7; color: #92400e; }
     .resp-cell { font-size: 12px; color: #334155; }
     .resp-vazio { color: #94a3b8; font-style: italic; }
-    .filters-bar { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .filters-bar { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .filters-periodo { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px; }
+    .filters-periodo .campo-data { display: flex; flex-direction: column; gap: 5px; }
+    .filters-periodo .campo-data span { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+    .periodo-atalhos { display: flex; gap: 6px; flex-wrap: wrap; }
+    .periodo-atalhos .btn { padding: 9px 11px; font-size: 12px; }
+    .periodo-atalhos .btn.ativo { background: var(--blue-dark); color: #fff; border-color: var(--blue-dark); }
+    .filtros-resumo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; color: #475569; padding: 9px 2px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+    .filtros-resumo strong { color: var(--blue-dark); }
     .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.72); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100; }
     .modal-backdrop.open { display: flex; }
     .modal-card { background: #fff; border-radius: 16px; width: 100%; max-width: 860px; max-height: 94vh; overflow-y: auto; }
@@ -169,6 +177,9 @@
       .form-grid, .filters-bar { grid-template-columns: 1fr; }
       .linha-tripla { grid-template-columns: 1fr; }
       .obj-list { max-height: 210px; }
+      .filters-periodo { grid-template-columns: 1fr 1fr; }
+      .periodo-atalhos { grid-column: 1 / -1; }
+      .periodo-atalhos .btn { flex: 1 1 auto; }
     }
     @media print {
       .tricolor-bar, .sidebar, .mobile-header, .prof-topbar, .main-content, .modal-header, .no-print, .toast { display: none !important; }
@@ -402,6 +413,29 @@
             <select id="filterDept" onchange="renderReportsTable()"><option value="">Todos os Departamentos</option></select>
             <select id="filterStatus" onchange="renderReportsTable()"><option value="">Todos os Status</option><option value="signed">✅ Assinadas</option><option value="pending">⏳ Pendentes</option></select>
           </div>
+
+          <div class="filters-periodo">
+            <div class="campo-data">
+              <span>De</span>
+              <input type="date" id="filterDe" onchange="marcarAtalho('')" />
+            </div>
+            <div class="campo-data">
+              <span>Até</span>
+              <input type="date" id="filterAte" onchange="marcarAtalho('')" />
+            </div>
+            <div class="periodo-atalhos">
+              <button type="button" class="btn btn-outline" id="btHoje" onclick="setPeriodo('hoje')">Hoje</button>
+              <button type="button" class="btn btn-outline" id="bt7" onclick="setPeriodo('7')">7 dias</button>
+              <button type="button" class="btn btn-outline" id="btMes" onclick="setPeriodo('mes')">Este mês</button>
+              <button type="button" class="btn btn-outline" onclick="setPeriodo('limpar')">Limpar</button>
+            </div>
+          </div>
+
+          <div class="filtros-resumo">
+            <div id="filtrosResumo">—</div>
+            <button class="btn btn-outline btn-sm" onclick="setPeriodo('limpar')">Limpar filtros</button>
+          </div>
+
           <div class="table-wrap">
             <table>
               <thead><tr><th>Protocolo</th><th>Data</th><th>Servidor</th><th>Unidade</th><th>Responsável</th><th>Horário</th><th>Status</th><th>Ações</th></tr></thead>
@@ -488,10 +522,10 @@
     const OBJETIVO_MIN_CHARS = 25;
 
     const DEFAULT_LISTS = {
-      servidores: ['Cassiano Gonsalves', 'Prof. Carlos Eduardo Mendes', 'Profa. Ana Paula Ferreira', 'Lucas Henrique Oliveira', 'Mariana Costa Silva'],
-      departamentos: ['CEMTEC — Centro Municipal de Tecnologia e Robótica Educacional', 'SEMED — Coordenação Pedagógica', 'SEMED — Tecnologia Educacional / TI', 'SEMED — Manutenção e Infraestrutura'],
-      unidades: ['CEMTEC Sorriso', 'E.M. Aureliano Pereira da Silva', 'E.M. Caravagio', 'E.M. Ivete Lourdes Arenhardt', 'E.M. Jardim Amazônico', 'E.M. Papa João Paulo II', 'E.M. Rui Barbosa', 'CEMEIS Caminhos do Saber'],
-      objetivos: ['Suporte técnico em laboratório de informática e rede Wi-Fi', 'Acompanhamento de oficina de Robótica Educacional'],
+      servidores: [],
+      departamentos: [],
+      unidades: [],
+      objetivos: [],
       responsaveis: []
     };
 
@@ -512,7 +546,7 @@
     const isProfessorMode = params.get('modo') === 'ficha';
 
     /* ============================================================
-       ASSINATURA — coordenadas relativas
+       ASSINATURA
        ============================================================ */
 
     class SignaturePad {
@@ -632,13 +666,13 @@
             if (pts[j].y > maxY) maxY = pts[j].y;
           }
         }
-        var m = 0.04;
+        var m = 0.03;
         minX = Math.max(0, minX - m); maxX = Math.min(1, maxX + m);
         minY = Math.max(0, minY - m); maxY = Math.min(1, maxY + m);
         var bwRatio = Math.max(maxX - minX, 0.05);
         var bhRatio = Math.max(maxY - minY, 0.05);
         var srcW = bwRatio * padW, srcH = bhRatio * padH;
-        var OUT_H = 260;
+        var OUT_H = 220;
         var OUT_W = Math.round(OUT_H * (srcW / srcH));
         OUT_W = Math.max(170, Math.min(OUT_W, 900));
         var tmp = document.createElement('canvas');
@@ -704,7 +738,7 @@
     }
 
     /* ============================================================
-       OBJETIVOS — lista suspensa com checkbox
+       OBJETIVOS
        ============================================================ */
 
     function toggleObjMenu(ev) {
@@ -1149,15 +1183,6 @@
               if (json.listas.responsaveis && json.listas.responsaveis.length) lists.responsaveis = json.listas.responsaveis;
             }
 
-            if (!okPares) {
-              if (lists.servidores.length === lists.departamentos.length) {
-                lists.paresServidor = lists.servidores.map(function (s, i) { return [s, lists.departamentos[i]]; });
-              }
-              if (lists.unidades.length === lists.responsaveis.length) {
-                lists.paresUnidade = lists.unidades.map(function (u, i) { return [u, lists.responsaveis[i]]; });
-              }
-            }
-
             if (Array.isArray(json.visits)) {
               visits = json.visits.map(function (v) {
                 return Object.assign({}, v, { entrada: formatTimeClean(v.entrada), saida: formatTimeClean(v.saida) });
@@ -1240,13 +1265,19 @@
       var units = Array.from(new Set(lists.unidades.concat(visits.map(function (v) { return v.unidade; })))).filter(Boolean).sort();
       var depts = Array.from(new Set(lists.departamentos.concat(visits.map(function (v) { return v.departamento; })))).filter(Boolean).sort();
 
-      document.getElementById('filterUnit').innerHTML = '<option value="">Todas as Unidades</option>' + units.map(function (u) {
+      var selU = document.getElementById('filterUnit');
+      var atualU = selU.value;
+      selU.innerHTML = '<option value="">Todas as Unidades</option>' + units.map(function (u) {
         return '<option value="' + esc(u) + '">' + esc(u) + '</option>';
       }).join('');
+      selU.value = atualU;
 
-      document.getElementById('filterDept').innerHTML = '<option value="">Todos os Departamentos</option>' + depts.map(function (d) {
+      var selD = document.getElementById('filterDept');
+      var atualD = selD.value;
+      selD.innerHTML = '<option value="">Todos os Departamentos</option>' + depts.map(function (d) {
         return '<option value="' + esc(d) + '">' + esc(d) + '</option>';
       }).join('');
+      selD.value = atualD;
     }
 
     function respCell(nome) {
@@ -1327,20 +1358,70 @@
     }
 
     /* ============================================================
-       RELATÓRIOS
+       RELATÓRIOS — filtros + período
        ============================================================ */
 
-    function renderReportsTable() {
+    function dataISO(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function setPeriodo(modo) {
+      var de = document.getElementById('filterDe');
+      var ate = document.getElementById('filterAte');
+      var hoje = new Date();
+
+      if (modo === 'hoje') {
+        de.value = dataISO(hoje);
+        ate.value = dataISO(hoje);
+      } else if (modo === '7') {
+        var d7 = new Date(hoje.getTime() - 6 * 86400000);
+        de.value = dataISO(d7);
+        ate.value = dataISO(hoje);
+      } else if (modo === 'mes') {
+        de.value = dataISO(new Date(hoje.getFullYear(), hoje.getMonth(), 1));
+        ate.value = dataISO(hoje);
+      } else {
+        de.value = '';
+        ate.value = '';
+      }
+      marcarAtalho(modo === 'limpar' ? '' : modo);
+      renderReportsTable();
+    }
+
+    function marcarAtalho(modo) {
+      ['btHoje', 'bt7', 'btMes'].forEach(function (id) {
+        var b = document.getElementById(id);
+        if (b) b.classList.remove('ativo');
+      });
+      var mapa = { hoje: 'btHoje', '7': 'bt7', mes: 'btMes' };
+      if (mapa[modo]) {
+        var el = document.getElementById(mapa[modo]);
+        if (el) el.classList.add('ativo');
+      }
+    }
+
+    function listaFiltrada() {
       var q = (document.getElementById('filterSearch').value || '').toLowerCase();
       var u = document.getElementById('filterUnit').value;
       var d = document.getElementById('filterDept').value;
       var s = document.getElementById('filterStatus').value;
+      var de = document.getElementById('filterDe').value;
+      var ate = document.getElementById('filterAte').value;
 
-      var list = visits.filter(function (v) {
+      return visits.filter(function (v) {
         var hay = (v.protocolo + ' ' + v.servidor + ' ' + v.unidade + ' ' + (v.responsavel || '') + ' ' + v.objetivo).toLowerCase();
-        return (!u || v.unidade === u) && (!d || v.departamento === d) && (!s || v.status === s) && (!q || hay.indexOf(q) !== -1);
+        if (u && v.unidade !== u) return false;
+        if (d && v.departamento !== d) return false;
+        if (s && v.status !== s) return false;
+        if (q && hay.indexOf(q) === -1) return false;
+        if (de && String(v.data || '') < de) return false;
+        if (ate && String(v.data || '') > ate) return false;
+        return true;
       });
+    }
 
+    function renderReportsTable() {
+      var list = listaFiltrada();
       window._reportList = list;
 
       document.getElementById('reportsTableBody').innerHTML = list.map(function (v, i) {
@@ -1356,7 +1437,18 @@
             ? '<a href="' + v.pdfUrl + '" target="_blank" class="btn btn-success btn-sm">📁 PDF Drive</a>'
             : '<button class="btn btn-outline btn-sm" onclick="openA4Modal(window._reportList[' + i + '])">📄 A4</button>') + '</td>' +
         '</tr>';
-      }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma ficha encontrada.</td></tr>';
+      }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma ficha encontrada com estes filtros.</td></tr>';
+
+      var assinadas = list.filter(function (v) { return v.status === 'signed'; }).length;
+      var pendentes = list.length - assinadas;
+      var mins = list.map(function (v) { return calcDurationMinutes(v.entrada, v.saida); }).filter(function (x) { return x !== null; });
+      var totalMin = mins.reduce(function (a, b) { return a + b; }, 0);
+
+      var txt = '<strong>' + list.length + '</strong> ficha(s) · <strong>' + assinadas + '</strong> assinada(s) · ' +
+                '<strong>' + pendentes + '</strong> pendente(s)';
+      if (mins.length) txt += ' · ' + formatMinutes(totalMin) + ' de permanência';
+
+      document.getElementById('filtrosResumo').innerHTML = txt;
     }
 
     /* ============================================================
@@ -1435,24 +1527,31 @@
     }
 
     /* ============================================================
-       CSV
+       CSV — respeita os filtros da tela
        ============================================================ */
 
     function exportCSV() {
-      var headers = ['Protocolo', 'Data', 'Servidor', 'Departamento', 'Unidade', 'Responsavel', 'Objetivo', 'Entrada', 'Saida', 'Status', 'Link PDF'];
+      var list = listaFiltrada();
+      if (!list.length) {
+        showToast('Nenhuma ficha com os filtros atuais.');
+        return;
+      }
+      var headers = ['Protocolo', 'Data', 'Servidor', 'Departamento', 'Unidade', 'Responsavel', 'Objetivo', 'Entrada', 'Saida', 'Duracao', 'Status', 'Link PDF'];
       var escCsv = function (v) { return '"' + String(v || '').replace(/"/g, '""') + '"'; };
       var lines = [headers.map(escCsv).join(';')];
-      visits.forEach(function (v) {
+      list.forEach(function (v) {
         lines.push([
           v.protocolo, formatDateBR(v.data), v.servidor, v.departamento, v.unidade,
           v.responsavel || '', String(v.objetivo || '').replace(/\n/g, ' | '),
-          formatTimeClean(v.entrada), formatTimeClean(v.saida), v.status, v.pdfUrl
+          formatTimeClean(v.entrada), formatTimeClean(v.saida), v.duracao || '',
+          v.status === 'signed' ? 'Assinada' : 'Pendente', v.pdfUrl
         ].map(escCsv).join(';'));
       });
       var a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' }));
       a.download = 'fichas-cemtec-' + todayISO() + '.csv';
       a.click();
+      showToast('CSV exportado com ' + list.length + ' ficha(s).');
     }
 
     /* ============================================================
@@ -1558,7 +1657,8 @@
       populateDatalists();
       renderObjPills();
       renderObjLista();
-      atualizarContadorObjetivo();
+      atualizarContadorObjeto || atualizarContadorObjetivo();
+      renderReportsTable();
       initAccessMode();
 
       setTimeout(function () { if (padUnit) { padUnit.resize(); padUnit.redraw(); } }, 250);
