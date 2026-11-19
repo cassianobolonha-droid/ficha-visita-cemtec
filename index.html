@@ -6,883 +6,223 @@
   <title>Ficha de Visita Digital — CEMTEC | SEMED Sorriso</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --blue-dark: #003580;
-      --blue-mid: #0056b3;
-      --blue-light: #009FE3;
-      --yellow: #FBC02D;
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --success: #16a34a;
-      --warning: #d97706;
-      --danger: #dc2626;
-      --radius: 14px;
+      --blue-dark: #003580; --blue-mid: #0056b3; --blue-light: #009FE3; --yellow: #FBC02D;
+      --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0;
+      --success: #16a34a; --warning: #d97706; --danger: #dc2626; --radius: 14px;
       --shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Tricolor Bar */
-    .tricolor-bar {
-      display: flex;
-      height: 5px;
-      width: 100%;
-    }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    .tricolor-bar { display: flex; height: 5px; width: 100%; }
     .tricolor-bar .c1 { flex: 5; background: var(--blue-dark); }
     .tricolor-bar .c2 { flex: 3; background: var(--blue-light); }
     .tricolor-bar .c3 { flex: 2; background: var(--yellow); }
 
-    /* Layout */
-    .app-shell {
-      display: flex;
-      flex: 1;
-      min-height: calc(100vh - 5px);
+    /* PIN Gate */
+    .pin-gate {
+      position: fixed; inset: 0; background: linear-gradient(135deg, #003580 0%, #001f4d 100%);
+      display: none; align-items: center; justify-content: center; padding: 20px; z-index: 500;
     }
+    .pin-gate.open { display: flex; }
+    .pin-card {
+      background: #fff; border-radius: 18px; padding: 28px 24px; width: 100%; max-width: 380px;
+      text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+    }
+    .pin-card img { height: 54px; margin: 0 auto 12px; object-fit: contain; }
+    .pin-card h2 { font-size: 19px; color: var(--blue-dark); margin-bottom: 6px; }
+    .pin-card p { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+    .pin-input {
+      width: 100%; padding: 14px; font-size: 22px; letter-spacing: 8px; text-align: center;
+      border: 2px solid #cbd5e1; border-radius: 12px; margin-bottom: 12px; font-weight: 800;
+    }
+    .pin-error { color: var(--danger); font-size: 12px; font-weight: 600; min-height: 18px; margin-bottom: 8px; }
 
-    /* Sidebar */
+    /* Professor Mode Header */
+    .prof-topbar {
+      display: none; background: var(--blue-dark); color: #fff; padding: 12px 18px;
+      align-items: center; justify-content: space-between; gap: 12px;
+    }
+    body.mode-professor .prof-topbar { display: flex; }
+    body.mode-professor .sidebar, body.mode-professor .mobile-header { display: none !important; }
+    body.mode-professor .main-content { max-width: 900px; }
+
+    .app-shell { display: flex; flex: 1; min-height: calc(100vh - 5px); }
     .sidebar {
-      width: 270px;
-      background: linear-gradient(180deg, var(--blue-dark) 0%, #002359 100%);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      padding: 20px 16px;
-      position: sticky;
-      top: 0;
-      height: calc(100vh - 5px);
-      z-index: 40;
-      transition: transform 0.25s ease;
+      width: 270px; background: linear-gradient(180deg, var(--blue-dark) 0%, #002359 100%);
+      color: #fff; display: flex; flex-direction: column; padding: 20px 16px;
+      position: sticky; top: 0; height: calc(100vh - 5px); z-index: 40; transition: transform 0.25s ease;
     }
-    .brand-box {
-      background: rgba(255, 255, 255, 0.96);
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
-      margin-bottom: 18px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .brand-box img {
-      max-height: 58px;
-      max-width: 100%;
-      object-fit: contain;
-      display: block;
-      margin: 0 auto 6px;
-    }
-    .brand-sub {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--blue-dark);
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-      border-top: 1px solid #e2e8f0;
-      padding-top: 6px;
-    }
-    .live-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.18);
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      margin-bottom: 20px;
-    }
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #4ade80;
-      box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.25);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.45; }
-    }
-
-    .nav-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1;
-    }
+    .brand-box { background: #fff; border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 16px; }
+    .brand-box img { max-height: 54px; max-width: 100%; object-fit: contain; display: block; margin: 0 auto 6px; }
+    .brand-sub { font-size: 10px; font-weight: 700; color: var(--blue-dark); text-transform: uppercase; border-top: 1px solid #e2e8f0; padding-top: 6px; }
+    .nav-list { display: flex; flex-direction: column; gap: 6px; flex: 1; }
     .nav-btn {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-      padding: 12px 14px;
-      border: none;
-      border-radius: 10px;
-      background: transparent;
-      color: rgba(255,255,255,0.82);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.2s;
+      display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border: none;
+      border-radius: 10px; background: transparent; color: rgba(255,255,255,0.85);
+      font-size: 14px; font-weight: 600; cursor: pointer; text-align: left;
     }
     .nav-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
-    .nav-btn.active {
-      background: #fff;
-      color: var(--blue-dark);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.16);
-    }
-    .nav-btn .badge {
-      margin-left: auto;
-      background: var(--yellow);
-      color: #1e293b;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 999px;
-    }
-    .sidebar-footer {
-      font-size: 11px;
-      color: rgba(255,255,255,0.65);
-      border-top: 1px solid rgba(255,255,255,0.14);
-      padding-top: 14px;
-      line-height: 1.5;
-    }
+    .nav-btn.active { background: #fff; color: var(--blue-dark); }
+    .nav-btn .badge { margin-left: auto; background: var(--yellow); color: #1e293b; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+    .sidebar-footer { font-size: 11px; color: rgba(255,255,255,0.7); border-top: 1px solid rgba(255,255,255,0.14); padding-top: 12px; line-height: 1.5; }
 
-    /* Mobile Header */
     .mobile-header {
-      display: none;
-      background: var(--blue-dark);
-      color: #fff;
-      padding: 10px 14px;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 50;
+      display: none; background: var(--blue-dark); color: #fff; padding: 10px 14px;
+      align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50;
     }
-    .mobile-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .mobile-brand img {
-      height: 34px;
-      background: #fff;
-      padding: 3px 6px;
-      border-radius: 6px;
-    }
-    .mobile-menu-btn {
-      background: rgba(255,255,255,0.15);
-      border: none;
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 18px;
-      cursor: pointer;
-    }
+    .mobile-brand { display: flex; align-items: center; gap: 10px; }
+    .mobile-brand img { height: 34px; background: #fff; padding: 3px 6px; border-radius: 6px; }
+    .mobile-menu-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 18px; cursor: pointer; }
 
-    /* Main Content */
-    .main-content {
-      flex: 1;
-      padding: 24px 28px 40px;
-      max-width: 1400px;
-      width: 100%;
-      margin: 0 auto;
-    }
-    .page-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 22px;
-    }
-    .page-title h1 {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--blue-dark);
-    }
-    .page-title p {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 3px;
-    }
-    .header-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+    .main-content { flex: 1; padding: 24px 28px 40px; max-width: 1400px; width: 100%; margin: 0 auto; }
+    .page-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+    .page-title h1 { font-size: 23px; font-weight: 800; color: var(--blue-dark); }
+    .page-title p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+    .header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
-    /* Buttons */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      border: 1px solid transparent;
-      cursor: pointer;
-      transition: all 0.18s;
-      font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 15px;
+      border-radius: 10px; font-size: 13px; font-weight: 600; border: 1px solid transparent;
+      cursor: pointer; font-family: inherit; text-decoration: none;
     }
     .btn-primary { background: var(--blue-dark); color: #fff; }
-    .btn-primary:hover { background: var(--blue-mid); }
     .btn-accent { background: var(--blue-light); color: #fff; }
-    .btn-accent:hover { filter: brightness(0.92); }
     .btn-success { background: var(--success); color: #fff; }
-    .btn-success:hover { filter: brightness(0.92); }
     .btn-warning { background: var(--warning); color: #fff; }
     .btn-danger { background: #fee2e2; color: var(--danger); border-color: #fecaca; }
-    .btn-danger:hover { background: var(--danger); color: #fff; }
     .btn-outline { background: #fff; color: var(--text); border-color: var(--border); }
-    .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
-    .btn-sm { padding: 6px 11px; font-size: 12px; border-radius: 8px; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
 
-    /* Views */
     .view-section { display: none; }
     .view-section.active { display: block; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 18px; }
+    .card-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+    .card-title { font-size: 16px; font-weight: 700; color: var(--blue-dark); }
 
-    /* Cards & Grids */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-    }
-    .card-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-    .card-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--blue-dark);
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 14px;
-      margin-bottom: 20px;
-    }
-    .kpi-card {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow);
-      border-top: 4px solid var(--blue-dark);
-    }
+    .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 18px; }
+    .kpi-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; border-top: 4px solid var(--blue-dark); }
     .kpi-card.c-light { border-top-color: var(--blue-light); }
     .kpi-card.c-yellow { border-top-color: var(--yellow); }
     .kpi-card.c-green { border-top-color: var(--success); }
     .kpi-card.c-amber { border-top-color: var(--warning); }
     .kpi-label { font-size: 12px; font-weight: 600; color: var(--muted); }
-    .kpi-value { font-size: 28px; font-weight: 800; color: var(--text); margin: 6px 0 2px; }
+    .kpi-value { font-size: 26px; font-weight: 800; margin: 6px 0 2px; }
     .kpi-sub { font-size: 11px; color: var(--muted); }
 
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1.4fr 1fr 1.2fr;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-    .chart-wrap { position: relative; height: 260px; }
+    .charts-grid { display: grid; grid-template-columns: 1.4fr 1fr 1.2fr; gap: 16px; margin-bottom: 18px; }
+    .chart-wrap { position: relative; height: 250px; }
 
-    /* Form */
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group.full { grid-column: 1 / -1; }
-    label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #334155;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
+    label { font-size: 13px; font-weight: 600; color: #334155; display: flex; justify-content: space-between; }
+    input[type="text"], input[type="date"], input[type="time"], input[type="url"], input[type="password"], select, textarea {
+      width: 100%; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-family: inherit; background: #fff;
     }
-    input[type="text"], input[type="date"], input[type="time"], input[type="url"], select, textarea {
-      width: 100%;
-      padding: 11px 13px;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      font-size: 14px;
-      font-family: inherit;
-      background: #fff;
-      color: var(--text);
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--blue-light);
-      box-shadow: 0 0 0 3px rgba(0, 159, 227, 0.16);
-    }
-    textarea { min-height: 110px; resize: vertical; }
-
-    .input-row {
-      display: flex;
-      gap: 8px;
-      align-items: stretch;
-    }
+    textarea { min-height: 105px; resize: vertical; }
+    .input-row { display: flex; gap: 8px; }
     .input-row input { flex: 1; }
+    .chips-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+    .chip { background: #eff6ff; color: var(--blue-dark); border: 1px solid #bfdbfe; padding: 6px 10px; border-radius: 999px; font-size: 12px; cursor: pointer; }
 
-    .save-list-btn {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--blue-light);
-      background: #e0f2fe;
-      border: none;
-      padding: 3px 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: none;
-    }
-    .save-list-btn.visible { display: inline-block; }
-
-    /* Chips */
-    .chips-wrap {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      margin-bottom: 6px;
-    }
-    .chip {
-      background: #eff6ff;
-      color: var(--blue-dark);
-      border: 1px solid #bfdbfe;
-      padding: 6px 11px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .chip:hover { background: var(--blue-dark); color: #fff; border-color: var(--blue-dark); }
-
-    /* Signature Pad */
-    .sig-box {
-      border: 2px dashed #94a3b8;
-      border-radius: 12px;
-      background: #fff;
-      overflow: hidden;
-      position: relative;
-    }
-    .sig-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 10px 12px;
-      background: #f8fafc;
-      border-bottom: 1px solid var(--border);
-    }
-    .sig-colors { display: flex; align-items: center; gap: 6px; }
-    .color-dot {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      cursor: pointer;
-    }
+    .sig-box { border: 2px dashed #94a3b8; border-radius: 12px; background: #fff; overflow: hidden; position: relative; }
+    .sig-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; background: #f8fafc; border-bottom: 1px solid var(--border); }
+    .color-dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
     .color-dot.active { border-color: var(--yellow); transform: scale(1.12); }
-    .sig-canvas {
-      width: 100%;
-      height: 200px;
-      display: block;
-      cursor: crosshair;
-      touch-action: none;
-      background: #ffffff;
-    }
-    .sig-guide {
-      position: absolute;
-      left: 10%;
-      right: 10%;
-      bottom: 34px;
-      border-bottom: 1px solid #cbd5e1;
-      pointer-events: none;
-      text-align: center;
-      font-size: 11px;
-      color: #94a3b8;
-      padding-top: 4px;
-    }
+    .sig-canvas { width: 100%; height: 200px; display: block; cursor: crosshair; touch-action: none; }
+    .sig-guide { position: absolute; left: 10%; right: 10%; bottom: 32px; border-bottom: 1px solid #cbd5e1; pointer-events: none; text-align: center; font-size: 11px; color: #94a3b8; }
 
-    /* Switch */
-    .switch-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .switch-row input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--blue-dark);
-      cursor: pointer;
-    }
-
-    /* Table */
     .table-wrap { overflow-x: auto; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    th, td {
-      padding: 11px 12px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-    th {
-      background: #f8fafc;
-      color: #475569;
-      font-weight: 700;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    tr:hover td { background: #f8fafc; }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: #f8fafc; color: #475569; font-weight: 700; font-size: 11px; text-transform: uppercase; }
+    .status-pill { display: inline-flex; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
     .status-signed { background: #dcfce7; color: #166534; }
     .status-pending { background: #fef3c7; color: #92400e; }
+    .filters-bar { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
 
-    /* Filters */
-    .filters-bar {
-      display: grid;
-      grid-template-columns: 1.5fr 1fr 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    /* Lists Management */
-    .lists-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-    .list-items {
-      max-height: 240px;
-      overflow-y: auto;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-top: 10px;
-    }
-    .list-item-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 13px;
-    }
-    .list-item-row:last-child { border-bottom: none; }
-
-    /* Modals */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.72);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 100;
-      overflow-y: auto;
-    }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.72); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100; }
     .modal-backdrop.open { display: flex; }
-    .modal-card {
-      background: #fff;
-      border-radius: 16px;
-      width: 100%;
-      max-width: 860px;
-      max-height: 94vh;
-      overflow-y: auto;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-    }
-    .modal-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      background: #fff;
-      z-index: 5;
-    }
+    .modal-card { background: #fff; border-radius: 16px; width: 100%; max-width: 860px; max-height: 94vh; overflow-y: auto; }
+    .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: #fff; z-index: 5; }
     .modal-body { padding: 20px; }
 
-    /* Fullscreen Signature Modal */
-    .fs-sig-modal {
-      position: fixed;
-      inset: 0;
-      background: #fff;
-      z-index: 200;
-      display: none;
-      flex-direction: column;
-    }
+    .fs-sig-modal { position: fixed; inset: 0; background: #fff; z-index: 200; display: none; flex-direction: column; }
     .fs-sig-modal.open { display: flex; }
-    .fs-sig-top {
-      background: var(--blue-dark);
-      color: #fff;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .fs-sig-canvas-wrap {
-      flex: 1;
-      position: relative;
-      background: #fff;
-    }
-    #fsSigCanvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      touch-action: none;
-      cursor: crosshair;
-    }
-    .fs-sig-bottom {
-      padding: 12px 16px;
-      background: #f8fafc;
-      border-top: 1px solid var(--border);
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 10px;
-    }
+    .fs-sig-top { background: var(--blue-dark); color: #fff; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .fs-sig-canvas-wrap { flex: 1; position: relative; }
+    #fsSigCanvas { width: 100%; height: 100%; display: block; touch-action: none; }
+    .fs-sig-bottom { padding: 12px 16px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 10px; }
 
-    /* Official A4 Sheet */
-    .a4-sheet {
-      background: #fff;
-      width: 100%;
-      max-width: 794px;
-      margin: 0 auto;
-      padding: 36px 46px 24px;
-      border: 1px solid #cbd5e1;
-      position: relative;
-      color: #111827;
-      font-family: 'Times New Roman', Georgia, serif;
-      overflow: hidden;
-    }
-    .a4-watermark {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-      opacity: 0.07;
-      z-index: 0;
-    }
-    .a4-watermark img {
-      width: 340px;
-      max-width: 70%;
-      filter: grayscale(100%);
-    }
-    .a4-content { position: relative; z-index: 1; }
-    .a4-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 18px;
-      margin-bottom: 24px;
-    }
-    .a4-header-line {
-      flex: 1;
-      height: 1.5px;
-      background: var(--blue-dark);
-    }
-    .a4-logos {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .a4-logos img {
-      height: 54px;
-      max-width: 180px;
-      object-fit: contain;
-    }
-    .a4-logo-divider {
-      width: 1.5px;
-      height: 44px;
-      background: #94a3b8;
-    }
-    .a4-semed-text {
-      font-family: 'Inter', sans-serif;
-      color: var(--blue-dark);
-      line-height: 1.2;
-      text-align: left;
-    }
-    .a4-semed-text strong { font-size: 15px; display: block; letter-spacing: 0.5px; }
-    .a4-semed-text span { font-size: 9px; text-transform: uppercase; display: block; }
+    .a4-sheet { background: #fff; max-width: 794px; margin: 0 auto; padding: 34px 44px 24px; border: 1px solid #cbd5e1; font-family: 'Times New Roman', Georgia, serif; }
+    .a4-header { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 22px; }
+    .a4-header-line { flex: 1; height: 1.5px; background: var(--blue-dark); }
+    .a4-logos { display: flex; align-items: center; gap: 12px; }
+    .a4-logos img { height: 50px; object-fit: contain; }
+    .a4-title { text-align: center; font-size: 20px; font-weight: 700; margin-bottom: 22px; }
+    .a4-field { display: flex; gap: 8px; margin-bottom: 14px; font-size: 16px; }
+    .a4-field-value { flex: 1; border-bottom: 1px solid #1f2937; padding: 0 6px 2px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; }
+    .a4-objective-box { margin: 10px 0 20px; min-height: 130px; line-height: 28px; font-family: 'Inter', sans-serif; font-size: 14px; background-image: repeating-linear-gradient(to bottom, transparent 0px, transparent 27px, #374151 27px, #374151 28px); white-space: pre-wrap; }
+    .a4-sig-block { text-align: center; max-width: 340px; margin: 24px auto; }
+    .a4-sig-block img { max-height: 80px; margin-bottom: -8px; }
+    .a4-sig-line { border-top: 1px solid #1f2937; padding-top: 6px; font-size: 14px; }
 
-    .a4-title {
-      text-align: center;
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      margin-bottom: 26px;
-      text-transform: uppercase;
-    }
-    .a4-field {
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      margin-bottom: 16px;
-      font-size: 16px;
-    }
-    .a4-field-label { white-space: nowrap; font-weight: 400; }
-    .a4-field-value {
-      flex: 1;
-      border-bottom: 1px solid #1f2937;
-      padding: 0 8px 2px;
-      min-height: 22px;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-    }
-    .a4-date-row {
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      margin-bottom: 18px;
-      font-size: 16px;
-    }
-    .a4-date-part {
-      display: inline-block;
-      min-width: 44px;
-      text-align: center;
-      border-bottom: 1px solid #1f2937;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-    }
-    .a4-objective-box {
-      margin: 10px 0 22px;
-      min-height: 150px;
-      line-height: 30px;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      background-image: repeating-linear-gradient(
-        to bottom,
-        transparent 0px,
-        transparent 29px,
-        #374151 29px,
-        #374151 30px
-      );
-      padding: 0 4px;
-      white-space: pre-wrap;
-    }
-    .a4-times {
-      margin-bottom: 42px;
-      font-size: 16px;
-      line-height: 2;
-    }
-    .a4-time-slot {
-      display: inline-block;
-      min-width: 42px;
-      text-align: center;
-      border-bottom: 1px solid #1f2937;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-    }
-    .a4-signatures {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      margin: 24px 0 28px;
-    }
-    .a4-sig-block {
-      flex: 1;
-      max-width: 340px;
-      text-align: center;
-    }
-    .a4-sig-img-wrap {
-      height: 82px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      margin-bottom: -8px;
-    }
-    .a4-sig-img-wrap img {
-      max-height: 82px;
-      max-width: 100%;
-      object-fit: contain;
-    }
-    .a4-sig-line {
-      border-top: 1px solid #1f2937;
-      padding-top: 6px;
-      font-size: 14px;
-    }
-    .a4-sig-meta {
-      font-family: 'Inter', sans-serif;
-      font-size: 10px;
-      color: #475569;
-      margin-top: 3px;
-    }
-    .a4-protocol {
-      font-family: 'Inter', sans-serif;
-      font-size: 10px;
-      color: #475569;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 6px 10px;
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 18px;
-    }
-    .a4-footer {
-      font-family: 'Inter', sans-serif;
-      font-size: 10px;
-      color: #334155;
-      margin-top: 12px;
-    }
-    .a4-footer-top {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-    .a4-footer-bottom {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 6px;
-      font-weight: 600;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #0f172a;
-      color: #fff;
-      padding: 12px 18px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.25s ease;
-      z-index: 300;
-    }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all 0.25s; z-index: 600; }
     .toast.show { transform: translateY(0); opacity: 1; }
 
-    /* Responsive */
-    @media (max-width: 1120px) {
-      .kpi-grid { grid-template-columns: repeat(3, 1fr); }
-      .charts-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } .charts-grid { grid-template-columns: 1fr; } }
     @media (max-width: 860px) {
       .mobile-header { display: flex; }
-      .sidebar {
-        position: fixed;
-        left: 0;
-        top: 5px;
-        bottom: 0;
-        transform: translateX(-100%);
-      }
+      .sidebar { position: fixed; left: 0; top: 5px; bottom: 0; transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
       .main-content { padding: 16px 14px 36px; }
       .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-      .form-grid, .filters-bar, .lists-grid { grid-template-columns: 1fr; }
-      .a4-sheet { padding: 20px 18px; }
+      .form-grid, .filters-bar { grid-template-columns: 1fr; }
     }
-
-    /* Print */
     @media print {
-      body { background: #fff !important; }
-      .tricolor-bar, .sidebar, .mobile-header, .main-content, .modal-header, .no-print, .toast {
-        display: none !important;
-      }
-      .modal-backdrop {
-        position: static !important;
-        background: none !important;
-        padding: 0 !important;
-        display: block !important;
-      }
-      .modal-card {
-        box-shadow: none !important;
-        max-height: none !important;
-        max-width: none !important;
-        border: none !important;
-      }
-      .modal-body { padding: 0 !important; }
-      .a4-sheet {
-        border: none !important;
-        max-width: none !important;
-        padding: 12mm 14mm !important;
-      }
-      body.print-report .main-content { display: block !important; padding: 0 !important; }
-      body.print-report .modal-backdrop { display: none !important; }
-      body.print-report .view-section { display: none !important; }
-      body.print-report #view-reports { display: block !important; }
+      .tricolor-bar, .sidebar, .mobile-header, .prof-topbar, .main-content, .modal-header, .no-print, .toast { display: none !important; }
+      .modal-backdrop { position: static !important; background: none !important; padding: 0 !important; display: block !important; }
+      .modal-card { max-height: none !important; max-width: none !important; box-shadow: none !important; }
+      .a4-sheet { border: none !important; padding: 10mm !important; }
     }
   </style>
 </head>
 <body>
-  <div class="tricolor-bar">
-    <div class="c1"></div><div class="c2"></div><div class="c3"></div>
+  <div class="tricolor-bar"><div class="c1"></div><div class="c2"></div><div class="c3"></div></div>
+
+  <!-- TELA DE PIN DO COORDENADOR -->
+  <div class="pin-gate" id="pinGate">
+    <div class="pin-card">
+      <img class="dynamic-logo" alt="CEMTEC" />
+      <h2>Acesso do Coordenador</h2>
+      <p>Digite o PIN do setor para abrir o Dashboard e os Relatórios Gerais.</p>
+      <input type="password" id="pinInput" class="pin-input" maxlength="8" placeholder="••••" onkeydown="if(event.key==='Enter') verifyPin()" />
+      <div class="pin-error" id="pinError"></div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:10px;" onclick="verifyPin()">🔓 Entrar no Painel Geral</button>
+      <button class="btn btn-outline" style="width:100%;" onclick="enterProfessorMode()">✍️ Sou Professor (Abrir só a Ficha)</button>
+    </div>
+  </div>
+
+  <!-- BARRA SUPERIOR DO MODO PROFESSOR -->
+  <div class="prof-topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img class="dynamic-logo" style="height:34px;background:#fff;padding:3px 6px;border-radius:6px;" alt="CEMTEC" />
+      <div>
+        <div style="font-weight:800;font-size:14px;">Ficha de Visita — CEMTEC / SEMED</div>
+        <div style="font-size:11px;opacity:.85;">Modo Professor (Envio direto para a Coordenação)</div>
+      </div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="requestCoordinatorAccess()">🔒 Coordenador</button>
   </div>
 
   <header class="mobile-header">
     <div class="mobile-brand">
-      <img class="dynamic-logo" alt="CEMTEC Sorriso" />
-      <div>
-        <div style="font-weight:800;font-size:14px;">CEMTEC / SEMED</div>
-        <div style="font-size:11px;opacity:.8;">Ficha de Visita Digital</div>
-      </div>
+      <img class="dynamic-logo" alt="CEMTEC" />
+      <div><div style="font-weight:800;font-size:14px;">CEMTEC / SEMED</div><div style="font-size:11px;opacity:.8;">Painel Coordenador</div></div>
     </div>
     <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
   </header>
@@ -890,34 +230,18 @@
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <div class="brand-box">
-        <img class="dynamic-logo" alt="Logo CEMTEC" />
+        <img class="dynamic-logo" alt="CEMTEC" />
         <div class="brand-sub">SEMED • Secretaria Municipal de Educação</div>
       </div>
-
-      <div class="live-badge">
-        <span class="live-dot"></span>
-        <span>Painel em Tempo Real</span>
-      </div>
-
       <nav class="nav-list">
-        <button class="nav-btn active" data-view="dashboard" onclick="switchView('dashboard')">
-          📊 Dashboard
-        </button>
-        <button class="nav-btn" data-view="new" onclick="switchView('new')">
-          ✍️ Nova Ficha de Visita
-        </button>
-        <button class="nav-btn" data-view="reports" onclick="switchView('reports')">
-          📋 Relatórios & Fichas
-          <span class="badge" id="navPendingBadge">0</span>
-        </button>
-        <button class="nav-btn" data-view="lists" onclick="switchView('lists')">
-          🗂️ Listas & Planilha
-        </button>
+        <button class="nav-btn active" data-view="dashboard" onclick="switchView('dashboard')">📊 Dashboard</button>
+        <button class="nav-btn" data-view="new" onclick="switchView('new')">✍️ Nova Ficha</button>
+        <button class="nav-btn" data-view="reports" onclick="switchView('reports')">📋 Relatórios & PDFs <span class="badge" id="navPendingBadge">0</span></button>
+        <button class="nav-btn" data-view="lists" onclick="switchView('lists')">⚙️ Planilha & Links</button>
       </nav>
-
       <div class="sidebar-footer">
-        <strong>Prefeitura de Sorriso - MT</strong><br/>
-        CEMTEC — Centro Municipal de Tecnologia e Robótica Educacional
+        <button class="btn btn-accent btn-sm" style="width:100%;margin-bottom:10px;" onclick="copyProfessorLink()">🔗 Copiar Link p/ Professores</button>
+        <strong>Prefeitura de Sorriso - MT</strong><br/>CEMTEC • Robótica e Tecnologia
       </div>
     </aside>
 
@@ -926,75 +250,35 @@
       <section class="view-section active" id="view-dashboard">
         <div class="page-header">
           <div class="page-title">
-            <h1>Dashboard de Visitas Técnicas</h1>
-            <p>Acompanhamento em tempo real das fichas, unidades atendidas e assinaturas digitais.</p>
+            <h1>Dashboard Geral — Coordenação</h1>
+            <p>Acompanhamento das fichas enviadas pelos professores em tempo real.</p>
           </div>
           <div class="header-actions">
-            <button class="btn btn-outline" onclick="loadDemoData()">✨ Carregar Demonstração</button>
+            <button class="btn btn-outline" onclick="syncVisitsFromCloud()">🔄 Atualizar da Planilha</button>
+            <button class="btn btn-accent" onclick="copyProfessorLink()">🔗 Link dos Professores</button>
             <button class="btn btn-primary" onclick="switchView('new')">+ Nova Ficha</button>
           </div>
         </div>
 
         <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">Total de Visitas</div>
-            <div class="kpi-value" id="kpiTotal">0</div>
-            <div class="kpi-sub">Registros acumulados</div>
-          </div>
-          <div class="kpi-card c-light">
-            <div class="kpi-label">Visitas Hoje</div>
-            <div class="kpi-value" id="kpiToday">0</div>
-            <div class="kpi-sub" id="kpiTodayDate">—</div>
-          </div>
-          <div class="kpi-card c-yellow">
-            <div class="kpi-label">Unidades Atendidas</div>
-            <div class="kpi-value" id="kpiUnits">0</div>
-            <div class="kpi-sub">Escolas / destinos distintos</div>
-          </div>
-          <div class="kpi-card c-green">
-            <div class="kpi-label">Taxa de Assinatura</div>
-            <div class="kpi-value" id="kpiSignedRate">0%</div>
-            <div class="kpi-sub" id="kpiPendingText">0 pendentes</div>
-          </div>
-          <div class="kpi-card c-amber">
-            <div class="kpi-label">Tempo Médio</div>
-            <div class="kpi-value" id="kpiAvgTime">0 min</div>
-            <div class="kpi-sub">Permanência por visita</div>
-          </div>
+          <div class="kpi-card"><div class="kpi-label">Total de Visitas</div><div class="kpi-value" id="kpiTotal">0</div><div class="kpi-sub">Registros na base</div></div>
+          <div class="kpi-card c-light"><div class="kpi-label">Visitas Hoje</div><div class="kpi-value" id="kpiToday">0</div><div class="kpi-sub" id="kpiTodayDate">—</div></div>
+          <div class="kpi-card c-yellow"><div class="kpi-label">Unidades Atendidas</div><div class="kpi-value" id="kpiUnits">0</div><div class="kpi-sub">Escolas distintas</div></div>
+          <div class="kpi-card c-green"><div class="kpi-label">Taxa de Assinatura</div><div class="kpi-value" id="kpiSignedRate">0%</div><div class="kpi-sub" id="kpiPendingText">0 pendentes</div></div>
+          <div class="kpi-card c-amber"><div class="kpi-label">Tempo Médio</div><div class="kpi-value" id="kpiAvgTime">0 min</div><div class="kpi-sub">Permanência</div></div>
         </div>
 
         <div class="charts-grid">
-          <div class="card">
-            <div class="card-header"><div class="card-title">Visitas por Unidade / Escola</div></div>
-            <div class="chart-wrap"><canvas id="chartUnits"></canvas></div>
-          </div>
-          <div class="card">
-            <div class="card-header"><div class="card-title">Status das Assinaturas</div></div>
-            <div class="chart-wrap"><canvas id="chartStatus"></canvas></div>
-          </div>
-          <div class="card">
-            <div class="card-header"><div class="card-title">Visitas por Departamento</div></div>
-            <div class="chart-wrap"><canvas id="chartDepts"></canvas></div>
-          </div>
+          <div class="card"><div class="card-title" style="margin-bottom:10px;">Visitas por Unidade</div><div class="chart-wrap"><canvas id="chartUnits"></canvas></div></div>
+          <div class="card"><div class="card-title" style="margin-bottom:10px;">Status das Assinaturas</div><div class="chart-wrap"><canvas id="chartStatus"></canvas></div></div>
+          <div class="card"><div class="card-title" style="margin-bottom:10px;">Visitas por Departamento</div><div class="chart-wrap"><canvas id="chartDepts"></canvas></div></div>
         </div>
 
         <div class="card">
-          <div class="card-header">
-            <div class="card-title">Últimas Visitas Registradas</div>
-            <button class="btn btn-outline btn-sm" onclick="switchView('reports')">Ver todas →</button>
-          </div>
+          <div class="card-header"><div class="card-title">Últimas Visitas</div><button class="btn btn-outline btn-sm" onclick="switchView('reports')">Ver todas →</button></div>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Protocolo</th>
-                  <th>Data / Horário</th>
-                  <th>Servidor</th>
-                  <th>Unidade / Escola</th>
-                  <th>Status</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Protocolo</th><th>Data</th><th>Servidor</th><th>Unidade</th><th>Status</th><th>Ações</th></tr></thead>
               <tbody id="recentVisitsBody"></tbody>
             </table>
           </div>
@@ -1005,138 +289,81 @@
       <section class="view-section" id="view-new">
         <div class="page-header">
           <div class="page-title">
-            <h1>Nova Ficha de Visita</h1>
-            <p>Selecione os campos pré-definidos ou digite novos valores e colete a assinatura digital na tela.</p>
-          </div>
-          <div class="header-actions">
-            <button class="btn btn-outline" onclick="resetVisitForm()">Limpar Formulário</button>
+            <h1>Ficha de Visita Digital</h1>
+            <p>Preencha os dados, colete a assinatura na tela e envie diretamente para a pasta da coordenação.</p>
           </div>
         </div>
-
         <form id="visitForm" onsubmit="return false;">
           <div class="card">
-            <div class="card-header"><div class="card-title">1. Dados da Visita</div></div>
+            <div class="card-title" style="margin-bottom:14px;">1. Dados da Visita</div>
             <div class="form-grid">
               <div class="form-group">
-                <label>
-                  <span>Nome do Servidor *</span>
-                  <button type="button" class="save-list-btn" id="saveServidorBtn" onclick="quickAddToList('servidores','fServidor')">+ Salvar na lista</button>
-                </label>
-                <input type="text" id="fServidor" list="dlServidores" placeholder="Digite ou selecione o servidor..." required oninput="checkNewListItem('servidores','fServidor','saveServidorBtn')" />
+                <label>Nome do Servidor *</label>
+                <input type="text" id="fServidor" list="dlServidores" placeholder="Selecione ou digite..." required />
                 <datalist id="dlServidores"></datalist>
               </div>
-
               <div class="form-group">
-                <label>
-                  <span>Departamento *</span>
-                  <button type="button" class="save-list-btn" id="saveDeptBtn" onclick="quickAddToList('departamentos','fDepartamento')">+ Salvar na lista</button>
-                </label>
-                <input type="text" id="fDepartamento" list="dlDepartamentos" placeholder="Digite ou selecione o departamento..." required oninput="checkNewListItem('departamentos','fDepartamento','saveDeptBtn')" />
+                <label>Departamento *</label>
+                <input type="text" id="fDepartamento" list="dlDepartamentos" placeholder="Selecione ou digite..." required />
                 <datalist id="dlDepartamentos"></datalist>
               </div>
-
               <div class="form-group">
-                <label>
-                  <span>Unidade / Escola / Destino *</span>
-                  <button type="button" class="save-list-btn" id="saveUnidadeBtn" onclick="quickAddToList('unidades','fUnidade')">+ Salvar na lista</button>
-                </label>
-                <input type="text" id="fUnidade" list="dlUnidades" placeholder="Digite ou selecione a escola/unidade..." required oninput="checkNewListItem('unidades','fUnidade','saveUnidadeBtn')" />
+                <label>Unidade / Escola / Destino *</label>
+                <input type="text" id="fUnidade" list="dlUnidades" placeholder="Selecione ou digite..." required />
                 <datalist id="dlUnidades"></datalist>
               </div>
-
               <div class="form-group">
-                <label><span>Data da Visita *</span></label>
+                <label>Data da Visita *</label>
                 <input type="date" id="fData" required />
               </div>
-
               <div class="form-group">
-                <label><span>Horário de Entrada *</span></label>
+                <label>Horário de Entrada *</label>
                 <div class="input-row">
-                  <input type="time" id="fEntrada" required onchange="updateDurationPreview()" />
+                  <input type="time" id="fEntrada" required />
                   <button type="button" class="btn btn-outline btn-sm" onclick="setNowTime('fEntrada')">Agora</button>
                 </div>
               </div>
-
               <div class="form-group">
-                <label>
-                  <span>Horário de Saída</span>
-                  <span id="durationPreview" style="color:var(--blue-light);font-weight:700;"></span>
-                </label>
+                <label>Horário de Saída</label>
                 <div class="input-row">
-                  <input type="time" id="fSaida" onchange="updateDurationPreview()" />
+                  <input type="time" id="fSaida" />
                   <button type="button" class="btn btn-outline btn-sm" onclick="setNowTime('fSaida')">Agora</button>
                 </div>
               </div>
-
               <div class="form-group full">
-                <label><span>Objetivo da Visita * (toque nos atalhos para preencher rápido)</span></label>
+                <label>Objetivo da Visita *</label>
                 <div class="chips-wrap" id="objectiveChips"></div>
-                <textarea id="fObjetivo" placeholder="Descreva o objetivo da visita, atividades realizadas ou observações..." required></textarea>
+                <textarea id="fObjetivo" placeholder="Descreva o objetivo da visita..." required></textarea>
               </div>
             </div>
           </div>
 
           <div class="card">
             <div class="card-header">
-              <div class="card-title">2. Assinatura Digital do Responsável pela Unidade</div>
+              <div class="card-title">2. Assinatura do Responsável pela Unidade</div>
               <button type="button" class="btn btn-accent btn-sm" onclick="openFullscreenSig('unit')">📱 Assinar em Tela Cheia</button>
             </div>
-
-            <div class="form-grid" style="margin-bottom:14px;">
-              <div class="form-group full">
-                <label><span>Nome do Responsável pela Unidade (opcional, aparece abaixo da assinatura)</span></label>
-                <input type="text" id="fResponsavel" placeholder="Ex.: Dir. Maria Aparecida / Coord. Pedagógica" />
-              </div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Nome do Responsável pela Unidade (opcional)</label>
+              <input type="text" id="fResponsavel" placeholder="Ex.: Dir. Maria Aparecida" />
             </div>
-
             <div class="sig-box">
               <div class="sig-toolbar">
-                <div class="sig-colors">
-                  <span style="font-size:12px;font-weight:600;color:var(--muted);">Tinta:</span>
-                  <button type="button" class="color-dot active" style="background:#003580;" onclick="setPenColor('unit','#003580',this)" title="Azul Caneta"></button>
-                  <button type="button" class="color-dot" style="background:#0f172a;" onclick="setPenColor('unit','#0f172a',this)" title="Preto"></button>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <button type="button" class="color-dot active" style="background:#003580;" onclick="setPenColor('#003580',this)"></button>
+                  <button type="button" class="color-dot" style="background:#0f172a;" onclick="setPenColor('#0f172a',this)"></button>
                 </div>
                 <div style="display:flex;gap:8px;">
-                  <button type="button" class="btn btn-outline btn-sm" onclick="undoSignature('unit')">↩ Desfazer</button>
-                  <button type="button" class="btn btn-outline btn-sm" onclick="clearSignature('unit')">🗑 Limpar</button>
+                  <button type="button" class="btn btn-outline btn-sm" onclick="padUnit.undo()">↩ Desfazer</button>
+                  <button type="button" class="btn btn-outline btn-sm" onclick="padUnit.clear();capturedUnit='';">🗑 Limpar</button>
                 </div>
               </div>
               <canvas id="sigCanvasUnit" class="sig-canvas"></canvas>
-              <div class="sig-guide">Assine acima desta linha (dedo, caneta touch ou mouse)</div>
+              <div class="sig-guide">Assine acima desta linha</div>
             </div>
-
-            <div style="margin-top:16px;">
-              <label class="switch-row">
-                <input type="checkbox" id="toggleServerSig" onchange="toggleServerSigBox()" />
-                <span>Incluir também a assinatura do servidor na ficha oficial</span>
-              </label>
-            </div>
-
-            <div id="serverSigContainer" style="display:none;margin-top:14px;">
-              <div class="card-header" style="margin-bottom:10px;">
-                <div class="card-title" style="font-size:14px;">Assinatura do Servidor</div>
-                <button type="button" class="btn btn-accent btn-sm" onclick="openFullscreenSig('server')">📱 Tela Cheia</button>
-              </div>
-              <div class="sig-box">
-                <div class="sig-toolbar">
-                  <div class="sig-colors">
-                    <span style="font-size:12px;font-weight:600;color:var(--muted);">Tinta:</span>
-                    <button type="button" class="color-dot active" style="background:#003580;" onclick="setPenColor('server','#003580',this)"></button>
-                    <button type="button" class="color-dot" style="background:#0f172a;" onclick="setPenColor('server','#0f172a',this)"></button>
-                  </div>
-                  <div style="display:flex;gap:8px;">
-                    <button type="button" class="btn btn-outline btn-sm" onclick="undoSignature('server')">↩ Desfazer</button>
-                    <button type="button" class="btn btn-outline btn-sm" onclick="clearSignature('server')">🗑 Limpar</button>
-                  </div>
-                </div>
-                <canvas id="sigCanvasServer" class="sig-canvas"></canvas>
-                <div class="sig-guide">Assinatura do Servidor</div>
-              </div>
-            </div>
-
-            <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;margin-top:20px;">
-              <button type="button" class="btn btn-warning" onclick="saveVisit('pending')">⏳ Salvar Aguardando Assinatura</button>
-              <button type="button" class="btn btn-success" onclick="saveVisit('signed')">✅ Salvar Ficha Assinada</button>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;margin-top:18px;">
+              <button type="button" class="btn btn-warning" id="btnSavePending" onclick="saveVisit('pending')">⏳ Salvar Pendente</button>
+              <button type="button" class="btn btn-success" id="btnSaveSigned" onclick="saveVisit('signed')">✅ Enviar Ficha Assinada (PDF + Drive)</button>
             </div>
           </div>
         </form>
@@ -1144,663 +371,221 @@
 
       <!-- RELATÓRIOS -->
       <section class="view-section" id="view-reports">
-        <div class="page-header no-print">
-          <div class="page-title">
-            <h1>Relatórios & Fichas Registradas</h1>
-            <p>Filtre visitas, colete assinaturas pendentes, imprima em A4 ou exporte para Excel/Google Sheets.</p>
-          </div>
+        <div class="page-header">
+          <div class="page-title"><h1>Relatórios & PDFs no Drive</h1><p>Todas as fichas sincronizadas com link direto para o PDF oficial.</p></div>
           <div class="header-actions">
-            <button class="btn btn-outline" onclick="exportCSV()">📥 Exportar CSV (Planilha)</button>
-            <button class="btn btn-primary" onclick="printManagementReport()">🖨️ Imprimir Relatório</button>
+            <button class="btn btn-outline" onclick="syncVisitsFromCloud()">🔄 Atualizar</button>
+            <button class="btn btn-primary" onclick="exportCSV()">📥 Exportar CSV</button>
           </div>
         </div>
-
         <div class="card">
-          <div class="filters-bar no-print">
-            <input type="text" id="filterSearch" placeholder="🔍 Buscar servidor, escola, objetivo ou protocolo..." oninput="renderReportsTable()" />
+          <div class="filters-bar">
+            <input type="text" id="filterSearch" placeholder="🔍 Buscar servidor, escola ou protocolo..." oninput="renderReportsTable()" />
             <select id="filterUnit" onchange="renderReportsTable()"><option value="">Todas as Unidades</option></select>
             <select id="filterDept" onchange="renderReportsTable()"><option value="">Todos os Departamentos</option></select>
-            <select id="filterStatus" onchange="renderReportsTable()">
-              <option value="">Todos os Status</option>
-              <option value="signed">✅ Assinadas</option>
-              <option value="pending">⏳ Aguardando Assinatura</option>
-            </select>
+            <select id="filterStatus" onchange="renderReportsTable()"><option value="">Todos os Status</option><option value="signed">✅ Assinadas</option><option value="pending">⏳ Pendentes</option></select>
           </div>
-
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Protocolo</th>
-                  <th>Data</th>
-                  <th>Servidor</th>
-                  <th>Departamento</th>
-                  <th>Unidade / Escola</th>
-                  <th>Horário</th>
-                  <th>Status</th>
-                  <th class="no-print">Ações</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Protocolo</th><th>Data</th><th>Servidor</th><th>Unidade</th><th>Horário</th><th>Status</th><th>Ações</th></tr></thead>
               <tbody id="reportsTableBody"></tbody>
             </table>
           </div>
         </div>
       </section>
 
-      <!-- LISTAS & PLANILHA -->
+      <!-- CONFIGURAÇÕES -->
       <section class="view-section" id="view-lists">
-        <div class="page-header">
-          <div class="page-title">
-            <h1>Listas Pré-Definidas & Integração Google Sheets</h1>
-            <p>Sincronize automaticamente com sua planilha do Google Drive ou edite os cadastros manualmente.</p>
-          </div>
-        </div>
-
+        <div class="page-header"><div class="page-title"><h1>Planilha, Drive & Links de Acesso</h1><p>Gerencie a integração com o Google Drive e compartilhe o link exclusivo dos professores.</p></div></div>
         <div class="card">
-          <div class="card-header">
-            <div class="card-title">🔗 Sincronização com Google Sheets</div>
-            <a id="openSheetLink" href="https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit" target="_blank" class="btn btn-outline btn-sm">Abrir Planilha no Drive ↗</a>
+          <div class="card-title" style="margin-bottom:10px;">🔗 Link Exclusivo para Professores (somente a ficha)</div>
+          <div class="input-row">
+            <input type="text" id="profLinkDisplay" readonly />
+            <button class="btn btn-primary" onclick="copyProfessorLink()">📋 Copiar Link</button>
           </div>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
-            Certifique-se de que a planilha esteja compartilhada como <strong>"Qualquer pessoa com o link → Leitor"</strong>. O sistema lê automaticamente a aba <code>Listas</code> (colunas: Servidores, Departamentos, Unidades, Objetivos).
-          </p>
-          <div class="input-row" style="margin-bottom:10px;">
-            <input type="url" id="sheetUrlInput" placeholder="Cole o link da planilha Google Sheets..." />
-            <button class="btn btn-primary" onclick="syncFromGoogleSheets()">🔄 Puxar da Planilha Agora</button>
-          </div>
-          <div id="syncStatusText" style="font-size:12px;color:var(--muted);"></div>
         </div>
-
         <div class="card">
-          <div class="card-header">
-            <div class="card-title">🖼️ Identidade Visual / Logo Institucional</div>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;">
-            <img class="dynamic-logo" style="height:56px;border:1px solid var(--border);border-radius:8px;padding:6px;background:#fff;" alt="Prévia Logo" />
-            <div style="display:flex;flex-wrap:wrap;gap:10px;">
-              <label class="btn btn-outline btn-sm" style="cursor:pointer;">
-                📤 Enviar Logo do Computador/Celular
-                <input type="file" accept="image/*" style="display:none;" onchange="uploadCustomLogo(event)" />
-              </label>
-              <button class="btn btn-outline btn-sm" onclick="resetDefaultLogo()">↩ Restaurar Logo CEMTEC (Drive)</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="lists-grid">
-          <div class="card">
-            <div class="card-title" style="margin-bottom:10px;">👤 Servidores</div>
-            <div class="input-row">
-              <input type="text" id="addServidores" placeholder="Adicionar novo servidor..." />
-              <button class="btn btn-primary btn-sm" onclick="addListItem('servidores','addServidores')">Adicionar</button>
-            </div>
-            <div class="list-items" id="listServidores"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-title" style="margin-bottom:10px;">🏢 Departamentos</div>
-            <div class="input-row">
-              <input type="text" id="addDepartamentos" placeholder="Adicionar novo departamento..." />
-              <button class="btn btn-primary btn-sm" onclick="addListItem('departamentos','addDepartamentos')">Adicionar</button>
-            </div>
-            <div class="list-items" id="listDepartamentos"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-title" style="margin-bottom:10px;">🏫 Unidades / Escolas / Destinos</div>
-            <div class="input-row">
-              <input type="text" id="addUnidades" placeholder="Adicionar nova unidade..." />
-              <button class="btn btn-primary btn-sm" onclick="addListItem('unidades','addUnidades')">Adicionar</button>
-            </div>
-            <div class="list-items" id="listUnidades"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-title" style="margin-bottom:10px;">🎯 Objetivos Frequentes</div>
-            <div class="input-row">
-              <input type="text" id="addObjetivos" placeholder="Adicionar objetivo rápido..." />
-              <button class="btn btn-primary btn-sm" onclick="addListItem('objetivos','addObjetivos')">Adicionar</button>
-            </div>
-            <div class="list-items" id="listObjetivos"></div>
+          <div class="card-title" style="margin-bottom:10px;">☁️ Sincronização com Google Sheets & Drive</div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Status da integração Apps Script: <strong id="cloudStatusLabel">Verificando...</strong></p>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+            <button class="btn btn-primary" onclick="syncFromGoogleSheets()">🔄 Atualizar Listas da Planilha</button>
+            <button class="btn btn-outline" onclick="syncVisitsFromCloud()">📥 Puxar Fichas da Planilha</button>
+            <a href="https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit" target="_blank" class="btn btn-outline">Abrir Planilha ↗</a>
+            <a href="https://drive.google.com/drive/folders/1hugA5K2eknsw7tznPtNCzin9g6NvIJSj" target="_blank" class="btn btn-outline">Abrir Pasta de PDFs no Drive ↗</a>
           </div>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- MODAL FICHA A4 -->
+  <!-- MODAL A4 -->
   <div class="modal-backdrop" id="a4Modal">
     <div class="modal-card">
       <div class="modal-header no-print">
-        <strong style="color:var(--blue-dark);">Visualização Oficial — Ficha de Visita (A4)</strong>
+        <strong style="color:var(--blue-dark);">Comprovante — Ficha de Visita (A4)</strong>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-warning btn-sm" id="modalCollectSigBtn" style="display:none;" onclick="collectSignatureFromModal()">✍️ Coletar Assinatura</button>
-          <button class="btn btn-primary btn-sm" onclick="printA4()">🖨️ Imprimir / Salvar PDF</button>
-          <button class="btn btn-outline btn-sm" onclick="closeA4Modal()">Fechar ✕</button>
+          <a id="modalDrivePdfBtn" href="#" target="_blank" class="btn btn-success btn-sm" style="display:none;">📁 Abrir PDF no Drive</a>
+          <button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ Imprimir / PDF</button>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('a4Modal').classList.remove('open')">Fechar ✕</button>
         </div>
       </div>
       <div class="modal-body" id="a4ModalBody"></div>
     </div>
   </div>
 
-  <!-- MODAL ASSINATURA TELA CHEIA / COLETA PENDENTE -->
+  <!-- MODAL TELA CHEIA -->
   <div class="fs-sig-modal" id="fsSigModal">
     <div class="fs-sig-top">
-      <div>
-        <strong id="fsSigTitle">Assinatura Digital</strong>
-        <div style="font-size:11px;opacity:.85;">Vire o celular na horizontal para maior conforto</div>
-      </div>
-      <button class="btn btn-outline btn-sm" onclick="closeFullscreenSig()">Cancelar</button>
+      <strong>Assinatura Digital (Tela Cheia)</strong>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('fsSigModal').classList.remove('open')">Cancelar</button>
     </div>
-    <div class="fs-sig-canvas-wrap">
-      <canvas id="fsSigCanvas"></canvas>
-      <div class="sig-guide">Assine acima desta linha</div>
-    </div>
+    <div class="fs-sig-canvas-wrap"><canvas id="fsSigCanvas"></canvas><div class="sig-guide">Assine acima desta linha</div></div>
     <div class="fs-sig-bottom">
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button type="button" class="color-dot active" style="background:#003580;" onclick="setFsColor('#003580',this)"></button>
-        <button type="button" class="color-dot" style="background:#0f172a;" onclick="setFsColor('#0f172a',this)"></button>
-        <button type="button" class="btn btn-outline btn-sm" onclick="undoFsSig()">↩ Desfazer</button>
-        <button type="button" class="btn btn-outline btn-sm" onclick="clearFsSig()">🗑 Limpar</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline btn-sm" onclick="padFs.undo()">↩ Desfazer</button>
+        <button class="btn btn-outline btn-sm" onclick="padFs.clear()">🗑 Limpar</button>
       </div>
-      <button type="button" class="btn btn-success" onclick="confirmFullscreenSig()">✅ Confirmar Assinatura</button>
+      <button class="btn btn-success" onclick="confirmFullscreenSig()">✅ Confirmar Assinatura</button>
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
   <script>
-    // ===== CONFIGURAÇÕES INICIAIS =====
+    // =========================================================================
+    // CONFIGURAÇÃO PRINCIPAL — COLE AQUI A URL DO APPS SCRIPT E DEFINA SEU PIN
+    // =========================================================================
+    const APPS_SCRIPT_URL = ''; // Ex: 'https://script.google.com/macros/s/AKfycb.../exec'
+    const COORDINATOR_PIN = '2026';
     const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit';
     const DRIVE_LOGO_ID = '1Wr0oaQn3PFDETlL2jskRZJlaZdeVxRCW';
-    const LOGO_SOURCES = [
-      `https://lh3.googleusercontent.com/d/${DRIVE_LOGO_ID}`,
-      `https://drive.google.com/thumbnail?id=${DRIVE_LOGO_ID}&sz=w600`
-    ];
-    const SVG_FALLBACK_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="240" height="72" viewBox="0 0 240 72">
-        <rect width="240" height="72" rx="10" fill="#ffffff"/>
-        <circle cx="34" cy="36" r="22" fill="#003580"/>
-        <path d="M24 36 L34 24 L44 36 L34 48 Z" fill="#009FE3"/>
-        <circle cx="34" cy="36" r="5" fill="#FBC02D"/>
-        <text x="66" y="34" font-family="Arial,sans-serif" font-weight="800" font-size="22" fill="#003580">CEMTEC</text>
-        <text x="66" y="50" font-family="Arial,sans-serif" font-weight="600" font-size="9" fill="#475569">TECNOLOGIA E ROBÓTICA • SORRISO</text>
-      </svg>
-    `);
+    const LOGO_URL = `https://lh3.googleusercontent.com/d/${DRIVE_LOGO_ID}`;
 
     const DEFAULT_LISTS = {
-      servidores: [
-        'Cassiano Gonsalves',
-        'Prof. Carlos Eduardo Mendes',
-        'Profa. Ana Paula Ferreira',
-        'Lucas Henrique Oliveira',
-        'Mariana Costa Silva'
-      ],
-      departamentos: [
-        'CEMTEC — Centro Municipal de Tecnologia e Robótica Educacional',
-        'SEMED — Coordenação Pedagógica',
-        'SEMED — Tecnologia Educacional / TI',
-        'SEMED — Manutenção e Infraestrutura',
-        'SEMED — Gestão Escolar',
-        'SEMED — Transporte Escolar'
-      ],
-      unidades: [
-        'CEMTEC Sorriso',
-        'E.M. Aureliano Pereira da Silva',
-        'E.M. Caravagio',
-        'E.M. Ivete Lourdes Arenhardt',
-        'E.M. Jardim Amazônico',
-        'E.M. Jardim Bela Vista',
-        'E.M. Leonel de Moura Brizola',
-        'E.M. Papa João Paulo II',
-        'E.M. Prof.ª Geni Forgiarini',
-        'E.M. Rui Barbosa',
-        'E.M. São Domingos',
-        'E.M. Vila Bela',
-        'CEMEIS Caminhos do Saber',
-        'CEMEIS Sonho de Criança'
-      ],
-      objetivos: [
-        'Suporte técnico em laboratório de informática e rede Wi-Fi',
-        'Acompanhamento de oficina de Robótica Educacional',
-        'Formação continuada de professores em ferramentas digitais',
-        'Manutenção preventiva/corretiva de equipamentos (notebooks, projetores, som)',
-        'Entrega e instalação de kits de tecnologia educacional',
-        'Reunião de alinhamento pedagógico com a gestão escolar',
-        'Vistoria de infraestrutura tecnológica da unidade'
-      ]
+      servidores: ['Cassiano Gonsalves', 'Prof. Carlos Eduardo Mendes', 'Profa. Ana Paula Ferreira', 'Lucas Henrique Oliveira', 'Mariana Costa Silva'],
+      departamentos: ['CEMTEC — Centro Municipal de Tecnologia e Robótica Educacional', 'SEMED — Coordenação Pedagógica', 'SEMED — Tecnologia Educacional / TI', 'SEMED — Manutenção e Infraestrutura'],
+      unidades: ['CEMTEC Sorriso', 'E.M. Aureliano Pereira da Silva', 'E.M. Caravagio', 'E.M. Ivete Lourdes Arenhardt', 'E.M. Jardim Amazônico', 'E.M. Papa João Paulo II', 'E.M. Rui Barbosa', 'CEMEIS Caminhos do Saber'],
+      objetivos: ['Suporte técnico em laboratório de informática e rede Wi-Fi', 'Acompanhamento de oficina de Robótica Educacional', 'Formação continuada de professores em ferramentas digitais', 'Manutenção preventiva/corretiva de equipamentos', 'Entrega e instalação de kits de tecnologia educacional']
     };
 
-    const STORAGE_KEYS = {
-      visits: 'cemtec_visits_v2',
-      lists: 'cemtec_lists_v2',
-      sheetUrl: 'cemtec_sheet_url_v2',
-      customLogo: 'cemtec_custom_logo_v2'
-    };
+    let visits = JSON.parse(localStorage.getItem('cemtec_visits_v3') || '[]');
+    let lists = JSON.parse(localStorage.getItem('cemtec_lists_v3') || 'null') || structuredClone(DEFAULT_LISTS);
+    let padUnit, padFs, capturedUnit = '', charts = {};
 
-    let visits = JSON.parse(localStorage.getItem(STORAGE_KEYS.visits) || '[]');
-    let lists = JSON.parse(localStorage.getItem(STORAGE_KEYS.lists) || 'null') || structuredClone(DEFAULT_LISTS);
-    let currentModalVisitId = null;
-    let charts = {};
+    // ===== ACCESS CONTROL (MODO PROFESSOR vs COORDENADOR) =====
+    const params = new URLSearchParams(window.location.search);
+    const isProfessorMode = params.get('modo') === 'ficha';
 
-    // ===== SIGNATURE PAD ENGINE =====
+    function initAccessMode() {
+      const baseUrl = window.location.href.split('?')[0];
+      document.getElementById('profLinkDisplay').value = `${baseUrl}?modo=ficha`;
+
+      if (isProfessorMode) {
+        document.body.classList.add('mode-professor');
+        switchView('new');
+      } else if (sessionStorage.getItem('cemtec_coord_auth') !== '1') {
+        document.getElementById('pinGate').classList.add('open');
+        setTimeout(() => document.getElementById('pinInput').focus(), 100);
+      } else {
+        switchView('dashboard');
+      }
+    }
+
+    function verifyPin() {
+      const val = document.getElementById('pinInput').value.trim();
+      if (val === COORDINATOR_PIN) {
+        sessionStorage.setItem('cemtec_coord_auth', '1');
+        document.getElementById('pinGate').classList.remove('open');
+        document.body.classList.remove('mode-professor');
+        switchView('dashboard');
+        syncVisitsFromCloud(true);
+      } else {
+        document.getElementById('pinError').textContent = 'PIN incorreto. Tente novamente.';
+        document.getElementById('pinInput').value = '';
+      }
+    }
+
+    function enterProfessorMode() {
+      document.getElementById('pinGate').classList.remove('open');
+      document.body.classList.add('mode-professor');
+      switchView('new');
+    }
+
+    function requestCoordinatorAccess() {
+      document.getElementById('pinError').textContent = '';
+      document.getElementById('pinInput').value = '';
+      document.getElementById('pinGate').classList.add('open');
+      setTimeout(() => document.getElementById('pinInput').focus(), 100);
+    }
+
+    function copyProfessorLink() {
+      const link = document.getElementById('profLinkDisplay').value;
+      navigator.clipboard.writeText(link).then(() => showToast('Link dos Professores copiado! Cole no WhatsApp.'));
+    }
+
+    // ===== SIGNATURE PAD =====
     class SignaturePad {
       constructor(canvas) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
-        this.color = '#003580';
-        this.strokes = [];
-        this.currentStroke = null;
-        this.drawing = false;
-        this.bindEvents();
-        this.resize();
+        this.canvas = canvas; this.ctx = canvas.getContext('2d'); this.color = '#003580';
+        this.strokes = []; this.drawing = false; this.bind(); this.resize();
       }
       resize() {
-        const rect = this.canvas.getBoundingClientRect();
-        if (!rect.width || !rect.height) return;
+        const r = this.canvas.getBoundingClientRect(); if (!r.width || !r.height) return;
         const dpr = Math.max(window.devicePixelRatio || 1, 2);
-        this.canvas.width = rect.width * dpr;
-        this.canvas.height = rect.height * dpr;
-        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        this.redraw();
+        this.canvas.width = r.width * dpr; this.canvas.height = r.height * dpr;
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0); this.redraw();
       }
-      getPoint(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-      }
-      bindEvents() {
-        this.canvas.addEventListener('pointerdown', (e) => {
-          e.preventDefault();
-          this.canvas.setPointerCapture(e.pointerId);
-          this.drawing = true;
-          const pt = this.getPoint(e);
-          this.currentStroke = { color: this.color, points: [pt] };
-          this.strokes.push(this.currentStroke);
-          this.redraw();
+      pt(e) { const r = this.canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+      bind() {
+        this.canvas.addEventListener('pointerdown', e => {
+          e.preventDefault(); this.canvas.setPointerCapture(e.pointerId);
+          this.drawing = true; this.strokes.push({ color: this.color, points: [this.pt(e)] }); this.redraw();
         });
-        this.canvas.addEventListener('pointermove', (e) => {
-          if (!this.drawing) return;
-          e.preventDefault();
-          const pt = this.getPoint(e);
-          this.currentStroke.points.push(pt);
-          this.redraw();
+        this.canvas.addEventListener('pointermove', e => {
+          if (!this.drawing) return; e.preventDefault();
+          this.strokes[this.strokes.length - 1].points.push(this.pt(e)); this.redraw();
         });
-        const end = () => { this.drawing = false; this.currentStroke = null; };
-        this.canvas.addEventListener('pointerup', end);
-        this.canvas.addEventListener('pointercancel', end);
+        const stop = () => this.drawing = false;
+        this.canvas.addEventListener('pointerup', stop); this.canvas.addEventListener('pointercancel', stop);
       }
       redraw() {
-        const rect = this.canvas.getBoundingClientRect();
-        this.ctx.clearRect(0, 0, rect.width, rect.height);
-        this.ctx.lineCap = 'round';
-        this.ctx.lineJoin = 'round';
+        const r = this.canvas.getBoundingClientRect(); this.ctx.clearRect(0, 0, r.width, r.height);
+        this.ctx.lineCap = 'round'; this.ctx.lineJoin = 'round';
         for (const s of this.strokes) {
-          this.ctx.strokeStyle = s.color;
-          this.ctx.lineWidth = 2.6;
-          this.ctx.beginPath();
-          if (s.points.length === 1) {
-            this.ctx.arc(s.points[0].x, s.points[0].y, 1.3, 0, Math.PI * 2);
-            this.ctx.fillStyle = s.color;
-            this.ctx.fill();
-          } else {
-            this.ctx.moveTo(s.points[0].x, s.points[0].y);
-            for (let i = 1; i < s.points.length; i++) {
-              this.ctx.lineTo(s.points[i].x, s.points[i].y);
-            }
-            this.ctx.stroke();
-          }
+          this.ctx.strokeStyle = s.color; this.ctx.lineWidth = 2.6; this.ctx.beginPath();
+          this.ctx.moveTo(s.points[0].x, s.points[0].y);
+          for (let i = 1; i < s.points.length; i++) this.ctx.lineTo(s.points[i].x, s.points[i].y);
+          this.ctx.stroke();
         }
       }
       undo() { this.strokes.pop(); this.redraw(); }
       clear() { this.strokes = []; this.redraw(); }
       isEmpty() { return this.strokes.length === 0; }
       toDataURL() { return this.isEmpty() ? '' : this.canvas.toDataURL('image/png'); }
-      loadFromDataURL(dataUrl) {
-        this.clear();
-        if (!dataUrl) return;
-        const img = new Image();
-        img.onload = () => {
-          const rect = this.canvas.getBoundingClientRect();
-          this.ctx.drawImage(img, 0, 0, rect.width, rect.height);
-        };
-        img.src = dataUrl;
+      loadDataURL(url) {
+        this.clear(); if (!url) return;
+        const img = new Image(); img.onload = () => { const r = this.canvas.getBoundingClientRect(); this.ctx.drawImage(img, 0, 0, r.width, r.height); }; img.src = url;
       }
     }
 
-    let padUnit, padServer, padFs;
-    let fsTarget = 'unit'; // 'unit' | 'server' | 'collect:<visitId>'
-    let capturedData = { unit: '', server: '' };
-
-    // ===== LOGO =====
-    function applyLogos() {
-      const custom = localStorage.getItem(STORAGE_KEYS.customLogo);
-      document.querySelectorAll('.dynamic-logo').forEach((img) => {
-        if (custom) {
-          img.src = custom;
-          return;
-        }
-        let idx = 0;
-        img.onerror = () => {
-          idx++;
-          if (idx < LOGO_SOURCES.length) img.src = LOGO_SOURCES[idx];
-          else img.src = SVG_FALLBACK_LOGO;
-        };
-        img.src = LOGO_SOURCES[0];
-      });
-    }
-    function getCurrentLogoSrc() {
-      const custom = localStorage.getItem(STORAGE_KEYS.customLogo);
-      if (custom) return custom;
-      const first = document.querySelector('.dynamic-logo');
-      return first ? first.src : SVG_FALLBACK_LOGO;
-    }
-    function uploadCustomLogo(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        localStorage.setItem(STORAGE_KEYS.customLogo, reader.result);
-        applyLogos();
-        showToast('Logo institucional atualizada!');
-      };
-      reader.readAsDataURL(file);
-    }
-    function resetDefaultLogo() {
-      localStorage.removeItem(STORAGE_KEYS.customLogo);
-      applyLogos();
-      showToast('Logo padrão do CEMTEC restaurada.');
-    }
-
-    // ===== NAVIGATION =====
-    function switchView(view) {
-      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-      document.getElementById('view-' + view).classList.add('active');
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
-      document.getElementById('sidebar').classList.remove('open');
-      if (view === 'new') {
-        setTimeout(() => { padUnit.resize(); padServer.resize(); }, 60);
-      }
-      if (view === 'dashboard') renderDashboard();
-      if (view === 'reports') renderReportsTable();
-      if (view === 'lists') renderListsManager();
-    }
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('open');
-    }
-
-    // ===== FORM & LISTS =====
-    function populateDatalistsAndChips() {
-      const map = [
-        ['dlServidores', lists.servidores],
-        ['dlDepartamentos', lists.departamentos],
-        ['dlUnidades', lists.unidades]
-      ];
-      map.forEach(([id, arr]) => {
-        document.getElementById(id).innerHTML = arr.map(v => `<option value="${escapeHtml(v)}"></option>`).join('');
-      });
-
-      const chipsEl = document.getElementById('objectiveChips');
-      chipsEl.innerHTML = lists.objetivos.map(obj =>
-        `<button type="button" class="chip" onclick="appendObjective('${escapeJs(obj)}')">+ ${escapeHtml(obj)}</button>`
-      ).join('');
-
-      // Filters
-      const uSel = document.getElementById('filterUnit');
-      const dSel = document.getElementById('filterDept');
-      const curU = uSel.value, curD = dSel.value;
-      const allUnits = [...new Set([...lists.unidades, ...visits.map(v => v.unidade)])].filter(Boolean).sort();
-      const allDepts = [...new Set([...lists.departamentos, ...visits.map(v => v.departamento)])].filter(Boolean).sort();
-      uSel.innerHTML = '<option value="">Todas as Unidades</option>' + allUnits.map(u => `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
-      dSel.innerHTML = '<option value="">Todos os Departamentos</option>' + allDepts.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
-      uSel.value = curU;
-      dSel.value = curD;
-    }
-
-    function appendObjective(text) {
-      const ta = document.getElementById('fObjetivo');
-      ta.value = ta.value.trim() ? ta.value.trim() + '\n• ' + text : text;
-      ta.focus();
-    }
-
-    function checkNewListItem(listKey, inputId, btnId) {
-      const val = document.getElementById(inputId).value.trim();
-      const exists = lists[listKey].some(x => x.toLowerCase() === val.toLowerCase());
-      document.getElementById(btnId).classList.toggle('visible', val.length > 2 && !exists);
-    }
-
-    function quickAddToList(listKey, inputId) {
-      const val = document.getElementById(inputId).value.trim();
-      if (!val) return;
-      if (!lists[listKey].includes(val)) {
-        lists[listKey].push(val);
-        saveLists();
-        showToast(`"${val}" salvo na lista!`);
-      }
-      checkNewListItem(listKey, inputId, inputId === 'fServidor' ? 'saveServidorBtn' : inputId === 'fDepartamento' ? 'saveDeptBtn' : 'saveUnidadeBtn');
-    }
-
-    function addListItem(listKey, inputId) {
-      const input = document.getElementById(inputId);
-      const val = input.value.trim();
-      if (!val) return;
-      if (!lists[listKey].some(x => x.toLowerCase() === val.toLowerCase())) {
-        lists[listKey].push(val);
-        saveLists();
-        input.value = '';
-        renderListsManager();
-        showToast('Item adicionado com sucesso!');
-      } else {
-        showToast('Este item já existe na lista.');
-      }
-    }
-
-    function removeListItem(listKey, index) {
-      lists[listKey].splice(index, 1);
-      saveLists();
-      renderListsManager();
-    }
-
-    function saveLists() {
-      localStorage.setItem(STORAGE_KEYS.lists, JSON.stringify(lists));
-      populateDatalistsAndChips();
-    }
-
-    function renderListsManager() {
-      const renderBox = (key, elId) => {
-        const el = document.getElementById(elId);
-        if (!lists[key].length) {
-          el.innerHTML = '<div style="padding:14px;color:var(--muted);font-size:12px;">Nenhum item cadastrado.</div>';
-          return;
-        }
-        el.innerHTML = lists[key].map((item, idx) => `
-          <div class="list-item-row">
-            <span>${escapeHtml(item)}</span>
-            <button class="btn btn-danger btn-sm" onclick="removeListItem('${key}',${idx})">✕</button>
-          </div>
-        `).join('');
-      };
-      renderBox('servidores', 'listServidores');
-      renderBox('departamentos', 'listDepartamentos');
-      renderBox('unidades', 'listUnidades');
-      renderBox('objetivos', 'listObjetivos');
-    }
-
-    // ===== GOOGLE SHEETS SYNC =====
-    function extractSheetId(url) {
-      const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-      return m ? m[1] : null;
-    }
-
-    function parseCSV(text) {
-      const rows = [];
-      let row = [], cell = '', inQuotes = false;
-      for (let i = 0; i < text.length; i++) {
-        const c = text[i], next = text[i + 1];
-        if (inQuotes) {
-          if (c === '"' && next === '"') { cell += '"'; i++; }
-          else if (c === '"') { inQuotes = false; }
-          else { cell += c; }
-        } else {
-          if (c === '"') { inQuotes = true; }
-          else if (c === ',') { row.push(cell.trim()); cell = ''; }
-          else if (c === '\r' && next === '\n') { row.push(cell.trim()); rows.push(row); row = []; cell = ''; i++; }
-          else if (c === '\n') { row.push(cell.trim()); rows.push(row); row = []; cell = ''; }
-          else { cell += c; }
-        }
-      }
-      if (cell.length || row.length) { row.push(cell.trim()); rows.push(row); }
-      return rows;
-    }
-
-    async function syncFromGoogleSheets(silent = false) {
-      const urlInput = document.getElementById('sheetUrlInput');
-      const url = (urlInput.value || DEFAULT_SHEET_URL).trim();
-      const id = extractSheetId(url);
-      const statusEl = document.getElementById('syncStatusText');
-      if (!id) {
-        if (!silent) showToast('Link da planilha inválido.');
-        return;
-      }
-      localStorage.setItem(STORAGE_KEYS.sheetUrl, url);
-      document.getElementById('openSheetLink').href = url;
-      statusEl.textContent = 'Sincronizando com o Google Sheets...';
-
-      const csvUrl = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=Listas`;
-      try {
-        const res = await fetch(csvUrl);
-        if (!res.ok) throw new Error('Permissão negada ou planilha indisponível');
-        const text = await res.text();
-        if (text.trim().startsWith('<!DOCTYPE') || text.includes('accounts.google.com')) {
-          throw new Error('Planilha restrita. Libere como "Qualquer pessoa com o link (Leitor)".');
-        }
-        const rows = parseCSV(text);
-        if (rows.length < 2) throw new Error('Aba "Listas" vazia.');
-
-        const headers = rows[0].map(h => h.toLowerCase());
-        const idxS = headers.findIndex(h => h.includes('servidor'));
-        const idxD = headers.findIndex(h => h.includes('depart'));
-        const idxU = headers.findIndex(h => h.includes('unidad') || h.includes('escola'));
-        const idxO = headers.findIndex(h => h.includes('objetiv'));
-
-        const col = (i) => i < 0 ? [] : [...new Set(rows.slice(1).map(r => (r[i] || '').trim()).filter(Boolean))];
-        const newS = col(idxS >= 0 ? idxS : 0);
-        const newD = col(idxD >= 0 ? idxD : 1);
-        const newU = col(idxU >= 0 ? idxU : 2);
-        const newO = col(idxO >= 0 ? idxO : 3);
-
-        if (newS.length) lists.servidores = newS;
-        if (newD.length) lists.departamentos = newD;
-        if (newU.length) lists.unidades = newU;
-        if (newO.length) lists.objetivos = newO;
-
-        saveLists();
-        renderListsManager();
-        const now = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        statusEl.innerHTML = `<span style="color:var(--success);font-weight:600;">✅ Sincronizado às ${now} (${lists.servidores.length} servidores, ${lists.unidades.length} unidades).</span>`;
-        if (!silent) showToast('Listas atualizadas direto do Google Sheets!');
-      } catch (err) {
-        statusEl.innerHTML = `<span style="color:var(--warning);font-weight:600;">⚠️ ${err.message}</span>`;
-        if (!silent) showToast('Não foi possível ler a planilha. Verifique se está liberada como Leitor.');
-      }
-    }
-
-    // ===== TIME HELPERS =====
-    function setNowTime(fieldId) {
-      const now = new Date();
-      const hh = String(now.getHours()).padStart(2, '0');
-      const mm = String(now.getMinutes()).padStart(2, '0');
-      document.getElementById(fieldId).value = `${hh}:${mm}`;
-      updateDurationPreview();
-    }
-    function calcDurationMinutes(entrada, saida) {
-      if (!entrada || !saida) return null;
-      const [h1, m1] = entrada.split(':').map(Number);
-      const [h2, m2] = saida.split(':').map(Number);
-      const diff = (h2 * 60 + m2) - (h1 * 60 + m1);
-      return diff >= 0 ? diff : null;
-    }
-    function formatMinutes(mins) {
-      if (mins === null || mins === undefined) return '—';
-      if (mins < 60) return `${mins} min`;
-      const h = Math.floor(mins / 60), m = mins % 60;
-      return m ? `${h}h ${m}min` : `${h}h`;
-    }
-    function updateDurationPreview() {
-      const mins = calcDurationMinutes(document.getElementById('fEntrada').value, document.getElementById('fSaida').value);
-      document.getElementById('durationPreview').textContent = mins !== null ? `Duração: ${formatMinutes(mins)}` : '';
-    }
-
-    // ===== SIGNATURE CONTROLS =====
-    function setPenColor(which, color, btn) {
-      const pad = which === 'unit' ? padUnit : padServer;
-      pad.color = color;
+    function setPenColor(c, btn) {
+      padUnit.color = c;
       btn.parentElement.querySelectorAll('.color-dot').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     }
-    function undoSignature(which) {
-      if (which === 'unit') { padUnit.undo(); capturedData.unit = padUnit.toDataURL(); }
-      else { padServer.undo(); capturedData.server = padServer.toDataURL(); }
-    }
-    function clearSignature(which) {
-      if (which === 'unit') { padUnit.clear(); capturedData.unit = ''; }
-      else { padServer.clear(); capturedData.server = ''; }
-    }
-    function toggleServerSigBox() {
-      const show = document.getElementById('toggleServerSig').checked;
-      document.getElementById('serverSigContainer').style.display = show ? 'block' : 'none';
-      if (show) setTimeout(() => padServer.resize(), 60);
-    }
-
-    function openFullscreenSig(target) {
-      fsTarget = target;
-      const title = target === 'server' ? 'Assinatura do Servidor' : 'Assinatura do Responsável pela Unidade';
-      document.getElementById('fsSigTitle').textContent = title;
+    function openFullscreenSig() {
       document.getElementById('fsSigModal').classList.add('open');
-      setTimeout(() => {
-        padFs.clear();
-        padFs.resize();
-      }, 60);
+      setTimeout(() => { padFs.clear(); padFs.resize(); }, 60);
     }
-    function closeFullscreenSig() {
+    function confirmFullscreenSig() {
+      if (padFs.isEmpty()) { showToast('Faça a assinatura primeiro.'); return; }
+      capturedUnit = padFs.toDataURL();
+      padUnit.loadDataURL(capturedUnit);
       document.getElementById('fsSigModal').classList.remove('open');
     }
-    function setFsColor(color, btn) {
-      padFs.color = color;
-      btn.parentElement.querySelectorAll('.color-dot').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
-    function undoFsSig() { padFs.undo(); }
-    function clearFsSig() { padFs.clear(); }
 
-    function confirmFullscreenSig() {
-      if (padFs.isEmpty()) {
-        showToast('Faça a assinatura antes de confirmar.');
-        return;
-      }
-      const dataUrl = padFs.toDataURL();
-      if (fsTarget.startsWith('collect:')) {
-        const visitId = fsTarget.split(':')[1];
-        const v = visits.find(x => x.id === visitId);
-        if (v) {
-          v.sigUnit = dataUrl;
-          v.status = 'signed';
-          v.signedAt = new Date().toISOString();
-          persistVisits();
-          showToast('Assinatura coletada e ficha validada!');
-          if (currentModalVisitId === visitId) openA4Modal(visitId);
-        }
-      } else if (fsTarget === 'unit') {
-        capturedData.unit = dataUrl;
-        padUnit.loadFromDataURL(dataUrl);
-      } else if (fsTarget === 'server') {
-        capturedData.server = dataUrl;
-        padServer.loadFromDataURL(dataUrl);
-      }
-      closeFullscreenSig();
-    }
-
-    // ===== SAVE VISIT =====
-    function saveVisit(mode) {
+    // ===== SAVE & CLOUD SYNC =====
+    async function saveVisit(mode) {
       const servidor = document.getElementById('fServidor').value.trim();
       const departamento = document.getElementById('fDepartamento').value.trim();
       const unidade = document.getElementById('fUnidade').value.trim();
@@ -1809,460 +594,233 @@
       const saida = document.getElementById('fSaida').value;
       const objetivo = document.getElementById('fObjetivo').value.trim();
       const responsavel = document.getElementById('fResponsavel').value.trim();
-      const includeServerSig = document.getElementById('toggleServerSig').checked;
 
       if (!servidor || !departamento || !unidade || !data || !entrada || !objetivo) {
-        showToast('Preencha todos os campos obrigatórios (*).');
-        return;
+        showToast('Preencha todos os campos obrigatórios (*).'); return;
       }
+      const sigUnit = padUnit.isEmpty() ? capturedUnit : padUnit.toDataURL();
+      if (mode === 'signed' && !sigUnit) { showToast('Colha a assinatura na tela antes de enviar.'); return; }
 
-      const sigUnit = padUnit.isEmpty() ? capturedData.unit : padUnit.toDataURL();
-      const sigServer = includeServerSig ? (padServer.isEmpty() ? capturedData.server : padServer.toDataURL()) : '';
-
-      if (mode === 'signed' && !sigUnit) {
-        showToast('Colha a assinatura do responsável ou salve como "Aguardando Assinatura".');
-        return;
-      }
-
-      const year = new Date().getFullYear();
-      const seq = String(visits.length + 1).padStart(4, '0');
       const visit = {
         id: 'v_' + Date.now(),
-        protocolo: `SEMED-${year}-${seq}`,
-        servidor,
-        departamento,
-        unidade,
-        data,
-        entrada,
-        saida,
-        objetivo,
-        responsavel,
-        includeServerSig,
-        sigUnit: mode === 'signed' ? sigUnit : '',
-        sigServer,
-        status: mode === 'signed' ? 'signed' : 'pending',
-        createdAt: new Date().toISOString(),
-        signedAt: mode === 'signed' ? new Date().toISOString() : null
+        protocolo: `SEMED-${new Date().getFullYear()}-${String(Math.floor(1000 + Math.random() * 9000))}`,
+        servidor, departamento, unidade, data, dataBR: formatDateBR(data),
+        entrada, saida, duracao: formatMinutes(calcDurationMinutes(entrada, saida)),
+        objetivo, responsavel, sigUnit: mode === 'signed' ? sigUnit : '',
+        status: mode === 'signed' ? 'signed' : 'pending', pdfUrl: ''
       };
 
-      visits.unshift(visit);
-      persistVisits();
-      resetVisitForm();
-      showToast(mode === 'signed' ? 'Ficha salva e assinada com sucesso!' : 'Ficha salva como Aguardando Assinatura.');
-      openA4Modal(visit.id);
-    }
+      const btn = document.getElementById(mode === 'signed' ? 'btnSaveSigned' : 'btnSavePending');
+      const origText = btn.textContent;
+      btn.disabled = true; btn.textContent = '⏳ Salvando e gerando PDF...';
 
-    function resetVisitForm() {
+      if (APPS_SCRIPT_URL) {
+        try {
+          const res = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(visit)
+          });
+          const json = await res.json();
+          if (json.status === 'ok' && json.pdfUrl) {
+            visit.pdfUrl = json.pdfUrl;
+            showToast('✅ Ficha salva na Planilha e PDF gerado no Drive!');
+          }
+        } catch (err) {
+          showToast('⚠️ Salvo localmente (verifique a URL do Apps Script).');
+        }
+      } else {
+        showToast('Ficha salva localmente (configure APPS_SCRIPT_URL para enviar ao Drive).');
+      }
+
+      btn.disabled = false; btn.textContent = origText;
+      visits.unshift(visit);
+      localStorage.setItem('cemtec_visits_v3', JSON.stringify(visits));
       document.getElementById('visitForm').reset();
       document.getElementById('fData').value = todayISO();
       setNowTime('fEntrada');
-      document.getElementById('durationPreview').textContent = '';
-      document.getElementById('serverSigContainer').style.display = 'none';
-      padUnit.clear();
-      padServer.clear();
-      capturedData = { unit: '', server: '' };
+      padUnit.clear(); capturedUnit = '';
+      renderDashboard(); renderReportsTable();
+      openA4Modal(visit);
     }
 
-    function deleteVisit(id) {
-      if (!confirm('Deseja excluir esta ficha permanentemente?')) return;
-      visits = visits.filter(v => v.id !== id);
-      persistVisits();
-      showToast('Ficha excluída.');
-    }
-
-    function persistVisits() {
-      localStorage.setItem(STORAGE_KEYS.visits, JSON.stringify(visits));
-      populateDatalistsAndChips();
-      renderDashboard();
-      renderReportsTable();
-    }
-
-    // ===== DASHBOARD & CHARTS =====
-    function renderDashboard() {
-      const today = todayISO();
-      const total = visits.length;
-      const todayCount = visits.filter(v => v.data === today).length;
-      const uniqueUnits = new Set(visits.map(v => v.unidade)).size;
-      const signedCount = visits.filter(v => v.status === 'signed').length;
-      const pendingCount = total - signedCount;
-      const rate = total ? Math.round((signedCount / total) * 100) : 0;
-
-      const durations = visits.map(v => calcDurationMinutes(v.entrada, v.saida)).filter(m => m !== null);
-      const avg = durations.length ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0;
-
-      document.getElementById('kpiTotal').textContent = total;
-      document.getElementById('kpiToday').textContent = todayCount;
-      document.getElementById('kpiTodayDate').textContent = formatDateBR(today);
-      document.getElementById('kpiUnits').textContent = uniqueUnits;
-      document.getElementById('kpiSignedRate').textContent = rate + '%';
-      document.getElementById('kpiPendingText').textContent = `${pendingCount} pendente(s)`;
-      document.getElementById('kpiAvgTime').textContent = formatMinutes(avg);
-      document.getElementById('navPendingBadge').textContent = pendingCount;
-
-      renderCharts(signedCount, pendingCount);
-
-      const recentBody = document.getElementById('recentVisitsBody');
-      if (!visits.length) {
-        recentBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:26px;">Nenhuma visita registrada ainda. Clique em <strong>+ Nova Ficha</strong> ou em <strong>Carregar Demonstração</strong>.</td></tr>';
+    async function syncVisitsFromCloud(silent = false) {
+      const lbl = document.getElementById('cloudStatusLabel');
+      if (!APPS_SCRIPT_URL) {
+        lbl.textContent = 'Não configurada (cole a URL do Apps Script no código)';
         return;
       }
-      recentBody.innerHTML = visits.slice(0, 6).map(v => `
+      lbl.textContent = 'Conectada (Planilha + Pasta PDF no Drive)';
+      try {
+        const res = await fetch(APPS_SCRIPT_URL);
+        const json = await res.json();
+        if (json.status === 'ok' && Array.isArray(json.visits)) {
+          visits = json.visits;
+          localStorage.setItem('cemtec_visits_v3', JSON.stringify(visits));
+          populateDatalists(); renderDashboard(); renderReportsTable();
+          if (!silent) showToast(`Sincronizado! ${visits.length} ficha(s) carregadas da planilha.`);
+        }
+      } catch (e) {
+        if (!silent) showToast('Erro ao buscar fichas da planilha.');
+      }
+    }
+
+    async function syncFromGoogleSheets(silent = false) {
+      const m = DEFAULT_SHEET_URL.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+      if (!m) return;
+      try {
+        const res = await fetch(`https://docs.google.com/spreadsheets/d/${m[1]}/gviz/tq?tqx=out:csv&sheet=Listas`);
+        const text = await res.text();
+        if (text.trim().startsWith('<!DOCTYPE')) return;
+        const rows = text.split(/\r?\n/).map(r => r.split(',').map(c => c.replace(/^"|"$/g, '').trim()));
+        if (rows.length < 2) return;
+        const col = i => [...new Set(rows.slice(1).map(r => r[i] || '').filter(Boolean))];
+        if (col(0).length) lists.servidores = col(0);
+        if (col(1).length) lists.departamentos = col(1);
+        if (col(2).length) lists.unidades = col(2);
+        if (col(3).length) lists.objetivos = col(3);
+        localStorage.setItem('cemtec_lists_v3', JSON.stringify(lists));
+        populateDatalists();
+        if (!silent) showToast('Listas atualizadas da planilha!');
+      } catch (e) {}
+    }
+
+    // ===== UI RENDERING =====
+    function switchView(v) {
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('view-' + v).classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+      document.getElementById('sidebar').classList.remove('open');
+      if (v === 'new') setTimeout(() => padUnit.resize(), 60);
+      if (v === 'dashboard') renderDashboard();
+      if (v === 'reports') renderReportsTable();
+    }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+    function populateDatalists() {
+      document.getElementById('dlServidores').innerHTML = lists.servidores.map(v => `<option value="${esc(v)}">`).join('');
+      document.getElementById('dlDepartamentos').innerHTML = lists.departamentos.map(v => `<option value="${esc(v)}">`).join('');
+      document.getElementById('dlUnidades').innerHTML = lists.unidades.map(v => `<option value="${esc(v)}">`).join('');
+      document.getElementById('objectiveChips').innerHTML = lists.objetivos.map(o => `<button type="button" class="chip" onclick="appendObj('${o.replace(/'/g,"\\'")}')">+ ${esc(o)}</button>`).join('');
+      const units = [...new Set([...lists.unidades, ...visits.map(v => v.unidade)])].filter(Boolean).sort();
+      const depts = [...new Set([...lists.departamentos, ...visits.map(v => v.departamento)])].filter(Boolean).sort();
+      document.getElementById('filterUnit').innerHTML = '<option value="">Todas as Unidades</option>' + units.map(u => `<option value="${esc(u)}">${esc(u)}</option>`).join('');
+      document.getElementById('filterDept').innerHTML = '<option value="">Todos os Departamentos</option>' + depts.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('');
+    }
+    function appendObj(t) { const ta = document.getElementById('fObjetivo'); ta.value = ta.value.trim() ? ta.value.trim() + '\n• ' + t : t; }
+
+    function renderDashboard() {
+      const today = todayISO(), total = visits.length;
+      const signed = visits.filter(v => v.status === 'signed').length;
+      const pending = total - signed;
+      const durs = visits.map(v => calcDurationMinutes(v.entrada, v.saida)).filter(x => x !== null);
+      const avg = durs.length ? Math.round(durs.reduce((a,b)=>a+b,0)/durs.length) : 0;
+      document.getElementById('kpiTotal').textContent = total;
+      document.getElementById('kpiToday').textContent = visits.filter(v => v.data === today).length;
+      document.getElementById('kpiTodayDate').textContent = formatDateBR(today);
+      document.getElementById('kpiUnits').textContent = new Set(visits.map(v => v.unidade)).size;
+      document.getElementById('kpiSignedRate').textContent = (total ? Math.round(signed/total*100) : 0) + '%';
+      document.getElementById('kpiPendingText').textContent = `${pending} pendente(s)`;
+      document.getElementById('kpiAvgTime').textContent = formatMinutes(avg);
+      document.getElementById('navPendingBadge').textContent = pending;
+
+      const countBy = k => { const m = {}; visits.forEach(v => m[v[k]] = (m[v[k]]||0)+1); return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,6); };
+      const mk = (id, cfg) => { if (charts[id]) charts[id].destroy(); charts[id] = new Chart(document.getElementById(id), cfg); };
+      const uD = countBy('unidade'), dD = countBy('departamento');
+      mk('chartUnits', { type:'bar', data:{ labels:uD.map(x=>x[0].slice(0,22)), datasets:[{ data:uD.map(x=>x[1]), backgroundColor:'#003580', borderRadius:6 }] }, options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } } });
+      mk('chartStatus', { type:'doughnut', data:{ labels:['Assinadas','Pendentes'], datasets:[{ data:[signed,pending], backgroundColor:['#16a34a','#FBC02D'], borderWidth:0 }] }, options:{ responsive:true, maintainAspectRatio:false, cutout:'62%' } });
+      mk('chartDepts', { type:'bar', data:{ labels:dD.map(x=>x[0].split('—')[0]), datasets:[{ data:dD.map(x=>x[1]), backgroundColor:'#009FE3', borderRadius:6 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } } });
+
+      document.getElementById('recentVisitsBody').innerHTML = visits.slice(0,6).map((v,i) => `
         <tr>
-          <td><strong>${v.protocolo}</strong></td>
-          <td>${formatDateBR(v.data)}<br/><span style="font-size:11px;color:var(--muted);">${v.entrada}${v.saida ? ' – ' + v.saida : ''}</span></td>
-          <td>${escapeHtml(v.servidor)}</td>
-          <td>${escapeHtml(v.unidade)}</td>
-          <td>${statusBadge(v.status)}</td>
-          <td style="white-space:nowrap;">
-            <button class="btn btn-outline btn-sm" onclick="openA4Modal('${v.id}')">📄 Ficha</button>
-            ${v.status === 'pending' ? `<button class="btn btn-warning btn-sm" onclick="openFullscreenSig('collect:${v.id}')">✍️ Assinar</button>` : ''}
+          <td><strong>${esc(v.protocolo)}</strong></td>
+          <td>${formatDateBR(v.data)}</td>
+          <td>${esc(v.servidor)}</td>
+          <td>${esc(v.unidade)}</td>
+          <td>${v.status==='signed'?'<span class="status-pill status-signed">✅ Assinada</span>':'<span class="status-pill status-pending">⏳ Pendente</span>'}</td>
+          <td>
+            ${v.pdfUrl ? `<a href="${v.pdfUrl}" target="_blank" class="btn btn-success btn-sm">📁 PDF Drive</a>` : `<button class="btn btn-outline btn-sm" onclick="openA4Modal(visits[${i}])">📄 A4</button>`}
           </td>
         </tr>
-      `).join('');
-    }
-
-    function renderCharts(signedCount, pendingCount) {
-      const countBy = (key) => {
-        const map = {};
-        visits.forEach(v => { map[v[key]] = (map[v[key]] || 0) + 1; });
-        return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 7);
-      };
-
-      const unitData = countBy('unidade');
-      const deptData = countBy('departamento');
-
-      const buildChart = (id, config) => {
-        if (charts[id]) charts[id].destroy();
-        charts[id] = new Chart(document.getElementById(id), config);
-      };
-
-      buildChart('chartUnits', {
-        type: 'bar',
-        data: {
-          labels: unitData.map(x => x[0].length > 22 ? x[0].slice(0, 22) + '…' : x[0]),
-          datasets: [{ label: 'Visitas', data: unitData.map(x => x[1]), backgroundColor: '#003580', borderRadius: 6 }]
-        },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-      });
-
-      buildChart('chartStatus', {
-        type: 'doughnut',
-        data: {
-          labels: ['Assinadas', 'Aguardando Assinatura'],
-          datasets: [{ data: [signedCount, pendingCount], backgroundColor: ['#16a34a', '#FBC02D'], borderWidth: 0 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '62%' }
-      });
-
-      buildChart('chartDepts', {
-        type: 'bar',
-        data: {
-          labels: deptData.map(x => x[0].split('—')[0].trim()),
-          datasets: [{ label: 'Visitas', data: deptData.map(x => x[1]), backgroundColor: '#009FE3', borderRadius: 6 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-      });
-    }
-
-    // ===== REPORTS =====
-    function getFilteredVisits() {
-      const q = (document.getElementById('filterSearch').value || '').toLowerCase();
-      const u = document.getElementById('filterUnit').value;
-      const d = document.getElementById('filterDept').value;
-      const s = document.getElementById('filterStatus').value;
-      return visits.filter(v => {
-        if (u && v.unidade !== u) return false;
-        if (d && v.departamento !== d) return false;
-        if (s && v.status !== s) return false;
-        if (q) {
-          const hay = `${v.protocolo} ${v.servidor} ${v.departamento} ${v.unidade} ${v.objetivo} ${v.responsavel}`.toLowerCase();
-          if (!hay.includes(q)) return false;
-        }
-        return true;
-      });
+      `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma visita registrada ainda.</td></tr>';
     }
 
     function renderReportsTable() {
-      const list = getFilteredVisits();
-      const tbody = document.getElementById('reportsTableBody');
-      if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:26px;">Nenhuma ficha encontrada com os filtros selecionados.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = list.map(v => `
+      const q = (document.getElementById('filterSearch').value||'').toLowerCase();
+      const u = document.getElementById('filterUnit').value, d = document.getElementById('filterDept').value, s = document.getElementById('filterStatus').value;
+      const list = visits.filter(v => (!u || v.unidade===u) && (!d || v.departamento===d) && (!s || v.status===s) && (!q || `${v.protocolo} ${v.servidor} ${v.unidade} ${v.objetivo}`.toLowerCase().includes(q)));
+      document.getElementById('reportsTableBody').innerHTML = list.map(v => `
         <tr>
-          <td><strong>${v.protocolo}</strong></td>
+          <td><strong>${esc(v.protocolo)}</strong></td>
           <td>${formatDateBR(v.data)}</td>
-          <td>${escapeHtml(v.servidor)}</td>
-          <td>${escapeHtml(v.departamento)}</td>
-          <td>${escapeHtml(v.unidade)}</td>
-          <td>${v.entrada}${v.saida ? ' – ' + v.saida : ''}</td>
-          <td>${statusBadge(v.status)}</td>
-          <td class="no-print" style="white-space:nowrap;">
-            <button class="btn btn-outline btn-sm" onclick="openA4Modal('${v.id}')">📄 A4</button>
-            ${v.status === 'pending' ? `<button class="btn btn-warning btn-sm" onclick="openFullscreenSig('collect:${v.id}')">✍️ Assinar</button>` : ''}
-            <button class="btn btn-danger btn-sm" onclick="deleteVisit('${v.id}')">🗑</button>
+          <td>${esc(v.servidor)}</td>
+          <td>${esc(v.unidade)}</td>
+          <td>${esc(v.entrada)}${v.saida ? ' – '+esc(v.saida) : ''}</td>
+          <td>${v.status==='signed'?'<span class="status-pill status-signed">✅ Assinada</span>':'<span class="status-pill status-pending">⏳ Pendente</span>'}</td>
+          <td>
+            ${v.pdfUrl ? `<a href="${v.pdfUrl}" target="_blank" class="btn btn-success btn-sm">📁 PDF Drive</a>` : `<button class="btn btn-outline btn-sm" onclick='openA4Modal(${JSON.stringify(v).replace(/'/g,"&#39;")})'>📄 A4</button>`}
           </td>
         </tr>
-      `).join('');
+      `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma ficha encontrada.</td></tr>';
     }
 
-    function exportCSV() {
-      const rows = getFilteredVisits();
-      if (!rows.length) { showToast('Nenhuma ficha para exportar.'); return; }
-      const headers = ['Protocolo','Data','Nome do Servidor','Departamento','Unidade / Escola / Destino','Objetivo da Visita','Horário de Entrada','Horário de Saída','Duração','Status Assinatura','Responsável pela Unidade'];
-      const esc = (val) => `"${String(val || '').replace(/"/g, '""')}"`;
-      const lines = [headers.map(esc).join(';')];
-      rows.forEach(v => {
-        const dur = formatMinutes(calcDurationMinutes(v.entrada, v.saida));
-        lines.push([
-          v.protocolo, formatDateBR(v.data), v.servidor, v.departamento, v.unidade,
-          v.objetivo.replace(/\n/g, ' '), v.entrada, v.saida || '', dur,
-          v.status === 'signed' ? 'Assinada' : 'Aguardando Assinatura', v.responsavel || ''
-        ].map(esc).join(';'));
-      });
-      const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `fichas-visita-cemtec-${todayISO()}.csv`;
-      a.click();
-      showToast('Arquivo CSV exportado!');
-    }
-
-    function printManagementReport() {
-      document.body.classList.add('print-report');
-      window.print();
-      setTimeout(() => document.body.classList.remove('print-report'), 300);
-    }
-
-    // ===== A4 MODAL =====
-    function openA4Modal(id) {
-      const v = visits.find(x => x.id === id);
-      if (!v) return;
-      currentModalVisitId = id;
-      const [yyyy, mm, dd] = (v.data || '----/--/--').split('-');
-      const [hIn, mIn] = (v.entrada || '--:--').split(':');
-      const [hOut, mOut] = (v.saida || ' : ').split(':');
-      const logoSrc = getCurrentLogoSrc();
-
-      document.getElementById('modalCollectSigBtn').style.display = v.status === 'pending' ? 'inline-flex' : 'none';
-
+    function openA4Modal(v) {
+      const btnPdf = document.getElementById('modalDrivePdfBtn');
+      if (v.pdfUrl) { btnPdf.href = v.pdfUrl; btnPdf.style.display = 'inline-flex'; }
+      else { btnPdf.style.display = 'none'; }
+      const [y,m,d] = (v.data||'----/--/--').split('-');
       document.getElementById('a4ModalBody').innerHTML = `
         <div class="a4-sheet">
-          <div class="a4-watermark"><img src="${logoSrc}" alt="" /></div>
-          <div class="a4-content">
-            <div class="a4-header">
-              <div class="a4-header-line"></div>
-              <div class="a4-logos">
-                <img src="${logoSrc}" alt="CEMTEC" />
-                <div class="a4-logo-divider"></div>
-                <div class="a4-semed-text">
-                  <strong>SEMED</strong>
-                  <span>Secretaria Municipal</span>
-                  <span>de <b>Educação</b></span>
-                </div>
-              </div>
-              <div class="a4-header-line"></div>
-            </div>
-
-            <div class="a4-title">FICHA DE VISITA</div>
-
-            <div class="a4-field">
-              <span class="a4-field-label">Nome do Servidor:</span>
-              <span class="a4-field-value">${escapeHtml(v.servidor)}</span>
-            </div>
-            <div class="a4-field">
-              <span class="a4-field-label">Departamento:</span>
-              <span class="a4-field-value">${escapeHtml(v.departamento)}</span>
-            </div>
-            <div class="a4-field">
-              <span class="a4-field-label">Unidade / Escola / Destino:</span>
-              <span class="a4-field-value">${escapeHtml(v.unidade)}</span>
-            </div>
-
-            <div class="a4-date-row">
-              <span>Data:</span>
-              <span class="a4-date-part">${dd || ''}</span> /
-              <span class="a4-date-part">${mm || ''}</span> /
-              <span class="a4-date-part">${yyyy || ''}</span>
-            </div>
-
-            <div style="font-size:16px;margin-bottom:4px;">Objetivo da visita:</div>
-            <div class="a4-objective-box">${escapeHtml(v.objetivo)}</div>
-
-            <div class="a4-times">
-              <div>Horário de Entrada: <span class="a4-time-slot">${hIn || ''}</span> : <span class="a4-time-slot">${mIn || ''}</span></div>
-              <div>Horário de Saída: <span class="a4-time-slot">${v.saida ? hOut : ''}</span> : <span class="a4-time-slot">${v.saida ? mOut : ''}</span></div>
-            </div>
-
-            <div class="a4-signatures">
-              ${v.includeServerSig ? `
-                <div class="a4-sig-block">
-                  <div class="a4-sig-img-wrap">${v.sigServer ? `<img src="${v.sigServer}" alt="Assinatura Servidor"/>` : ''}</div>
-                  <div class="a4-sig-line">Assinatura do servidor</div>
-                  <div class="a4-sig-meta">${escapeHtml(v.servidor)}</div>
-                </div>
-              ` : ''}
-              <div class="a4-sig-block">
-                <div class="a4-sig-img-wrap">
-                  ${v.sigUnit ? `<img src="${v.sigUnit}" alt="Assinatura Responsável"/>` : '<span style="font-family:Inter,sans-serif;font-size:11px;color:#d97706;margin-bottom:14px;">[ Aguardando assinatura digital ]</span>'}
-                </div>
-                <div class="a4-sig-line">Assinatura do responsável pela unidade</div>
-                ${v.responsavel ? `<div class="a4-sig-meta">${escapeHtml(v.responsavel)}</div>` : ''}
-              </div>
-            </div>
-
-            <div class="a4-protocol">
-              <span><strong>Protocolo:</strong> ${v.protocolo}</span>
-              <span><strong>Status:</strong> ${v.status === 'signed' ? 'Validado digitalmente em ' + new Date(v.signedAt).toLocaleString('pt-BR') : 'Pendente de assinatura'}</span>
-            </div>
-
-            <div class="a4-footer">
-              <div class="a4-footer-top">
-                <span>📍 Avenida Tancredo Neves, nº 124, Centro Sul.</span>
-                <span>📞 66 3545-8100 &nbsp;|&nbsp; ✉️ educacao@sorriso.mt.gov.br</span>
-              </div>
-              <div class="tricolor-bar" style="height:4px;">
-                <div class="c1"></div><div class="c2"></div><div class="c3"></div>
-              </div>
-              <div class="a4-footer-bottom">
-                <span>🌐 site.sorriso.mt.gov.br/</span>
-                <span>/prefeituradesorriso</span>
-              </div>
-            </div>
+          <div class="a4-header">
+            <div class="a4-header-line"></div>
+            <div class="a4-logos"><img src="${LOGO_URL}" alt="CEMTEC" /><strong>SEMED SORRISO</strong></div>
+            <div class="a4-header-line"></div>
           </div>
-        </div>
-      `;
+          <div class="a4-title">FICHA DE VISITA</div>
+          <div class="a4-field"><span>Nome do Servidor:</span><span class="a4-field-value">${esc(v.servidor)}</span></div>
+          <div class="a4-field"><span>Departamento:</span><span class="a4-field-value">${esc(v.departamento)}</span></div>
+          <div class="a4-field"><span>Unidade / Escola / Destino:</span><span class="a4-field-value">${esc(v.unidade)}</span></div>
+          <div class="a4-field"><span>Data:</span><span class="a4-field-value">${d}/${m}/${y}</span></div>
+          <div>Objetivo da visita:</div>
+          <div class="a4-objective-box">${esc(v.objetivo)}</div>
+          <div style="margin-bottom:24px;">Horário de Entrada: <strong>${esc(v.entrada)}</strong> &nbsp;|&nbsp; Horário de Saída: <strong>${esc(v.saida||'—')}</strong></div>
+          <div class="a4-sig-block">
+            ${v.sigUnit ? `<img src="${v.sigUnit}" />` : '<div style="height:40px;color:#d97706;">[ Pendente ]</div>'}
+            <div class="a4-sig-line">Assinatura do responsável pela unidade${v.responsavel ? '<br/><small>'+esc(v.responsavel)+'</small>' : ''}</div>
+          </div>
+          <div style="font-family:Inter,sans-serif;font-size:11px;color:#475569;text-align:center;">Protocolo: <strong>${esc(v.protocolo)}</strong></div>
+        </div>`;
       document.getElementById('a4Modal').classList.add('open');
     }
 
-    function collectSignatureFromModal() {
-      if (currentModalVisitId) openFullscreenSig('collect:' + currentModalVisitId);
-    }
-    function closeA4Modal() {
-      document.getElementById('a4Modal').classList.remove('open');
-      currentModalVisitId = null;
-    }
-    function printA4() {
-      document.body.classList.remove('print-report');
-      window.print();
-    }
-
-    // ===== DEMO DATA =====
-    function makeFakeSignature(name) {
-      const c = document.createElement('canvas');
-      c.width = 400; c.height = 120;
-      const ctx = c.getContext('2d');
-      ctx.strokeStyle = '#003580';
-      ctx.lineWidth = 2.5;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(40, 82);
-      ctx.bezierCurveTo(90, 20, 140, 100, 195, 58);
-      ctx.bezierCurveTo(230, 35, 280, 95, 350, 52);
-      ctx.stroke();
-      ctx.font = 'italic 22px Georgia, serif';
-      ctx.fillStyle = '#003580';
-      ctx.fillText(name.split(' ')[0], 115, 76);
-      return c.toDataURL('image/png');
-    }
-
-    function loadDemoData() {
-      const today = todayISO();
-      const samples = [
-        { servidor: 'Cassiano Gonsalves', departamento: 'CEMTEC — Centro Municipal de Tecnologia e Robótica Educacional', unidade: 'E.M. Rui Barbosa', data: today, entrada: '08:00', saida: '09:45', objetivo: 'Acompanhamento de oficina de Robótica Educacional e calibração dos kits Arduino com os professores.', responsavel: 'Dir. Márcia Oliveira', status: 'signed' },
-        { servidor: 'Prof. Carlos Eduardo Mendes', departamento: 'SEMED — Tecnologia Educacional / TI', unidade: 'E.M. Ivete Lourdes Arenhardt', data: today, entrada: '10:00', saida: '11:30', objetivo: 'Suporte técnico em laboratório de informática e rede Wi-Fi da sala dos professores.', responsavel: 'Coord. Robson Silva', status: 'signed' },
-        { servidor: 'Profa. Ana Paula Ferreira', departamento: 'SEMED — Coordenação Pedagógica', unidade: 'E.M. Jardim Amazônico', data: today, entrada: '13:30', saida: '15:00', objetivo: 'Formação continuada de professores em ferramentas digitais e planejamento bimestral.', responsavel: 'Dir. Juliana Mendes', status: 'signed' },
-        { servidor: 'Lucas Henrique Oliveira', departamento: 'CEMTEC — Centro Municipal de Tecnologia e Robótica Educacional', unidade: 'E.M. Papa João Paulo II', data: today, entrada: '14:00', saida: '15:20', objetivo: 'Entrega e instalação de kits de tecnologia educacional e teste de projetor multimídia.', responsavel: 'Sec. Fernanda Costa', status: 'pending' },
-        { servidor: 'Mariana Costa Silva', departamento: 'SEMED — Manutenção e Infraestrutura', unidade: 'CEMEIS Caminhos do Saber', data: today, entrada: '15:30', saida: '', objetivo: 'Vistoria de infraestrutura tecnológica da unidade e levantamento de pontos de rede.', responsavel: '', status: 'pending' }
-      ];
-      const base = visits.length;
-      samples.forEach((s, i) => {
-        visits.unshift({
-          id: 'demo_' + Date.now() + '_' + i,
-          protocolo: `SEMED-${new Date().getFullYear()}-${String(base + i + 1).padStart(4, '0')}`,
-          ...s,
-          includeServerSig: false,
-          sigUnit: s.status === 'signed' ? makeFakeSignature(s.responsavel) : '',
-          sigServer: '',
-          createdAt: new Date().toISOString(),
-          signedAt: s.status === 'signed' ? new Date().toISOString() : null
-        });
-      });
-      persistVisits();
-      showToast('Dados de demonstração carregados (3 assinadas e 2 pendentes)!');
+    function exportCSV() {
+      const headers = ['Protocolo','Data','Servidor','Departamento','Unidade','Objetivo','Entrada','Saida','Status','Link PDF'];
+      const escCsv = v => `"${String(v||'').replace(/"/g,'""')}"`;
+      const lines = [headers.map(escCsv).join(';')];
+      visits.forEach(v => lines.push([v.protocolo, formatDateBR(v.data), v.servidor, v.departamento, v.unidade, v.objetivo, v.entrada, v.saida, v.status, v.pdfUrl].map(escCsv).join(';')));
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob(['\uFEFF'+lines.join('\n')], { type:'text/csv;charset=utf-8;' }));
+      a.download = `fichas-cemtec-${todayISO()}.csv`; a.click();
     }
 
     // ===== UTILS =====
-    function todayISO() {
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    }
-    function formatDateBR(iso) {
-      if (!iso) return '—';
-      const [y, m, d] = iso.split('-');
-      return `${d}/${m}/${y}`;
-    }
-    function statusBadge(status) {
-      return status === 'signed'
-        ? '<span class="status-pill status-signed">✅ Assinada</span>'
-        : '<span class="status-pill status-pending">⏳ Aguardando</span>';
-    }
-    function escapeHtml(s) {
-      return String(s || '').replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
-    }
-    function escapeJs(s) {
-      return String(s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    }
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
-    }
+    function todayISO() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function formatDateBR(iso) { if (!iso || !iso.includes('-')) return iso || '—'; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; }
+    function setNowTime(id) { const d = new Date(); document.getElementById(id).value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+    function calcDurationMinutes(a, b) { if (!a || !b) return null; const [h1,m1]=a.split(':').map(Number), [h2,m2]=b.split(':').map(Number); return (h2*60+m2)-(h1*60+m1) >= 0 ? (h2*60+m2)-(h1*60+m1) : null; }
+    function formatMinutes(m) { if (m === null || m === undefined) return '—'; return m < 60 ? `${m} min` : `${Math.floor(m/60)}h ${m%60}min`; }
+    function esc(s) { return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(window._tt); window._tt = setTimeout(()=>t.classList.remove('show'), 3500); }
 
-    // ===== INIT =====
     window.addEventListener('DOMContentLoaded', () => {
-      applyLogos();
+      document.querySelectorAll('.dynamic-logo').forEach(img => { img.src = LOGO_URL; });
       padUnit = new SignaturePad(document.getElementById('sigCanvasUnit'));
-      padServer = new SignaturePad(document.getElementById('sigCanvasServer'));
       padFs = new SignaturePad(document.getElementById('fsSigCanvas'));
-
       document.getElementById('fData').value = todayISO();
       setNowTime('fEntrada');
-
-      const savedUrl = localStorage.getItem(STORAGE_KEYS.sheetUrl) || DEFAULT_SHEET_URL;
-      document.getElementById('sheetUrlInput').value = savedUrl;
-      document.getElementById('openSheetLink').href = savedUrl;
-
-      populateDatalistsAndChips();
-      renderDashboard();
-      renderReportsTable();
-      renderListsManager();
-
-      // Tenta sincronizar silenciosamente ao abrir (funciona assim que a planilha estiver como Leitor)
+      populateDatalists();
+      initAccessMode();
       syncFromGoogleSheets(true);
-    });
-
-    window.addEventListener('resize', () => {
-      if (padUnit) padUnit.resize();
-      if (padServer) padServer.resize();
-      if (padFs && document.getElementById('fsSigModal').classList.contains('open')) padFs.resize();
-    });
-
-    // Sincroniza entre abas abertas no mesmo navegador em tempo real
-    window.addEventListener('storage', (e) => {
-      if (e.key === STORAGE_KEYS.visits) {
-        visits = JSON.parse(e.newValue || '[]');
-        renderDashboard();
-        renderReportsTable();
-      }
-      if (e.key === STORAGE_KEYS.lists) {
-        lists = JSON.parse(e.newValue || 'null') || structuredClone(DEFAULT_LISTS);
-        populateDatalistsAndChips();
-        renderListsManager();
-      }
+      if (!isProfessorMode) syncVisitsFromCloud(true);
     });
   </script>
 </body>
