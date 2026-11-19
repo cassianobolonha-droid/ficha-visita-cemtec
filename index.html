@@ -21,53 +21,30 @@
     .tricolor-bar .c1 { flex: 5; background: var(--blue-dark); }
     .tricolor-bar .c2 { flex: 3; background: var(--blue-light); }
     .tricolor-bar .c3 { flex: 2; background: var(--yellow); }
-    .pin-gate {
-      position: fixed; inset: 0; background: linear-gradient(135deg, #003580 0%, #001f4d 100%);
-      display: none; align-items: center; justify-content: center; padding: 20px; z-index: 500;
-    }
+    .pin-gate { position: fixed; inset: 0; background: linear-gradient(135deg, #003580 0%, #001f4d 100%); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 500; }
     .pin-gate.open { display: flex; }
-    .pin-card {
-      background: #fff; border-radius: 18px; padding: 28px 24px; width: 100%; max-width: 380px;
-      text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.35);
-    }
+    .pin-card { background: #fff; border-radius: 18px; padding: 28px 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.35); }
     .pin-card img { height: 54px; margin: 0 auto 12px; object-fit: contain; }
     .pin-card h2 { font-size: 19px; color: var(--blue-dark); margin-bottom: 6px; }
     .pin-card p { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
-    .pin-input {
-      width: 100%; padding: 14px; font-size: 22px; letter-spacing: 8px; text-align: center;
-      border: 2px solid #cbd5e1; border-radius: 12px; margin-bottom: 12px; font-weight: 800;
-    }
+    .pin-input { width: 100%; padding: 14px; font-size: 22px; letter-spacing: 8px; text-align: center; border: 2px solid #cbd5e1; border-radius: 12px; margin-bottom: 12px; font-weight: 800; }
     .pin-error { color: var(--danger); font-size: 12px; font-weight: 600; min-height: 18px; margin-bottom: 8px; }
-    .prof-topbar {
-      display: none; background: var(--blue-dark); color: #fff; padding: 12px 18px;
-      align-items: center; justify-content: space-between; gap: 12px;
-    }
+    .prof-topbar { display: none; background: var(--blue-dark); color: #fff; padding: 12px 18px; align-items: center; justify-content: space-between; gap: 12px; }
     body.mode-professor .prof-topbar { display: flex; }
     body.mode-professor .sidebar, body.mode-professor .mobile-header { display: none !important; }
     body.mode-professor .main-content { max-width: 900px; }
     .app-shell { display: flex; flex: 1; min-height: calc(100vh - 5px); }
-    .sidebar {
-      width: 270px; background: linear-gradient(180deg, var(--blue-dark) 0%, #002359 100%);
-      color: #fff; display: flex; flex-direction: column; padding: 20px 16px;
-      position: sticky; top: 0; height: calc(100vh - 5px); z-index: 40; transition: transform 0.25s ease;
-    }
+    .sidebar { width: 270px; background: linear-gradient(180deg, var(--blue-dark) 0%, #002359 100%); color: #fff; display: flex; flex-direction: column; padding: 20px 16px; position: sticky; top: 0; height: calc(100vh - 5px); z-index: 40; transition: transform 0.25s ease; }
     .brand-box { background: #fff; border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 16px; }
     .brand-box img { max-height: 54px; max-width: 100%; object-fit: contain; display: block; margin: 0 auto 6px; }
     .brand-sub { font-size: 10px; font-weight: 700; color: var(--blue-dark); text-transform: uppercase; border-top: 1px solid #e2e8f0; padding-top: 6px; }
     .nav-list { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-    .nav-btn {
-      display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border: none;
-      border-radius: 10px; background: transparent; color: rgba(255,255,255,0.85);
-      font-size: 14px; font-weight: 600; cursor: pointer; text-align: left;
-    }
+    .nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border: none; border-radius: 10px; background: transparent; color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; }
     .nav-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
     .nav-btn.active { background: #fff; color: var(--blue-dark); }
     .nav-btn .badge { margin-left: auto; background: var(--yellow); color: #1e293b; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
     .sidebar-footer { font-size: 11px; color: rgba(255,255,255,0.7); border-top: 1px solid rgba(255,255,255,0.14); padding-top: 12px; line-height: 1.5; }
-    .mobile-header {
-      display: none; background: var(--blue-dark); color: #fff; padding: 10px 14px;
-      align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50;
-    }
+    .mobile-header { display: none; background: var(--blue-dark); color: #fff; padding: 10px 14px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
     .mobile-brand { display: flex; align-items: center; gap: 10px; }
     .mobile-brand img { height: 34px; background: #fff; padding: 3px 6px; border-radius: 6px; }
     .mobile-menu-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 18px; cursor: pointer; }
@@ -76,11 +53,7 @@
     .page-title h1 { font-size: 23px; font-weight: 800; color: var(--blue-dark); }
     .page-title p { font-size: 13px; color: var(--muted); margin-top: 3px; }
     .header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 15px;
-      border-radius: 10px; font-size: 13px; font-weight: 600; border: 1px solid transparent;
-      cursor: pointer; font-family: inherit; text-decoration: none;
-    }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 15px; border-radius: 10px; font-size: 13px; font-weight: 600; border: 1px solid transparent; cursor: pointer; font-family: inherit; text-decoration: none; }
     .btn-primary { background: var(--blue-dark); color: #fff; }
     .btn-accent { background: var(--blue-light); color: #fff; }
     .btn-success { background: var(--success); color: #fff; }
@@ -108,9 +81,7 @@
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group.full { grid-column: 1 / -1; }
     label { font-size: 13px; font-weight: 600; color: #334155; display: flex; justify-content: space-between; }
-    input[type="text"], input[type="date"], input[type="time"], input[type="url"], input[type="password"], select, textarea {
-      width: 100%; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-family: inherit; background: #fff;
-    }
+    input[type="text"], input[type="date"], input[type="time"], input[type="url"], input[type="password"], select, textarea { width: 100%; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-family: inherit; background: #fff; }
     textarea { min-height: 105px; resize: vertical; }
     .input-row { display: flex; gap: 8px; }
     .input-row input { flex: 1; }
@@ -300,7 +271,7 @@
                 <datalist id="dlUnidades"></datalist>
               </div>
               <div class="form-group">
-                <label>Responsável pela Escola *</label>
+                <label>Responsável pela Escola</label>
                 <input type="text" id="fResponsavel" list="dlResponsaveis" placeholder="Selecione na lista ou digite o nome..." autocomplete="off" />
                 <datalist id="dlResponsaveis"></datalist>
                 <div class="dica-objetivo">Escolha um nome da lista ou digite um novo — o texto digitado é aceito.</div>
@@ -358,10 +329,6 @@
               <div class="card-title">2. Assinatura do Responsável pela Unidade</div>
               <button type="button" class="btn btn-accent btn-sm" onclick="openFullscreenSig()">📱 Assinar em Tela Cheia</button>
             </div>
-            <div class="form-group" style="margin-bottom:12px;">
-              <label>Quem está assinando (aparece abaixo da linha)</label>
-              <input type="text" id="fAssinante" list="dlResponsaveis" placeholder="Ex.: Dir. Maria Aparecida" autocomplete="off" />
-            </div>
             <div class="sig-box">
               <div class="sig-toolbar">
                 <div style="display:flex;gap:6px;align-items:center;">
@@ -370,7 +337,7 @@
                 </div>
                 <div style="display:flex;gap:8px;">
                   <button type="button" class="btn btn-outline btn-sm" onclick="padUnit.undo()">↩ Desfazer</button>
-                  <button type="button" class="btn btn-outline btn-sm" onclick="padUnit.clear();capturedUnit='';atualizarContadorObjetivo();">🗑 Limpar</button>
+                  <button type="button" class="btn btn-outline btn-sm" onclick="padUnit.clear();capturedUnit='';">🗑 Limpar</button>
                 </div>
               </div>
               <canvas id="sigCanvasUnit" class="sig-canvas"></canvas>
@@ -419,10 +386,9 @@
         </div>
         <div class="card">
           <div class="card-title" style="margin-bottom:10px;">☁️ Sincronização com Google Sheets &amp; Drive</div>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Status da integração Apps Script: <strong id="cloudStatusLabel">Verificando...</strong></p>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Status da integração: <strong id="cloudStatusLabel">Verificando...</strong></p>
           <div style="display:flex;flex-wrap:wrap;gap:10px;">
-            <button class="btn btn-primary" onclick="syncFromGoogleSheets()">🔄 Atualizar Listas da Planilha</button>
-            <button class="btn btn-outline" onclick="syncVisitsFromCloud()">📥 Puxar Fichas da Planilha</button>
+            <button class="btn btn-primary" onclick="syncVisitsFromCloud()">🔄 Sincronizar Listas &amp; Fichas</button>
             <a href="https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit" target="_blank" class="btn btn-outline">Abrir Planilha ↗</a>
             <a href="https://drive.google.com/drive/folders/1WyXDmpA_PBzXrrHUxr5yOByyq0ofLmlK" target="_blank" class="btn btn-outline">Abrir Pasta de PDFs no Drive ↗</a>
           </div>
@@ -465,43 +431,29 @@
   <script>
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec';
     const COORDINATOR_PIN = '2026';
-    const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit';
     const DRIVE_LOGO_ID = '1Wr0oaQn3PFDETlL2jskRZJlaZdeVxRCW';
     const LOGO_URL = 'https://lh3.googleusercontent.com/d/' + DRIVE_LOGO_ID;
 
     const OBJETIVO_MIN_CHARS = 25;
     const MODELO_OBJETIVO = 'Suporte técnico no laboratório de informática da unidade — verificação da rede Wi-Fi, manutenção dos computadores e orientação aos professores sobre o uso dos equipamentos.';
 
-    /* ------------------------------------------------------------------
-     * LISTA PADRÃO DE RESPONSÁVEIS PELA ESCOLA
-     * Substitua estes nomes pelos reais, OU cadastre na coluna E
-     * da aba "Listas" da planilha (a planilha sobrescreve esta lista).
-     * ------------------------------------------------------------------ */
     const DEFAULT_LISTS = {
       servidores: ['Cassiano Gonsalves', 'Prof. Carlos Eduardo Mendes', 'Profa. Ana Paula Ferreira', 'Lucas Henrique Oliveira', 'Mariana Costa Silva'],
       departamentos: ['CEMTEC — Centro Municipal de Tecnologia e Robótica Educacional', 'SEMED — Coordenação Pedagógica', 'SEMED — Tecnologia Educacional / TI', 'SEMED — Manutenção e Infraestrutura'],
       unidades: ['CEMTEC Sorriso', 'E.M. Aureliano Pereira da Silva', 'E.M. Caravagio', 'E.M. Ivete Lourdes Arenhardt', 'E.M. Jardim Amazônico', 'E.M. Papa João Paulo II', 'E.M. Rui Barbosa', 'CEMEIS Caminhos do Saber'],
       objetivos: ['Suporte técnico em laboratório de informática e rede Wi-Fi', 'Acompanhamento de oficina de Robótica Educacional', 'Formação continuada de professores em ferramentas digitais', 'Manutenção preventiva/corretiva de equipamentos', 'Entrega e instalação de kits de tecnologia educacional'],
-      responsaveis: [
-        'Maria Aparecida Souza',
-        'Rosângela Alves Pereira',
-        'João Batista Ferreira',
-        'Cleuza Maria dos Santos',
-        'Antônio Marcos Rocha'
-      ]
+      responsaveis: []
     };
 
-    let visits = JSON.parse(localStorage.getItem('cemtec_visits_v3') || '[]').map(function (v) {
+    let visits = JSON.parse(localStorage.getItem('cemtec_visits_v4') || '[]').map(function (v) {
       return Object.assign({}, v, {
         entrada: formatTimeClean(v.entrada),
         saida: formatTimeClean(v.saida)
       });
     });
 
-    let lists = JSON.parse(localStorage.getItem('cemtec_lists_v3') || 'null') || JSON.parse(JSON.stringify(DEFAULT_LISTS));
-    if (!Array.isArray(lists.responsaveis) || !lists.responsaveis.length) {
-      lists.responsaveis = DEFAULT_LISTS.responsaveis.slice();
-    }
+    let lists = JSON.parse(localStorage.getItem('cemtec_lists_v4') || 'null') || JSON.parse(JSON.stringify(DEFAULT_LISTS));
+    if (!Array.isArray(lists.responsaveis)) lists.responsaveis = [];
 
     let padUnit, padFs, capturedUnit = '', charts = {};
 
@@ -698,9 +650,7 @@
       const entrada = document.getElementById('fEntrada').value;
       const saida = document.getElementById('fSaida').value;
       const objetivo = cleanObjetivo(document.getElementById('fObjetivo').value);
-      const respEscola = document.getElementById('fResponsavel').value.trim();
-      const assinante = document.getElementById('fAssinante').value.trim();
-      const responsavel = assinante || respEscola;
+      const responsavel = document.getElementById('fResponsavel').value.trim();
 
       if (!servidor || !departamento || !unidade || !data || !entrada || !objetivo) {
         showToast('Preencha todos os campos obrigatórios (*).');
@@ -719,14 +669,14 @@
         return;
       }
 
-      if (respEscola) {
+      if (responsavel) {
         const existe = lists.responsaveis.some(function (n) {
-          return n.toLowerCase() === respEscola.toLowerCase();
+          return n.toLowerCase() === responsavel.toLowerCase();
         });
         if (!existe) {
-          lists.responsaveis.push(respEscola);
+          lists.responsaveis.push(responsavel);
           lists.responsaveis.sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
-          localStorage.setItem('cemtec_lists_v3', JSON.stringify(lists));
+          localStorage.setItem('cemtec_lists_v4', JSON.stringify(lists));
         }
       }
 
@@ -736,7 +686,7 @@
         servidor: servidor,
         departamento: departamento,
         unidade: unidade,
-        responsavel: respEscola,
+        responsavel: responsavel,
         data: data,
         dataBR: formatDateBR(data),
         entrada: entrada,
@@ -766,10 +716,10 @@
             visit.pdfUrl = json.pdfUrl;
             showToast('✅ Ficha salva na Planilha e PDF gerado no Drive!');
           } else {
-            showToast('⚠️ Erro no script: ' + (json.message || 'tente novamente'));
+            showToast('⚠️ Erro: ' + (json.message || 'tente novamente'));
           }
         } catch (err) {
-          showToast('⚠️ Falha de conexão com Apps Script: ' + err.message);
+          showToast('⚠️ Falha de conexão: ' + err.message);
         }
       }
 
@@ -777,7 +727,7 @@
       btn.textContent = origText;
 
       visits.unshift(visit);
-      localStorage.setItem('cemtec_visits_v3', JSON.stringify(visits));
+      localStorage.setItem('cemtec_visits_v4', JSON.stringify(visits));
 
       document.getElementById('visitForm').reset();
       document.getElementById('fData').value = todayISO();
@@ -800,18 +750,31 @@
         if (lbl) lbl.textContent = 'Não configurada';
         return;
       }
-      if (lbl) lbl.textContent = 'Conectada (Planilha + Pasta PDF no Drive)';
       try {
         const res = await fetch(APPS_SCRIPT_URL, { redirect: 'follow' });
         const json = await res.json();
-        if (json.status === 'ok' && Array.isArray(json.visits)) {
+
+        if (json.status !== 'ok') {
+          if (lbl) lbl.textContent = 'Erro: ' + (json.message || 'desconhecido');
+          return;
+        }
+
+        if (json.listas) {
+          if (json.listas.servidores && json.listas.servidores.length) lists.servidores = json.listas.servidores;
+          if (json.listas.departamentos && json.listas.departamentos.length) lists.departamentos = json.listas.departamentos;
+          if (json.listas.unidades && json.listas.unidades.length) lists.unidades = json.listas.unidades;
+          if (json.listas.objetivos && json.listas.objetivos.length) lists.objetivos = json.listas.objetivos;
+          if (json.listas.responsaveis && json.listas.responsaveis.length) lists.responsaveis = json.listas.responsaveis;
+        }
+
+        if (Array.isArray(json.visits)) {
           visits = json.visits.map(function (v) {
             return Object.assign({}, v, {
               entrada: formatTimeClean(v.entrada),
               saida: formatTimeClean(v.saida)
             });
           });
-          localStorage.setItem('cemtec_visits_v3', JSON.stringify(visits));
+          localStorage.setItem('cemtec_visits_v4', JSON.stringify(visits));
 
           json.visits.forEach(function (v) {
             if (v.responsavel) {
@@ -822,41 +785,19 @@
             }
           });
           lists.responsaveis.sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
-          localStorage.setItem('cemtec_lists_v3', JSON.stringify(lists));
-
-          populateDatalists();
-          renderDashboard();
-          renderReportsTable();
-          if (!silent) showToast('Sincronizado! ' + visits.length + ' ficha(s) carregadas da planilha.');
         }
-      } catch (e) {
-        if (!silent) showToast('Erro ao buscar fichas da planilha.');
-      }
-    }
 
-    async function syncFromGoogleSheets(silent) {
-      const m = DEFAULT_SHEET_URL.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-      if (!m) return;
-      try {
-        const res = await fetch('https://docs.google.com/spreadsheets/d/' + m[1] + '/gviz/tq?tqx=out:csv&sheet=Listas');
-        const text = await res.text();
-        if (text.trim().startsWith('<!DOCTYPE')) return;
-        const rows = text.split(/\r?\n/).map(function (r) {
-          return r.split(',').map(function (c) { return c.replace(/^"|"$/g, '').trim(); });
-        });
-        if (rows.length < 2) return;
-        const col = function (i) {
-          return Array.from(new Set(rows.slice(1).map(function (r) { return r[i] || ''; }).filter(Boolean)));
-        };
-        if (col(0).length) lists.servidores = col(0);
-        if (col(1).length) lists.departamentos = col(1);
-        if (col(2).length) lists.unidades = col(2);
-        if (col(3).length) lists.objetivos = col(3);
-        if (col(4).length) lists.responsaveis = col(4);   // coluna E = Responsáveis
-        localStorage.setItem('cemtec_lists_v3', JSON.stringify(lists));
+        localStorage.setItem('cemtec_lists_v4', JSON.stringify(lists));
         populateDatalists();
-        if (!silent) showToast('Listas atualizadas da planilha!');
-      } catch (e) {}
+        renderDashboard();
+        renderReportsTable();
+
+        if (lbl) lbl.textContent = 'Conectada — ' + visits.length + ' ficha(s) | ' + lists.responsaveis.length + ' responsável(is)';
+        if (!silent) showToast('Sincronizado! ' + visits.length + ' ficha(s) e ' + lists.responsaveis.length + ' responsável(is).');
+      } catch (e) {
+        if (lbl) lbl.textContent = 'Falha de conexão';
+        if (!silent) showToast('Erro ao buscar dados.');
+      }
     }
 
     /* ---------------- NAVEGAÇÃO ---------------- */
@@ -1189,8 +1130,7 @@
       populateDatalists();
       atualizarContadorObjetivo();
       initAccessMode();
-      syncFromGoogleSheets(true);
-      if (!isProfessorMode) syncVisitsFromCloud(true);
+      syncVisitsFromCloud(true);
     });
   </script>
 </body>
