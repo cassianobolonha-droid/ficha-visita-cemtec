@@ -360,7 +360,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
           </div>
           <div class="pills" id="objPills"></div>
           <textarea id="fObjetivo" placeholder="Detalhes adicionais (opcional): escreva o que mais foi feito nesta visita..." oninput="atualizarContadorObjetivo()"></textarea>
-          <div class="dica">💡 A lista mostra os objetivos do departamento. Mínimo de 25 caracteres.</div>
+          <div class="dica">💡 A lista mostra os objetivos do departamento escolhido. Mínimo de 25 caracteres.</div>
         </div>
       </div>
     </div>
@@ -536,11 +536,9 @@ const params=new URLSearchParams(window.location.search);
 const isProfessorMode=params.get('modo')==='ficha';
 const autoState={depto:false,serv:false,unidade:false,resp:false,prog:false};
 
-/* normaliza para exibir/comparar nomes */
 function normaliza(s){
   return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
 }
-/* chave de agrupamento — MESMA regra do Apps Script: só letras e números */
 function chave(s){
   return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
 }
@@ -1127,19 +1125,25 @@ function validarFicha(modo){
   return null;
 }
 
-/* ============ OBJETIVOS ============ */
+/* ============ OBJETIVOS — só do setor, sem misturar ============ */
 function objetivosDoDepartamento(){
   var depEl=document.getElementById('fDepartamento');
+  var nome=depEl?depEl.value.trim():'';
   var k=depEl?chave(depEl.value):'';
   var gerais=(mapaObjPorDepto['']||[]).slice();
+
   if(!k){
-    return {lista:(lists.objetivos||[]).slice(),gerais:false,departamento:(depEl?depEl.value.trim():'')};
+    return {lista:(lists.objetivos||[]).slice(),aviso:'Escolha o Departamento para ver os objetivos do setor.'};
   }
+
   var especificos=(mapaObjPorDepto[k]||[]).slice();
   var out=especificos.slice();
   gerais.forEach(function(o){ if(out.indexOf(o)===-1)out.push(o); });
-  if(!out.length)return {lista:(lists.objetivos||[]).slice(),gerais:false,departamento:(depEl?depEl.value.trim():'')};
-  return {lista:out,gerais:true,departamento:(depEl?depEl.value.trim():'')};
+
+  if(!out.length){
+    return {lista:[],aviso:'Nenhum objetivo cadastrado para '+nome+'. Escreva no campo de detalhes abaixo.'};
+  }
+  return {lista:out,aviso:'Objetivos de '+nome+(gerais.length?' + os que valem para todos':'')+' — '+out.length+' opção(ões).'};
 }
 
 function toggleObjMenu(ev){
@@ -1165,16 +1169,10 @@ function renderObjLista(){
     return !filtro||o.toLowerCase().indexOf(filtro)!==-1;
   });
   var el=document.getElementById('objLista');
-  var nota='';
-  if(!info.departamento){
-    nota='<div class="objnota">Escolha o Departamento para ver só os objetivos do setor.</div>';
-  }else{
-    nota='<div class="objnota">Objetivos de <strong>'+esc(info.departamento)+'</strong>'+
-      (info.gerais?' + os que valem para todos':'')+
-      ' — '+info.lista.length+' opção(ões).</div>';
-  }
+  var nota='<div class="objnota">'+esc(info.aviso)+'</div>';
+
   if(!lista.length){
-    el.innerHTML=nota+'<div style="padding:14px;font-size:12px;color:var(--mt);text-align:center">Nenhum objetivo encontrado.</div>';
+    el.innerHTML=nota;
     return;
   }
   el.innerHTML=nota+lista.map(function(o){
@@ -1355,8 +1353,8 @@ function aplicarAutoUnidade(){
   mostrarHint('hintUnidade','ok','✅ Unidade da última visita deste servidor.');
 }
 
-/* Unidade -> Responsável (chave corrigida) */
-function aplicarAutoResp(){
+/* Unidade -> Responsável: forcar=true sempre troca para o 1º da escola */
+function aplicarAutoResp(forcar){
   var unidade=document.getElementById('fUnidade').value.trim();
   var respEl=document.getElementById('fResponsavel');
   if(!unidade){esconderHint('hintResp');return;}
@@ -1364,33 +1362,29 @@ function aplicarAutoResp(){
   var lista=mapaRespPorUnidade[chave(unidade)]||[];
 
   if(!lista.length){
-    if(autoState.resp&&respEl.value.trim())limparAuto('fResponsavel','resp');
-    if(!respEl.value.trim()){
-      mostrarHint('hintResp','pend','Escola sem responsável cadastrado — digite o nome de quem vai assinar.');
-    }else{
-      esconderHint('hintResp');
+    if(respEl.value.trim()&&(forcar===true||autoState.resp)){
+      limparAuto('fResponsavel','resp');
     }
+    mostrarHint('hintResp','pend','Escola sem responsável cadastrado — digite o nome de quem vai assinar.');
     return;
   }
 
   var atual=respEl.value.trim();
   var pertence=atual&&lista.some(function(n){return normaliza(n)===normaliza(atual);});
 
-  if(!atual||autoState.resp||!pertence){
+  if(forcar===true||!atual||autoState.resp||!pertence){
     preencherAuto('fResponsavel',lista[0],'resp');
     autoState.resp=true;
     mostrarHint('hintResp','ok',lista.length>1
-      ?'✅ '+lista.length+' nomes nesta escola — abra a lista se for outro.'
+      ?'✅ '+lista.length+' nomes nesta escola. Atual: '+esc(lista[0])+'.'
       :'✅ '+esc(lista[0])+' — pode editar se precisar.');
     return;
   }
 
-  mostrarHint('hintResp','ok',lista.length>1
-    ?'✅ '+lista.length+' nomes nesta escola.'
-    :'✅ Nome desta escola.');
+  mostrarHint('hintResp','ok','✅ '+esc(atual)+' — consta nesta escola ('+lista.length+' nome(s)).');
 }
 
-/* ============ MAPAS — pares primeiro, chave única ============ */
+/* ============ MAPAS ============ */
 function montarMapas(){
   mapaServidorDepto={};
   mapaServPorDepto={};
@@ -1403,7 +1397,6 @@ function montarMapas(){
     if(mapa[k].indexOf(valor)===-1)mapa[k].push(valor);
   }
 
-  /* 1. fonte principal: pares (1 para 1) — chave padronizada */
   (lists.paresServidor||[]).forEach(function(p){
     if(!p||!p[0]||!p[1])return;
     mapaServidorDepto[chave(p[0])]=p[1];
@@ -1413,8 +1406,6 @@ function montarMapas(){
     if(!p||!p[0]||!p[1])return;
     addGrupo(mapaRespPorUnidade,chave(p[0]),p[1]);
   });
-
-  /* 2. grupos vindos do servidor — mesma chave, só complementam */
   (lists.servidoresPorDepartamento||[]).forEach(function(par){
     if(!par||!par[0])return;
     var k=chave(par[0]);
@@ -1431,9 +1422,8 @@ function montarMapas(){
     (par[1]||[]).forEach(function(o){ addGrupo(mapaObjPorDepto,k,o); });
   });
 
-  var totEscolas=Object.keys(mapaRespPorUnidade).length;
   var s='Carregados: '+Object.keys(mapaServPorDepto).length+' setor(es), '+
-        totEscolas+' escola(s), '+
+        Object.keys(mapaRespPorUnidade).length+' escola(s), '+
         Object.keys(mapaObjPorDepto).length+' lista(s) de objetivos.';
   var lbl=document.getElementById('autoFillLabel');
   if(lbl)lbl.textContent=s;
@@ -2305,8 +2295,15 @@ window.addEventListener('DOMContentLoaded',function(){
         var atual=elUnid.value.trim();
         ultimaUnidade=atual;
         autoState.resp=false;
-        aplicarAutoResp();
+        aplicarAutoResp(true);
         atualizarTodosCombos();
+      });
+    }
+    var elResp=document.getElementById('fResponsavel');
+    if(elResp){
+      elResp.addEventListener('change',function(){
+        autoState.resp=false;
+        aplicarAutoResp(false);
       });
     }
   });
