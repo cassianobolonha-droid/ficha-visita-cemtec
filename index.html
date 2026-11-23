@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     :root {
@@ -122,6 +123,7 @@
     .pen-bar { display: block; width: 14px; border-radius: 99px; background: currentColor; }
     .sig-canvas { width: 100%; height: 200px; display: block; cursor: crosshair; touch-action: none; }
     .sig-guide { position: absolute; left: 10%; right: 10%; bottom: 32px; border-bottom: 1px solid #cbd5e1; pointer-events: none; text-align: center; font-size: 11px; color: #94a3b8; }
+    .sig-aviso { font-size: 11px; color: var(--muted); background: #f8fafc; border: 1px solid var(--border); border-left: 3px solid var(--blue-light); border-radius: 8px; padding: 8px 11px; margin-bottom: 12px; line-height: 1.5; }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
@@ -163,11 +165,36 @@
     .a4-field { display: flex; gap: 8px; margin-bottom: 12px; font-size: 14px; }
     .a4-field-value { flex: 1; border-bottom: 1px solid #1f2937; padding: 0 6px 2px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; }
     .a4-objective-box { margin: 8px 0 16px; min-height: 90px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 13px; background: #fafafa; white-space: pre-wrap; color: #000; }
-    .a4-sig-block { text-align: center; max-width: 320px; margin: 20px auto; }
+    .a4-sig-block { text-align: center; max-width: 340px; margin: 20px auto; }
     .a4-sig-block img { max-height: 75px; margin-bottom: -6px; }
     .a4-sig-line { border-top: 1px solid #1f2937; padding-top: 6px; font-size: 13px; }
     .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all .25s; z-index: 600; }
     .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ============================================================
+       ASSINATURA ELETRÔNICA — traço gerado + carimbo
+       Prefixo siget evita colisão com .sig-* existentes
+       ============================================================ */
+    .siget { display: block; text-align: center; margin: 0 auto; max-width: 420px; }
+    .siget__traco {
+      display: block;
+      font-family: 'Caveat', 'Segoe Script', cursive;
+      font-size: 44px; line-height: 1.05;
+      color: #1c3d6e; opacity: .88;
+      transform: rotate(-3deg); transform-origin: center bottom;
+      padding: 0 6px 2px; white-space: nowrap;
+      user-select: none;
+    }
+    .siget__meta { font-family: 'Inter', sans-serif; font-size: 10px; line-height: 1.55; color: #5a6472; margin-top: 4px; }
+    .siget__meta strong { color: #334155; font-weight: 600; }
+    .siget__codigo {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 10px; letter-spacing: .04em;
+      background: rgba(0,0,0,.045);
+      border: 1px solid #d8dde2; border-radius: 3px;
+      padding: 0 4px; color: #334155;
+    }
+
     @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } .charts-grid { grid-template-columns: 1fr; } }
     @media (max-width: 860px) {
       .mobile-header { display: flex; }
@@ -187,12 +214,12 @@
       .modal-backdrop { position: static !important; background: none !important; padding: 0 !important; display: block !important; }
       .modal-card { max-height: none !important; max-width: none !important; box-shadow: none !important; }
       .a4-sheet { border: none !important; padding: 10mm !important; }
+      .siget__traco { color: #000 !important; opacity: 1 !important; }
     }
   </style>
 </head>
 <body>
   <div class="tricolor-bar"><div class="c1"></div><div class="c2"></div><div class="c3"></div></div>
-
   <div class="pin-gate" id="pinGate">
     <div class="pin-card">
       <img class="dynamic-logo" alt="CEMTEC" />
@@ -204,7 +231,6 @@
       <button class="btn btn-outline" style="width:100%;" onclick="enterProfessorMode()">✍️ Sou Professor (Abrir só a Ficha)</button>
     </div>
   </div>
-
   <div class="prof-topbar">
     <div style="display:flex;align-items:center;gap:10px;">
       <img class="dynamic-logo" style="height:34px;background:#fff;padding:3px 6px;border-radius:6px;" alt="CEMTEC" />
@@ -218,7 +244,6 @@
       <button class="btn btn-outline btn-sm" onclick="sairSistema()">🚪 Sair</button>
     </div>
   </div>
-
   <header class="mobile-header">
     <div class="mobile-brand">
       <img class="dynamic-logo" alt="CEMTEC" />
@@ -226,7 +251,6 @@
     </div>
     <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
   </header>
-
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <div class="brand-box">
@@ -245,7 +269,6 @@
         <strong>Prefeitura de Sorriso - MT</strong><br/>CEMTEC • Robótica e Tecnologia
       </div>
     </aside>
-
     <main class="main-content">
       <section class="view-section active" id="view-dashboard">
         <div class="page-header">
@@ -282,7 +305,6 @@
           </div>
         </div>
       </section>
-
       <section class="view-section" id="view-new">
         <div class="page-header">
           <div class="page-title">
@@ -317,7 +339,6 @@
                 <div class="auto-hint pend" id="hintResp" hidden></div>
                 <div class="dica-objetivo">O automático só sugere — você pode trocar quando outro responsável assinar.</div>
               </div>
-
               <div class="linha-tripla">
                 <div class="form-group">
                   <label>Data da Visita *</label>
@@ -338,10 +359,8 @@
                   </div>
                 </div>
               </div>
-
               <div class="form-group full">
                 <label>Objetivo da Visita * <span id="objCounter" style="font-weight:500;color:var(--muted);">0 caracteres</span></label>
-
                 <div class="obj-multi">
                   <button type="button" class="obj-multi-btn" id="objMultiBtn" onclick="toggleObjMenu(event)">
                     <span>☑️ Selecionar objetivos da lista</span>
@@ -359,21 +378,20 @@
                     </div>
                   </div>
                 </div>
-
                 <div class="obj-pills" id="objPills"></div>
-
                 <textarea id="fObjetivo" placeholder="Detalhes adicionais (opcional): escreva o que mais foi feito nesta visita..." oninput="atualizarContadorObjetivo()"></textarea>
                 <div class="dica-objetivo">💡 Marque os objetivos na lista. Se precisar de algo diferente, escreva no campo acima.</div>
               </div>
             </div>
           </div>
-
           <div class="card">
             <div class="card-header">
               <div class="card-title">2. Assinatura do Responsável pela Unidade</div>
               <button type="button" class="btn btn-accent btn-sm" onclick="openFullscreenSig()">📱 Assinar em Tela Cheia</button>
             </div>
-
+            <div class="sig-aviso">
+              Ao assinar, você concorda com o registro eletrônico desta ficha, incluindo data, hora e código de verificação.
+            </div>
             <div class="sig-box">
               <div class="sig-toolbar">
                 <div class="sig-group">
@@ -395,7 +413,6 @@
               <canvas id="sigCanvasUnit" class="sig-canvas"></canvas>
               <div class="sig-guide">Assine acima desta linha</div>
             </div>
-
             <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;margin-top:18px;">
               <button type="button" class="btn btn-warning" id="btnSavePending" onclick="saveVisit('pending')">⏳ Salvar Pendente</button>
               <button type="button" class="btn btn-success" id="btnSaveSigned" onclick="saveVisit('signed')">✅ Enviar Ficha Assinada (PDF + Drive)</button>
@@ -403,7 +420,6 @@
           </div>
         </form>
       </section>
-
       <section class="view-section" id="view-reports">
         <div class="page-header">
           <div class="page-title"><h1>Relatórios &amp; PDFs no Drive</h1><p>Todas as fichas sincronizadas com link direto para o PDF oficial.</p></div>
@@ -420,7 +436,6 @@
             <select id="filterDept" onchange="renderReportsTable()"><option value="">Todos os Departamentos</option></select>
             <select id="filterStatus" onchange="renderReportsTable()"><option value="">Todos os Status</option><option value="signed">✅ Assinadas</option><option value="pending">⏳ Pendentes</option></select>
           </div>
-
           <div class="filters-periodo">
             <div class="campo-data">
               <span>De</span>
@@ -436,12 +451,10 @@
               <button type="button" class="btn btn-outline" id="btMes" onclick="setPeriodo('mes')">Este mês</button>
             </div>
           </div>
-
           <div class="filtros-resumo">
             <div id="filtrosResumo">—</div>
             <button class="btn btn-outline btn-sm" onclick="setPeriodo('limpar')">Limpar filtros</button>
           </div>
-
           <div class="table-wrap">
             <table>
               <thead><tr><th>Protocolo</th><th>Data</th><th>Servidor</th><th>Unidade</th><th>Responsável</th><th>Horário</th><th>Status</th><th>Ações</th></tr></thead>
@@ -450,7 +463,6 @@
           </div>
         </div>
       </section>
-
       <section class="view-section" id="view-lists">
         <div class="page-header">
           <div class="page-title"><h1>Planilha, Drive &amp; Links de Acesso</h1><p>Gerencie a integração com o Google Drive e compartilhe o link exclusivo dos professores.</p></div>
@@ -478,7 +490,6 @@
       </section>
     </main>
   </div>
-
   <div class="modal-backdrop" id="a4Modal">
     <div class="modal-card">
       <div class="modal-header no-print">
@@ -492,7 +503,6 @@
       <div class="modal-body" id="a4ModalBody"></div>
     </div>
   </div>
-
   <div class="fs-sig-modal" id="fsSigModal">
     <div class="fs-sig-top">
       <strong>Assinatura Digital (Tela Cheia)</strong>
@@ -520,52 +530,41 @@
       <button class="btn btn-success" onclick="confirmFullscreenSig()">✅ Confirmar Assinatura</button>
     </div>
   </div>
-
   <div class="toast" id="toast"></div>
-
   <script>
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec';
     const SHEET_ID = '1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU';
     const COORDINATOR_PIN = '2026';
     const DRIVE_LOGO_ID = '1Wr0oaQn3PFDETlL2jskRZJlaZdeVxRCW';
     const LOGO_URL = 'https://lh3.googleusercontent.com/d/' + DRIVE_LOGO_ID;
-
     const OBJETIVO_MIN_CHARS = 25;
-
+    const AREA_MINIMA_ASSINATURA = 0.02;
     const DEFAULT_LISTS = {
       servidores: [], departamentos: [], unidades: [], objetivos: [], responsaveis: []
     };
-
     let visits = JSON.parse(localStorage.getItem('cemtec_visits_v5') || '[]').map(function (v) {
       return Object.assign({}, v, { entrada: formatTimeClean(v.entrada), saida: formatTimeClean(v.saida) });
     });
-
     let lists = JSON.parse(localStorage.getItem('cemtec_lists_v5') || 'null') || JSON.parse(JSON.stringify(DEFAULT_LISTS));
     if (!Array.isArray(lists.responsaveis)) lists.responsaveis = [];
     if (!Array.isArray(lists.paresServidor)) lists.paresServidor = [];
     if (!Array.isArray(lists.paresUnidade)) lists.paresUnidade = [];
-
     let mapaServidorDepto = {};
     let mapaUnidadeResp = {};
-
     let selectedObjetivos = [];
     let padUnit, padFs, charts = {};
-
     const params = new URLSearchParams(window.location.search);
     const isProfessorMode = params.get('modo') === 'ficha';
 
     /* ============================================================
        SESSÃO / MODO
        ============================================================ */
-
     function getModoSalvo() {
       try { return sessionStorage.getItem('cemtec_modo') || ''; } catch (e) { return ''; }
     }
-
     function setModoSalvo(m) {
       try { sessionStorage.setItem('cemtec_modo', m); } catch (e) {}
     }
-
     function sairSistema() {
       try {
         sessionStorage.removeItem('cemtec_coord_auth');
@@ -588,7 +587,6 @@
     /* ============================================================
        ASSINATURA
        ============================================================ */
-
     class SignaturePad {
       constructor(canvas) {
         this.canvas = canvas;
@@ -680,6 +678,27 @@
       undo() { this.strokes.pop(); this.redraw(); }
       clear() { this.strokes = []; this.redraw(); }
       isEmpty() { return this.strokes.length === 0; }
+
+      /* Área coberta pelo gesto (0 a 1) — detecta toque acidental */
+      areaCoberta() {
+        if (!this.strokes.length) return 0;
+        var minX = 1, minY = 1, maxX = 0, maxY = 0;
+        this.strokes.forEach(function (s) {
+          s.points.forEach(function (p) {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+          });
+        });
+        return (maxX - minX) * (maxY - minY);
+      }
+
+      /* Quantidade total de pontos capturados no gesto */
+      totalPontos() {
+        return this.strokes.reduce(function (acc, s) { return acc + s.points.length; }, 0);
+      }
+
       copyFrom(other) {
         this.clear();
         for (var i = 0; i < other.strokes.length; i++) {
@@ -748,7 +767,6 @@
         return tmp.toDataURL('image/png');
       }
     }
-
     function setPenColor(c, btn, which) {
       var pad = which === 'fs' ? padFs : padUnit;
       if (!pad) return;
@@ -756,7 +774,6 @@
       btn.parentElement.querySelectorAll('.color-dot').forEach(function (b) { b.classList.remove('active'); });
       btn.classList.add('active');
     }
-
     function setPenWidth(w, btn, which) {
       var pad = which === 'fs' ? padFs : padUnit;
       if (!pad) return;
@@ -764,12 +781,10 @@
       btn.parentElement.querySelectorAll('.pen-btn').forEach(function (b) { b.classList.remove('active'); });
       btn.classList.add('active');
     }
-
     function openFullscreenSig() {
       document.getElementById('fsSigModal').classList.add('open');
       setTimeout(function () { if (padFs) { padFs.resize(); padFs.redraw(); } }, 120);
     }
-
     function confirmFullscreenSig() {
       if (!padFs || padFs.isEmpty()) { showToast('Faça a assinatura primeiro.'); return; }
       padUnit.copyFrom(padFs);
@@ -780,7 +795,6 @@
     /* ============================================================
        OBJETIVOS
        ============================================================ */
-
     function toggleObjMenu(ev) {
       if (ev) ev.stopPropagation();
       var m = document.getElementById('objMenu');
@@ -792,11 +806,9 @@
         setTimeout(function () { document.getElementById('objSearch').focus(); }, 60);
       }
     }
-
     function fecharObjMenu() {
       document.getElementById('objMenu').classList.remove('open');
     }
-
     function renderObjLista() {
       var filtro = (document.getElementById('objSearch').value || '').toLowerCase();
       var lista = (lists.objetivos || []).filter(function (o) {
@@ -813,7 +825,6 @@
           '<input type="checkbox" ' + (sel ? 'checked' : '') + ' data-obj="' + esc(o) + '">' +
           '<span>' + esc(o) + '</span></label>';
       }).join('');
-
       el.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
         cb.addEventListener('change', function () {
           var v = cb.getAttribute('data-obj');
@@ -828,14 +839,12 @@
         });
       });
     }
-
     function renderObjPills() {
       var el = document.getElementById('objPills');
       el.innerHTML = selectedObjetivos.map(function (o, i) {
         return '<span class="obj-pill">' + esc(o) +
           '<button type="button" title="Remover" onclick="removerObjetivo(' + i + ')">×</button></span>';
       }).join('');
-
       var count = document.getElementById('objCount');
       if (selectedObjetivos.length) {
         count.hidden = false;
@@ -844,28 +853,24 @@
         count.hidden = true;
       }
     }
-
     function removerObjetivo(i) {
       selectedObjetivos.splice(i, 1);
       renderObjPills();
       renderObjLista();
       atualizarContadorObjetivo();
     }
-
     function limparObjetivos() {
       selectedObjetivos = [];
       renderObjPills();
       renderObjLista();
       atualizarContadorObjetivo();
     }
-
     function montarObjetivoFinal() {
       var partes = selectedObjetivos.slice();
       var livre = cleanObjetivo(document.getElementById('fObjetivo').value);
       if (livre) partes.push(livre);
       return partes.join('\n');
     }
-
     function atualizarContadorObjetivo() {
       var total = montarObjetivoFinal().replace(/\n/g, ' ').trim().length;
       var el = document.getElementById('objCounter');
@@ -873,7 +878,6 @@
       el.textContent = total + ' caracteres';
       el.style.color = total === 0 ? 'var(--muted)' : (total < OBJETIVO_MIN_CHARS ? '#d97706' : '#16a34a');
     }
-
     function cleanObjetivo(texto) {
       return String(texto || '')
         .replace(/\r/g, '')
@@ -889,21 +893,17 @@
     /* ============================================================
        PREENCHIMENTO AUTOMÁTICO
        ============================================================ */
-
     function normaliza(s) {
       return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
     }
-
     function aplicarAutoDepto(forcar) {
       var servidor = document.getElementById('fServidor').value.trim();
       var deptoEl = document.getElementById('fDepartamento');
       var hint = document.getElementById('hintDepto');
       hint.hidden = true;
       if (!servidor) return;
-
       var alvo = mapaServidorDepto[normaliza(servidor)];
       if (!alvo) return;
-
       if (!deptoEl.value.trim()) {
         deptoEl.value = alvo;
         hint.hidden = false;
@@ -911,9 +911,7 @@
         hint.innerHTML = '✅ Departamento preenchido automaticamente.';
         return;
       }
-
       if (normaliza(deptoEl.value) === normaliza(alvo)) return;
-
       if (forcar) {
         deptoEl.value = alvo;
         hint.hidden = false;
@@ -921,29 +919,24 @@
         hint.innerHTML = '✅ Departamento atualizado.';
         return;
       }
-
       hint.hidden = false;
       hint.className = 'auto-hint pend';
       hint.innerHTML = '💡 O setor cadastrado para este servidor é outro. ' +
         '<a href="#" onclick="aplicarAutoDepto(true);return false;">Usar "' + esc(alvo) + '"</a>';
     }
-
     function aplicarAutoResp(forcar) {
       var unidade = document.getElementById('fUnidade').value.trim();
       var respEl = document.getElementById('fResponsavel');
       var hint = document.getElementById('hintResp');
       hint.hidden = true;
       if (!unidade) return;
-
       var alvo = mapaUnidadeResp[normaliza(unidade)];
-
       if (!alvo) {
         hint.hidden = false;
         hint.className = 'auto-hint pend';
         hint.innerHTML = 'Sem responsável cadastrado para esta escola — digite o nome de quem está assinando.';
         return;
       }
-
       if (!respEl.value.trim()) {
         respEl.value = alvo;
         hint.hidden = false;
@@ -951,9 +944,7 @@
         hint.innerHTML = '✅ Responsável preenchido automaticamente. Pode trocar se outro assinar.';
         return;
       }
-
       if (normaliza(respEl.value) === normaliza(alvo)) return;
-
       if (forcar) {
         respEl.value = alvo;
         hint.hidden = false;
@@ -961,24 +952,20 @@
         hint.innerHTML = '✅ Responsável atualizado. Pode trocar se outro assinar.';
         return;
       }
-
       hint.hidden = false;
       hint.className = 'auto-hint pend';
       hint.innerHTML = '💡 Cadastro desta escola: "' + esc(alvo) + '". ' +
         '<a href="#" onclick="aplicarAutoResp(true);return false;">Usar este nome</a>';
     }
-
     function montarMapas() {
       mapaServidorDepto = {};
       mapaUnidadeResp = {};
-
       (lists.paresServidor || []).forEach(function (p) {
         if (p[0] && p[1]) mapaServidorDepto[normaliza(p[0])] = p[1];
       });
       (lists.paresUnidade || []).forEach(function (p) {
         if (p[0] && p[1]) mapaUnidadeResp[normaliza(p[0])] = p[1];
       });
-
       var s = 'Carregados: ' + Object.keys(mapaServidorDepto).length + ' servidor(es) → setor, ' +
               Object.keys(mapaUnidadeResp).length + ' escola(s) → responsável.';
       var lbl = document.getElementById('autoFillLabel');
@@ -988,22 +975,18 @@
     /* ============================================================
        ACESSO
        ============================================================ */
-
     function initAccessMode() {
       var baseUrl = window.location.href.split('?')[0];
       var profLink = document.getElementById('profLinkDisplay');
       if (profLink) profLink.value = baseUrl + '?modo=ficha';
-
       var modo = getModoSalvo();
       var autenticado = false;
       try { autenticado = sessionStorage.getItem('cemtec_coord_auth') === '1'; } catch (e) {}
-
       if (isProfessorMode || modo === 'ficha') {
         document.body.classList.add('mode-professor');
         switchView('new');
         return;
       }
-
       if (!autenticado) {
         document.getElementById('pinGate').classList.add('open');
         setTimeout(function () { document.getElementById('pinInput').focus(); }, 100);
@@ -1011,7 +994,6 @@
         switchView('dashboard');
       }
     }
-
     function verifyPin() {
       var val = document.getElementById('pinInput').value.trim();
       if (val === COORDINATOR_PIN) {
@@ -1026,21 +1008,18 @@
         document.getElementById('pinInput').value = '';
       }
     }
-
     function enterProfessorMode() {
       setModoSalvo('ficha');
       document.getElementById('pinGate').classList.remove('open');
       document.body.classList.add('mode-professor');
       switchView('new');
     }
-
     function requestCoordinatorAccess() {
       document.getElementById('pinError').textContent = '';
       document.getElementById('pinInput').value = '';
       document.getElementById('pinGate').classList.add('open');
       setTimeout(function () { document.getElementById('pinInput').focus(); }, 100);
     }
-
     function copyProfessorLink() {
       var link = document.getElementById('profLinkDisplay').value;
       navigator.clipboard.writeText(link).then(function () {
@@ -1051,7 +1030,6 @@
     /* ============================================================
        SALVAR
        ============================================================ */
-
     async function saveVisit(mode) {
       var servidor = document.getElementById('fServidor').value.trim();
       var departamento = document.getElementById('fDepartamento').value.trim();
@@ -1076,8 +1054,14 @@
       }
 
       var sigUnit = padUnit.isEmpty() ? '' : padUnit.toDataURL();
+
       if (mode === 'signed' && !sigUnit) {
         showToast('Colha a assinatura na tela antes de enviar.');
+        return;
+      }
+      /* Bloqueia assinatura de um pingo só / toque acidental */
+      if (mode === 'signed' && padUnit.areaCoberta() < AREA_MINIMA_ASSINATURA) {
+        showToast('Assinatura muito simples. Assine novamente.');
         return;
       }
 
@@ -1091,6 +1075,9 @@
           localStorage.setItem('cemtec_lists_v5', JSON.stringify(lists));
         }
       }
+
+      var agora = new Date().toISOString();
+      var area = Number(padUnit.areaCoberta().toFixed(4));
 
       var visit = {
         id: 'v_' + Date.now(),
@@ -1106,6 +1093,12 @@
         duracao: formatMinutes(calcDurationMinutes(entrada, saida)),
         objetivo: objetivo,
         sigUnit: mode === 'signed' ? sigUnit : '',
+        assinaturaEm: mode === 'signed' ? agora : '',
+        assinaturaCodigo: '',
+        assinaturaTracos: mode === 'signed' ? padUnit.strokes.length : '',
+        assinaturaPontos: mode === 'signed' ? padUnit.totalPontos() : '',
+        assinaturaArea: mode === 'signed' ? area : '',
+        registradoEm: agora,
         status: mode === 'signed' ? 'signed' : 'pending',
         pdfUrl: ''
       };
@@ -1124,8 +1117,12 @@
             body: JSON.stringify(visit)
           });
           var json = await res.json();
-          if (json.status === 'ok' && json.pdfUrl) {
-            visit.pdfUrl = json.pdfUrl;
+
+          if (json.status === 'ok') {
+            if (json.pdfUrl) visit.pdfUrl = json.pdfUrl;
+            /* Usa o código gerado pelo servidor — garante que A4 e PDF têm o mesmo */
+            if (json.codigo) visit.assinaturaCodigo = json.codigo;
+            if (json.aviso) console.warn('Aviso do Apps Script:', json.aviso);
             showToast('✅ Ficha salva na Planilha e PDF gerado no Drive!');
           } else {
             showToast('⚠️ Erro: ' + (json.message || 'tente novamente'));
@@ -1133,6 +1130,11 @@
         } catch (err) {
           showToast('⚠️ Falha de conexão: ' + err.message);
         }
+      }
+
+      /* Fallback: se o servidor não devolveu código, gera local */
+      if (!visit.assinaturaCodigo && visit.status === 'signed') {
+        visit.assinaturaCodigo = sigetCodigo(visit.protocolo + '|' + visit.assinaturaEm);
       }
 
       btn.disabled = false;
@@ -1151,7 +1153,6 @@
       padUnit.clear();
       atualizarContadorObjetivo();
       populateDatalists();
-
       renderDashboard();
       renderReportsTable();
       openA4Modal(visit);
@@ -1160,14 +1161,12 @@
     /* ============================================================
        SINCRONIZAÇÃO
        ============================================================ */
-
     async function carregarParesDaPlanilha() {
       try {
         var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Listas';
         var res = await fetch(url, { redirect: 'follow' });
         var texto = await res.text();
         if (!texto || texto.trim().charAt(0) === '<') return false;
-
         var rows = texto.split(/\r?\n/).filter(function (l) { return l.trim() !== ''; }).map(function (r) {
           var out = [], cur = '', dentro = false;
           for (var i = 0; i < r.length; i++) {
@@ -1182,7 +1181,6 @@
           return out;
         });
         if (rows.length < 2) return false;
-
         var head = rows[0].map(function (h) { return normaliza(h); });
         function idx(termos) {
           for (var i = 0; i < head.length; i++) {
@@ -1192,16 +1190,13 @@
           }
           return -1;
         }
-
         var cS = idx(['servidor']), cD = idx(['departamento']), cU = idx(['unidade', 'escola']), cR = idx(['respons']);
-
         var pS = [], pU = [];
         for (var r = 1; r < rows.length; r++) {
           var row = rows[r];
           if (cS > -1 && cD > -1 && row[cS] && row[cD]) pS.push([row[cS], row[cD]]);
           if (cU > -1 && cR > -1 && row[cU] && row[cR]) pU.push([row[cU], row[cR]]);
         }
-
         lists.paresServidor = pS;
         lists.paresUnidade = pU;
         return true;
@@ -1209,22 +1204,18 @@
         return false;
       }
     }
-
     async function syncTudo(silent) {
       var lbl = document.getElementById('cloudStatusLabel');
-
       var okPares = await carregarParesDaPlanilha();
       if (!okPares) {
         lists.paresServidor = lists.paresServidor || [];
         lists.paresUnidade = lists.paresUnidade || [];
         if (lbl) lbl.textContent = 'Listas vindas do Apps Script (sem vínculo automático)';
       }
-
       if (APPS_SCRIPT_URL) {
         try {
           var res = await fetch(APPS_SCRIPT_URL, { redirect: 'follow' });
           var json = await res.json();
-
           if (json.status === 'ok') {
             if (json.listas) {
               if (json.listas.servidores && json.listas.servidores.length) lists.servidores = json.listas.servidores;
@@ -1233,13 +1224,11 @@
               if (json.listas.objetivos && json.listas.objetivos.length) lists.objetivos = json.listas.objetivos;
               if (json.listas.responsaveis && json.listas.responsaveis.length) lists.responsaveis = json.listas.responsaveis;
             }
-
             if (Array.isArray(json.visits)) {
               visits = json.visits.map(function (v) {
                 return Object.assign({}, v, { entrada: formatTimeClean(v.entrada), saida: formatTimeClean(v.saida) });
               });
               localStorage.setItem('cemtec_visits_v5', JSON.stringify(visits));
-
               json.visits.forEach(function (v) {
                 if (v.responsavel) {
                   var existe = lists.responsaveis.some(function (n) {
@@ -1249,7 +1238,6 @@
                 }
               });
             }
-
             if (lbl) lbl.textContent = 'Conectada — ' + visits.length + ' ficha(s) | ' + (lists.objetivos || []).length + ' objetivo(s)';
           } else {
             if (lbl) lbl.textContent = 'Erro: ' + (json.message || 'desconhecido');
@@ -1258,26 +1246,21 @@
           if (lbl && !okPares) lbl.textContent = 'Falha de conexão';
         }
       }
-
       lists.paresServidor = lists.paresServidor || [];
       lists.paresUnidade = lists.paresUnidade || [];
-
       localStorage.setItem('cemtec_lists_v5', JSON.stringify(lists));
       montarMapas();
       populateDatalists();
       renderObjLista();
       renderDashboard();
       renderReportsTable();
-
       if (!silent) showToast('Sincronizado! ' + visits.length + ' ficha(s) e ' + (lists.objetivos || []).length + ' objetivo(s).');
     }
-
     function syncVisitsFromCloud(silent) { return syncTudo(silent); }
 
     /* ============================================================
        NAVEGAÇÃO
        ============================================================ */
-
     function switchView(v) {
       document.querySelectorAll('.view-section').forEach(function (s) { s.classList.remove('active'); });
       var alvo = document.getElementById('view-' + v);
@@ -1293,36 +1276,29 @@
       if (v === 'dashboard') renderDashboard();
       if (v === 'reports') renderReportsTable();
     }
-
     function toggleSidebar() {
       var sb = document.getElementById('sidebar');
       if (sb) sb.classList.toggle('open');
     }
-
     function populateDatalists() {
       var el = document.getElementById('dlServidores');
       if (el) el.innerHTML = (lists.servidores || []).map(function (v) {
         return '<option value="' + esc(v) + '">';
       }).join('');
-
       el = document.getElementById('dlDepartamentos');
       if (el) el.innerHTML = (lists.departamentos || []).map(function (v) {
         return '<option value="' + esc(v) + '">';
       }).join('');
-
       el = document.getElementById('dlUnidades');
       if (el) el.innerHTML = (lists.unidades || []).map(function (v) {
         return '<option value="' + esc(v) + '">';
       }).join('');
-
       el = document.getElementById('dlResponsaveis');
       if (el) el.innerHTML = (lists.responsaveis || []).map(function (v) {
         return '<option value="' + esc(v) + '">';
       }).join('');
-
       var units = Array.from(new Set((lists.unidades || []).concat(visits.map(function (v) { return v.unidade; })))).filter(Boolean).sort();
       var depts = Array.from(new Set((lists.departamentos || []).concat(visits.map(function (v) { return v.departamento; })))).filter(Boolean).sort();
-
       var selU = document.getElementById('filterUnit');
       if (selU) {
         var atualU = selU.value;
@@ -1331,7 +1307,6 @@
         }).join('');
         selU.value = atualU;
       }
-
       var selD = document.getElementById('filterDept');
       if (selD) {
         var atualD = selD.value;
@@ -1341,7 +1316,6 @@
         selD.value = atualD;
       }
     }
-
     function respCell(nome) {
       var n = String(nome || '').trim();
       return n ? '<span class="resp-cell">' + esc(n) + '</span>'
@@ -1351,7 +1325,6 @@
     /* ============================================================
        DASHBOARD
        ============================================================ */
-
     function renderDashboard() {
       var today = todayISO();
       var total = visits.length;
@@ -1359,12 +1332,10 @@
       var pending = total - signed;
       var durs = visits.map(function (v) { return calcDurationMinutes(v.entrada, v.saida); }).filter(function (x) { return x !== null; });
       var avg = durs.length ? Math.round(durs.reduce(function (a, b) { return a + b; }, 0) / durs.length) : 0;
-
       var set = function (id, txt) {
         var el = document.getElementById(id);
         if (el) el.textContent = txt;
       };
-
       set('kpiTotal', total);
       set('kpiToday', visits.filter(function (v) { return v.data === today; }).length);
       set('kpiTodayDate', formatDateBR(today));
@@ -1374,44 +1345,36 @@
       set('kpiAvgTime', formatMinutes(avg));
       var badge = document.getElementById('navPendingBadge');
       if (badge) badge.textContent = total;
-
       var countBy = function (k) {
         var m = {};
         visits.forEach(function (v) { m[v[k]] = (m[v[k]] || 0) + 1; });
         return Object.entries(m).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 6);
       };
-
       var mk = function (id, cfg) {
         var canvas = document.getElementById(id);
         if (!canvas || typeof Chart === 'undefined') return;
         if (charts[id]) charts[id].destroy();
         charts[id] = new Chart(canvas, cfg);
       };
-
       var uD = countBy('unidade');
       var dD = countBy('departamento');
-
       mk('chartUnits', {
         type: 'bar',
         data: { labels: uD.map(function (x) { return String(x[0]).slice(0, 22); }), datasets: [{ data: uD.map(function (x) { return x[1]; }), backgroundColor: '#003580', borderRadius: 6 }] },
         options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
-
       mk('chartStatus', {
         type: 'doughnut',
         data: { labels: ['Assinadas', 'Pendentes'], datasets: [{ data: [signed, pending], backgroundColor: ['#16a34a', '#FBC02D'], borderWidth: 0 }] },
         options: { responsive: true, maintainAspectRatio: false, cutout: '62%' }
       });
-
       mk('chartDepts', {
         type: 'bar',
         data: { labels: dD.map(function (x) { return String(x[0]).split('—')[0]; }), datasets: [{ data: dD.map(function (x) { return x[1]; }), backgroundColor: '#009FE3', borderRadius: 6 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
-
       var recentes = visits.slice(0, 6);
       window._dashList = recentes;
-
       var tb = document.getElementById('recentVisitsBody');
       if (tb) tb.innerHTML = recentes.map(function (v, i) {
         return '<tr>' +
@@ -1431,17 +1394,14 @@
     /* ============================================================
        RELATÓRIOS
        ============================================================ */
-
     function dataISO(d) {
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
-
     function setPeriodo(modo) {
       var de = document.getElementById('filterDe');
       var ate = document.getElementById('filterAte');
       if (!de || !ate) return;
       var hoje = new Date();
-
       if (modo === 'hoje') {
         de.value = dataISO(hoje);
         ate.value = dataISO(hoje);
@@ -1459,7 +1419,6 @@
       marcarAtalho(modo === 'limpar' ? '' : modo);
       renderReportsTable();
     }
-
     function marcarAtalho(modo) {
       ['btHoje', 'bt7', 'btMes'].forEach(function (id) {
         var b = document.getElementById(id);
@@ -1471,7 +1430,6 @@
         if (el) el.classList.add('ativo');
       }
     }
-
     function listaFiltrada() {
       var elQ = document.getElementById('filterSearch');
       var elU = document.getElementById('filterUnit');
@@ -1479,14 +1437,12 @@
       var elS = document.getElementById('filterStatus');
       var elDe = document.getElementById('filterDe');
       var elAte = document.getElementById('filterAte');
-
       var q = (elQ ? elQ.value : '').toLowerCase();
       var u = elU ? elU.value : '';
       var d = elD ? elD.value : '';
       var s = elS ? elS.value : '';
       var de = elDe ? elDe.value : '';
       var ate = elAte ? elAte.value : '';
-
       return visits.filter(function (v) {
         var hay = (v.protocolo + ' ' + v.servidor + ' ' + v.unidade + ' ' + (v.responsavel || '') + ' ' + v.objetivo).toLowerCase();
         if (u && v.unidade !== u) return false;
@@ -1498,11 +1454,9 @@
         return true;
       });
     }
-
     function renderReportsTable() {
       var list = listaFiltrada();
       window._reportList = list;
-
       var tb = document.getElementById('reportsTableBody');
       if (tb) tb.innerHTML = list.map(function (v, i) {
         return '<tr>' +
@@ -1518,16 +1472,13 @@
             : '<button class="btn btn-outline btn-sm" onclick="openA4Modal(window._reportList[' + i + '])">📄 A4</button>') + '</td>' +
         '</tr>';
       }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma ficha encontrada com estes filtros.</td></tr>';
-
       var assinadas = list.filter(function (v) { return v.status === 'signed'; }).length;
       var pendentes = list.length - assinadas;
       var mins = list.map(function (v) { return calcDurationMinutes(v.entrada, v.saida); }).filter(function (x) { return x !== null; });
       var totalMin = mins.reduce(function (a, b) { return a + b; }, 0);
-
       var txt = '<strong>' + list.length + '</strong> ficha(s) · <strong>' + assinadas + '</strong> assinada(s) · ' +
                 '<strong>' + pendentes + '</strong> pendente(s)';
       if (mins.length) txt += ' · ' + formatMinutes(totalMin) + ' de permanência';
-
       var resumo = document.getElementById('filtrosResumo');
       if (resumo) resumo.innerHTML = txt;
     }
@@ -1535,12 +1486,10 @@
     /* ============================================================
        MODAL / PDF
        ============================================================ */
-
     function driveEmbedUrl(url) {
       var m = String(url || '').match(/\/d\/([a-zA-Z0-9_-]+)/);
       return m ? 'https://drive.google.com/file/d/' + m[1] + '/preview' : '';
     }
-
     function openA4Modal(v) {
       var btnPdf = document.getElementById('modalDrivePdfBtn');
       var btnPrint = document.getElementById('btnPrintA4');
@@ -1554,7 +1503,6 @@
       }
 
       var embed = driveEmbedUrl(v.pdfUrl);
-
       if (embed) {
         titulo.textContent = 'PDF Oficial — Ficha de Visita';
         btnPrint.style.display = 'none';
@@ -1574,9 +1522,10 @@
       var sai = formatTimeClean(v.saida) || '—';
 
       var sigHtml = v.sigUnit
-        ? '<img src="' + v.sigUnit + '" />'
+        ? '<img src="' + v.sigUnit + '" />' + sigetHTML(v, true)
         : (v.status === 'signed'
-          ? '<div style="height:40px;display:flex;align-items:center;justify-content:center;color:#16a34a;font-weight:700;font-family:Inter,sans-serif;font-size:12px;">✔ Assinada digitalmente (ver PDF oficial no Drive)</div>'
+          ? (sigetHTML(v, false) ||
+             '<div style="height:40px;display:flex;align-items:center;justify-content:center;color:#16a34a;font-weight:700;font-family:Inter,sans-serif;font-size:12px;">✔ Assinada digitalmente (ver PDF oficial no Drive)</div>')
           : '<div style="height:40px;color:#d97706;">[ Pendente ]</div>');
 
       document.getElementById('a4ModalBody').innerHTML =
@@ -1603,21 +1552,19 @@
             'Avenida Tancredo Neves, nº 124, Centro Sul • Sorriso - MT • (66) 3545-8100 • educacao@sorriso.mt.gov.br' +
           '</div>' +
         '</div>';
-
       document.getElementById('a4Modal').classList.add('open');
     }
 
     /* ============================================================
        CSV
        ============================================================ */
-
     function exportCSV() {
       var list = listaFiltrada();
       if (!list.length) {
         showToast('Nenhuma ficha com os filtros atuais.');
         return;
       }
-      var headers = ['Protocolo', 'Data', 'Servidor', 'Departamento', 'Unidade', 'Responsavel', 'Objetivo', 'Entrada', 'Saida', 'Duracao', 'Status', 'Link PDF'];
+      var headers = ['Protocolo', 'Data', 'Servidor', 'Departamento', 'Unidade', 'Responsavel', 'Objetivo', 'Entrada', 'Saida', 'Duracao', 'Status', 'Codigo', 'Link PDF'];
       var escCsv = function (v) { return '"' + String(v || '').replace(/"/g, '""') + '"'; };
       var lines = [headers.map(escCsv).join(';')];
       list.forEach(function (v) {
@@ -1625,7 +1572,7 @@
           v.protocolo, formatDateBR(v.data), v.servidor, v.departamento, v.unidade,
           v.responsavel || '', String(v.objetivo || '').replace(/\n/g, ' | '),
           formatTimeClean(v.entrada), formatTimeClean(v.saida), v.duracao || '',
-          v.status === 'signed' ? 'Assinada' : 'Pendente', v.pdfUrl
+          v.status === 'signed' ? 'Assinada' : 'Pendente', v.assinaturaCodigo || '', v.pdfUrl
         ].map(escCsv).join(';'));
       });
       var a = document.createElement('a');
@@ -1638,7 +1585,6 @@
     /* ============================================================
        UTILITÁRIOS
        ============================================================ */
-
     function formatTimeClean(val) {
       var s = String(val || '').trim();
       if (!s) return '';
@@ -1646,24 +1592,20 @@
       var m = s.match(/(\d{2}):(\d{2})(?::\d{2})?/);
       return m ? m[1] + ':' + m[2] : s;
     }
-
     function todayISO() {
       var d = new Date();
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
-
     function formatDateBR(iso) {
       if (!iso || iso.indexOf('-') === -1) return iso || '—';
       var p = iso.split('-');
       return p[2] + '/' + p[1] + '/' + p[0];
     }
-
     function setNowTime(id) {
       var d = new Date();
       var el = document.getElementById(id);
       if (el) el.value = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
     }
-
     function calcDurationMinutes(a, b) {
       var ta = formatTimeClean(a), tb = formatTimeClean(b);
       if (!ta || !tb || ta.indexOf(':') === -1 || tb.indexOf(':') === -1) return null;
@@ -1671,16 +1613,57 @@
       var diff = (p2[0] * 60 + p2[1]) - (p1[0] * 60 + p1[1]);
       return (!isNaN(diff) && diff >= 0) ? diff : null;
     }
-
     function formatMinutes(m) {
       if (m === null || m === undefined) return '—';
       return m < 60 ? m + ' min' : Math.floor(m / 60) + 'h ' + (m % 60) + 'min';
     }
-
     function esc(s) {
       return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, function (m) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
       });
+    }
+
+    /* ============================================================
+       ASSINATURA ELETRÔNICA — traço gerado a partir do nome
+       ============================================================ */
+    function sigetHash(str) {
+      var h = 5381;
+      for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+      return h;
+    }
+    function sigetCodigo(semente) {
+      var s = String(semente);
+      var a = sigetHash(s).toString(36).toUpperCase();
+      var b = sigetHash(s + '|v').toString(36).toUpperCase();
+      while (a.length < 4) a = '0' + a;
+      while (b.length < 4) b = '0' + b;
+      return a.slice(0, 4) + '-' + b.slice(0, 4);
+    }
+    function sigetQuando(v) {
+      var iso = v.assinaturaEm;
+      if (!iso) iso = (v.data || '') + 'T' + (formatTimeClean(v.entrada) || '00:00') + ':00';
+      var dt = new Date(iso);
+      if (isNaN(dt.getTime())) return '';
+      var p = function (n) { return String(n).padStart(2, '0'); };
+      return p(dt.getDate()) + '/' + p(dt.getMonth() + 1) + '/' + dt.getFullYear() +
+             ' às ' + p(dt.getHours()) + ':' + p(dt.getMinutes());
+    }
+    function sigetHTML(v, semTraco) {
+      var nome = String(v.responsavel || '').trim();
+      if (!nome) return '';
+      var quando = sigetQuando(v);
+      var codigo = v.assinaturaCodigo || sigetCodigo(
+        [v.protocolo, v.servidor, nome, v.data, v.entrada].join('|')
+      );
+      return '<div class="siget" title="Representação visual do nome. A validade está no registro eletrônico.">' +
+        (semTraco ? '' : '<span class="siget__traco">' + esc(nome) + '</span>') +
+        '<div class="siget__meta">' +
+          'Assinado eletronicamente por <strong>' + esc(nome) + '</strong>' +
+          (quando ? ' em ' + esc(quando) : '') +
+          ' &middot; Protocolo ' + esc(v.protocolo) +
+          '<br>Código de verificação: <code class="siget__codigo">' + esc(codigo) + '</code>' +
+        '</div>' +
+      '</div>';
     }
 
     function showToast(msg) {
@@ -1695,7 +1678,6 @@
     /* ============================================================
        EVENTOS
        ============================================================ */
-
     document.addEventListener('click', function (e) {
       var menu = document.getElementById('objMenu');
       var btn = document.getElementById('objMultiBtn');
@@ -1703,12 +1685,10 @@
       if (menu.contains(e.target) || (btn && btn.contains(e.target))) return;
       menu.classList.remove('open');
     });
-
     window.addEventListener('resize', function () {
       if (padUnit) { padUnit.resize(); padUnit.redraw(); }
       if (padFs) { padFs.resize(); padFs.redraw(); }
     });
-
     window.addEventListener('orientationchange', function () {
       setTimeout(function () {
         if (padUnit) { padUnit.resize(); padUnit.redraw(); }
@@ -1719,26 +1699,21 @@
     /* ============================================================
        INICIALIZAÇÃO
        ============================================================ */
-
     window.addEventListener('DOMContentLoaded', function () {
       function tentar(nome, fn) {
         try { fn(); } catch (e) { console.error('Falha em ' + nome + ':', e); }
       }
-
       tentar('logos', function () {
         document.querySelectorAll('.dynamic-logo').forEach(function (img) { img.src = LOGO_URL; });
       });
-
       tentar('assinatura', function () {
         padUnit = new SignaturePad(document.getElementById('sigCanvasUnit'));
         padFs = new SignaturePad(document.getElementById('fsSigCanvas'));
       });
-
       tentar('data/hora', function () {
         document.getElementById('fData').value = todayISO();
         setNowTime('fEntrada');
       });
-
       tentar('eventos', function () {
         var elServ = document.getElementById('fServidor');
         if (elServ) {
@@ -1751,12 +1726,10 @@
           elUnid.addEventListener('blur', function () { aplicarAutoResp(false); });
         }
       });
-
       tentar('listas', function () {
         lists.paresServidor = lists.paresServidor || [];
         lists.paresUnidade = lists.paresUnidade || [];
       });
-
       tentar('mapas', montarMapas);
       tentar('datalists', populateDatalists);
       tentar('pills', renderObjPills);
@@ -1765,7 +1738,6 @@
       tentar('relatorios', renderReportsTable);
       tentar('acesso', initAccessMode);
       tentar('sync', function () { syncTudo(true); });
-
       setTimeout(function () {
         tentar('resize', function () { if (padUnit) { padUnit.resize(); padUnit.redraw(); } });
       }, 250);
