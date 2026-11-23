@@ -92,6 +92,7 @@ textarea{min-height:92px;resize:vertical}
 .citem{padding:10px 11px;font-size:13px;line-height:1.4;border-radius:8px;cursor:pointer;color:#334155;word-break:break-word}
 .citem:hover,.citem.ativo{background:#eff6ff;color:var(--bd);font-weight:600}
 .citem.atual{background:#e8f1fb;color:var(--bd);font-weight:700}
+.citem.novo{background:#f0fdf4;color:#166534;font-weight:700;border:1px dashed #86efac;margin-bottom:4px}
 .cvazio{padding:14px;font-size:12px;color:var(--mt);text-align:center}
 .crod{border-top:1px solid var(--br);margin-top:6px;padding-top:6px}
 .cbtnl{width:100%;padding:9px;border:none;border-radius:8px;background:#fff;color:var(--dg);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
@@ -292,7 +293,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
   <div class="ph">
     <div class="pt">
       <h1>Ficha de Visita Digital</h1>
-      <p>Escolha o <strong>Departamento</strong> primeiro — as listas de servidores e objetivos se filtram por ele.</p>
+      <p>Escolha o <strong>Departamento</strong> primeiro. Todos os campos aceitam digitação — o que for novo é salvo na planilha.</p>
     </div>
   </div>
   <form id="visitForm" onsubmit="return false" novalidate>
@@ -301,12 +302,12 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
       <div class="fg">
         <div class="gp">
           <label>Departamento <span class="ob">*</span></label>
-          <input type="text" id="fDepartamento" placeholder="Selecione o setor..." autocomplete="off" />
+          <input type="text" id="fDepartamento" placeholder="Selecione ou digite o setor..." autocomplete="off" />
           <div class="hint pend" id="hintDepto" hidden></div>
         </div>
         <div class="gp">
           <label>Nome do Servidor <span class="ob">*</span></label>
-          <input type="text" id="fServidor" placeholder="Selecione o servidor do setor..." autocomplete="off" />
+          <input type="text" id="fServidor" placeholder="Selecione ou digite o nome..." autocomplete="off" />
           <div class="hint pend" id="hintServ" hidden></div>
         </div>
         <div class="gp">
@@ -316,8 +317,9 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
         </div>
         <div class="gp">
           <label>Responsável pela Escola <span class="ob">*</span></label>
-          <input type="text" id="fResponsavel" placeholder="Selecione quem vai assinar..." autocomplete="off" />
-          <div class="dica">Preenche com o nome da escola. Se o coordenador assinar, troque ou digite.</div>
+          <input type="text" id="fResponsavel" placeholder="Selecione ou digite quem vai assinar..." autocomplete="off" />
+          <div class="hint pend" id="hintResp" hidden></div>
+          <div class="dica">Puxa o nome da escola. Pode digitar outro — se for novo, fica salvo.</div>
         </div>
         <div class="l3">
           <div class="gp">
@@ -358,7 +360,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
           </div>
           <div class="pills" id="objPills"></div>
           <textarea id="fObjetivo" placeholder="Detalhes adicionais (opcional): escreva o que mais foi feito nesta visita..." oninput="atualizarContadorObjetivo()"></textarea>
-          <div class="dica">💡 A lista mostra os objetivos do departamento escolhido. Mínimo de 25 caracteres.</div>
+          <div class="dica">💡 A lista mostra os objetivos do departamento. Mínimo de 25 caracteres.</div>
         </div>
       </div>
     </div>
@@ -449,7 +451,10 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <div class="ct" style="margin-bottom:10px">☁️ Sincronização com Google Sheets &amp; Drive</div>
     <p style="font-size:13px;color:var(--mt);margin-bottom:12px">Status da integração: <strong id="cloudStatusLabel">Verificando...</strong></p>
     <p style="font-size:13px;color:var(--mt);margin-bottom:12px">Preenchimentos automáticos: <strong id="autoFillLabel">Verificando...</strong></p>
-    <p style="font-size:12px;color:var(--mt);margin-bottom:12px;line-height:1.55">Listas lidas das abas <strong>Servidores</strong>, <strong>Unidades</strong> e <strong>Objetivos</strong> (A = Objetivo, B = Departamento).</p>
+    <p style="font-size:12px;color:var(--mt);margin-bottom:12px;line-height:1.55">
+      Listas lidas das abas <strong>Servidores</strong>, <strong>Unidades</strong> e <strong>Objetivos</strong> (A = Objetivo, B = Departamento).
+      Valores novos digitados na ficha são gravados automaticamente nessas abas.
+    </p>
     <div style="display:flex;flex-wrap:wrap;gap:10px">
       <button class="btn bp" onclick="syncTudo()">🔄 Sincronizar Listas &amp; Fichas</button>
       <a href="https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit" target="_blank" class="btn bo">Abrir Planilha ↗</a>
@@ -532,7 +537,11 @@ const params=new URLSearchParams(window.location.search);
 const isProfessorMode=params.get('modo')==='ficha';
 const autoState={depto:false,serv:false,unidade:false,resp:false,prog:false};
 
-/* ============ COMBO ============ */
+function normaliza(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+}
+
+/* ============ COMBO (permite digitar sempre) ============ */
 const COMBO_FONTES={
   fDepartamento:function(){return lists.departamentos||[];},
   fServidor:function(){
@@ -629,29 +638,58 @@ function criarCombo(id){
       panel.style.maxHeight=Math.max(110,Math.min(altura,Math.max(130,abaixo)))+'px';
     }
   }
+
+  function ligarNovo(){
+    const elNovo=panel.querySelector('.citem.novo');
+    if(!elNovo)return;
+    elNovo.addEventListener('pointerdown',function(e){
+      e.preventDefault();e.stopPropagation();
+      fechar();
+      atualizarLimpar();
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+      input.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+  }
+
   function render(){
     st.itens=filtrar();
     st.idx=-1;
     atualizarLimpar();
+
+    const txt=String(input.value||'').trim();
+    const listaCompleta=todos();
+    const temIgual=txt&&listaCompleta.some(function(o){return normaliza(o)===normaliza(txt);});
+
+    let html='';
+    if(txt&&!temIgual){
+      html+='<div class="citem novo" data-novo="1">➕ Usar "'+esc(txt)+'" — será salvo na lista</div>';
+    }
+
     if(!st.itens.length){
-      panel.innerHTML='<div class="cvazio">Nenhuma opção encontrada.</div>';
+      html+='<div class="cvazio">Nenhuma opção'+(txt?' — o texto digitado será usado':'')+'.</div>';
+      panel.innerHTML=html;
+      ligarNovo();
       return;
     }
+
     const atual=normaliza(input.value);
-    let html=st.itens.map(function(o,i){
-      const eh=(normaliza(o)===atual&&String(input.value||'').trim())?' atual':'';
+    html+=st.itens.map(function(o,i){
+      const eh=(normaliza(o)===atual&&txt)?' atual':'';
       return '<div class="citem'+eh+'" data-i="'+i+'">'+esc(o)+'</div>';
     }).join('');
-    if(String(input.value||'').trim()){
+
+    if(txt){
       html+='<div class="crod"><button type="button" class="cbtnl">Limpar campo e escolher de novo</button></div>';
     }
     panel.innerHTML=html;
-    panel.querySelectorAll('.citem').forEach(function(el){
+
+    panel.querySelectorAll('.citem:not(.novo)').forEach(function(el){
       el.addEventListener('pointerdown',function(e){
         e.preventDefault();e.stopPropagation();
         escolher(Number(el.getAttribute('data-i')));
       });
     });
+
     const bLimpar=panel.querySelector('.cbtnl');
     if(bLimpar){
       bLimpar.addEventListener('pointerdown',function(e){
@@ -659,7 +697,9 @@ function criarCombo(id){
         limparCampo();
       });
     }
+    ligarNovo();
   }
+
   function escolher(i){
     const v=st.itens[i];
     if(v===undefined)return;
@@ -701,7 +741,7 @@ function criarCombo(id){
   function mover(d){
     if(!st.itens.length)return;
     st.idx=(st.idx+d+st.itens.length)%st.itens.length;
-    panel.querySelectorAll('.citem').forEach(function(el,i){
+    panel.querySelectorAll('.citem:not(.novo)').forEach(function(el,i){
       el.classList.toggle('ativo',i===st.idx);
       if(i===st.idx){try{el.scrollIntoView({block:'nearest'});}catch(e){}}
     });
@@ -1044,8 +1084,8 @@ function validarFicha(modo){
     saida:document.getElementById('fSaida').value,
     objetivo:montarObjetivoFinal()
   };
-  if(!v.departamento)return{id:'fDepartamento',msg:'Escolha o Departamento.'};
-  if(!v.servidor)return{id:'fServidor',msg:'Escolha o Nome do Servidor.'};
+  if(!v.departamento)return{id:'fDepartamento',msg:'Escolha ou digite o Departamento.'};
+  if(!v.servidor)return{id:'fServidor',msg:'Escolha ou digite o Nome do Servidor.'};
   if(!v.unidade)return{id:'fUnidade',msg:'Preencha a Unidade / Escola / Destino.'};
   if(!v.responsavel)return{id:'fResponsavel',msg:'Preencha o nome do Responsável pela Escola.'};
   if(!v.data)return{id:'fData',msg:'Preencha a Data da Visita.'};
@@ -1066,20 +1106,17 @@ function validarFicha(modo){
   return null;
 }
 
-/* ============ OBJETIVOS (filtrados por departamento) ============ */
+/* ============ OBJETIVOS ============ */
 function objetivosDoDepartamento(){
   var depEl=document.getElementById('fDepartamento');
   var chave=depEl?normaliza(depEl.value):'';
   var gerais=(mapaObjPorDepto['']||[]).slice();
   if(!chave){
-    var todos=(lists.objetivos||[]).slice();
-    return {lista:todos,gerais:false,departamento:(depEl?depEl.value.trim():'')};
+    return {lista:(lists.objetivos||[]).slice(),gerais:false,departamento:(depEl?depEl.value.trim():'')};
   }
   var especificos=(mapaObjPorDepto[chave]||[]).slice();
   var out=especificos.slice();
-  gerais.forEach(function(o){
-    if(out.indexOf(o)===-1)out.push(o);
-  });
+  gerais.forEach(function(o){ if(out.indexOf(o)===-1)out.push(o); });
   if(!out.length)return {lista:(lists.objetivos||[]).slice(),gerais:false,departamento:(depEl?depEl.value.trim():'')};
   return {lista:out,gerais:true,departamento:(depEl?depEl.value.trim():'')};
 }
@@ -1192,9 +1229,6 @@ function cleanObjetivo(texto){
 }
 
 /* ============ AUTOMÁTICO ============ */
-function normaliza(s){
-  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
-}
 function esconderHint(id){
   var h=document.getElementById(id);
   if(h){h.hidden=true;h.innerHTML='';}
@@ -1226,24 +1260,19 @@ function limparAuto(id,chave){
   atualizarTodosCombos();
 }
 
-/* Departamento -> mostra só os servidores do setor */
 function aplicarFiltroServidor(){
   var depEl=document.getElementById('fDepartamento');
   var dep=depEl.value.trim();
   var srv=document.getElementById('fServidor');
   esconderHint('hintServ');
-  if(!dep){
-    esconderHint('hintDepto');
-    return;
-  }
+  if(!dep){esconderHint('hintDepto');return;}
   var chave=normaliza(dep);
   var lista=mapaServPorDepto[chave]||[];
 
   if(!lista.length){
-    mostrarHint('hintDepto','pend','Nenhum servidor cadastrado neste setor — pode digitar o nome.');
+    mostrarHint('hintDepto','ok','✅ Setor sem servidores cadastrados — pode digitar um nome novo.');
     return;
   }
-
   mostrarHint('hintDepto','ok','✅ '+lista.length+' servidor(es) em '+esc(dep)+'.');
 
   var atual=srv.value.trim();
@@ -1251,11 +1280,10 @@ function aplicarFiltroServidor(){
   var pertence=lista.some(function(n){return normaliza(n)===normaliza(atual);});
   if(!pertence){
     limparAuto('fServidor','serv');
-    mostrarHint('hintServ','pend','Esse servidor não é deste setor. Escolha um dos '+lista.length+'.');
+    mostrarHint('hintServ','pend','Esse servidor não é deste setor — escolha um dos '+lista.length+' ou digite um novo.');
   }
 }
 
-/* Servidor -> completa o departamento e sugere a última unidade */
 function aplicarAutoDoServidor(){
   var srv=document.getElementById('fServidor').value.trim();
   if(!srv)return;
@@ -1306,19 +1334,36 @@ function aplicarAutoUnidade(){
   mostrarHint('hintUnidade','ok','✅ Unidade da última visita deste servidor.');
 }
 
-/* Unidade -> responsável (automático, editável, sem aviso) */
 function aplicarAutoResp(){
   var unidade=document.getElementById('fUnidade').value.trim();
   var respEl=document.getElementById('fResponsavel');
-  if(!unidade)return;
+  if(!unidade){esconderHint('hintResp');return;}
   var lista=mapaRespPorUnidade[normaliza(unidade)]||[];
+
   if(!lista.length){
     if(autoState.resp&&respEl.value.trim())limparAuto('fResponsavel','resp');
+    if(!respEl.value.trim()){
+      mostrarHint('hintResp','pend','Escola sem responsável cadastrado — digite o nome de quem vai assinar.');
+    }else{
+      esconderHint('hintResp');
+    }
     return;
   }
+
   if(!respEl.value.trim()||autoState.resp){
     preencherAuto('fResponsavel',lista[0],'resp');
     autoState.resp=true;
+    mostrarHint('hintResp','ok',lista.length>1
+      ?'✅ '+lista.length+' nomes nesta escola — abra a lista se for outro.'
+      :'✅ Preenchido pelo cadastro. Pode editar.');
+    return;
+  }
+
+  var pertence=lista.some(function(n){return normaliza(n)===normaliza(respEl.value);});
+  if(pertence){
+    mostrarHint('hintResp','ok','✅ Nome desta escola.');
+  }else{
+    mostrarHint('hintResp','ok','➕ Nome novo — será salvo na lista desta escola.');
   }
 }
 
@@ -1361,6 +1406,60 @@ function montarMapas(){
         Object.keys(mapaObjPorDepto).length+' lista(s) de objetivos.';
   var lbl=document.getElementById('autoFillLabel');
   if(lbl)lbl.textContent=s;
+}
+
+/* ============ REGISTRAR LOCAL (reflete na hora) ============ */
+function registrarLocal(servidor,departamento,unidade,responsavel){
+  var mudou=false;
+
+  function addUnico(arr,valor){
+    if(!valor)return false;
+    if(arr.indexOf(valor)!==-1)return false;
+    arr.push(valor);
+    return true;
+  }
+
+  function addPar(lista,a,b){
+    if(!a||!b)return false;
+    var existe=lista.some(function(p){
+      return normaliza(p[0])===normaliza(a)&&normaliza(p[1])===normaliza(b);
+    });
+    if(existe)return false;
+    lista.push([a,b]);
+    return true;
+  }
+
+  function addGrupo(lista,chave,valor){
+    if(!chave||!valor)return false;
+    var k=normaliza(chave);
+    var achou=null;
+    lista.forEach(function(p){ if(p[0]===k)achou=p; });
+    if(!achou){ lista.push([k,[valor]]); return true; }
+    if(achou[1].indexOf(valor)===-1){ achou[1].push(valor); return true; }
+    return false;
+  }
+
+  if(addUnico(lists.servidores,servidor))mudou=true;
+  if(addUnico(lists.departamentos,departamento))mudou=true;
+  if(addUnico(lists.unidades,unidade))mudou=true;
+  if(addUnico(lists.responsaveis,responsavel))mudou=true;
+
+  if(addPar(lists.paresServidor,servidor,departamento))mudou=true;
+  if(addPar(lists.paresUnidade,unidade,responsavel))mudou=true;
+
+  if(addGrupo(lists.servidoresPorDepartamento,departamento,servidor))mudou=true;
+  if(addGrupo(lists.responsaveisPorUnidade,unidade,responsavel))mudou=true;
+
+  if(mudou){
+    lists.servidores.sort(function(a,b){return a.localeCompare(b,'pt-BR');});
+    lists.departamentos.sort(function(a,b){return a.localeCompare(b,'pt-BR');});
+    lists.unidades.sort(function(a,b){return a.localeCompare(b,'pt-BR');});
+    lists.responsaveis.sort(function(a,b){return a.localeCompare(b,'pt-BR');});
+    localStorage.setItem('cemtec_lists_v5',JSON.stringify(lists));
+    montarMapas();
+    atualizarTodosCombos();
+  }
+  return mudou;
 }
 
 /* ============ ACESSO ============ */
@@ -1445,17 +1544,6 @@ async function saveVisit(mode){
   var objetivo=montarObjetivoFinal();
   var sigUnit=padUnit.isEmpty()?'':padUnit.toDataURL();
 
-  if(responsavel){
-    var existe=lists.responsaveis.some(function(n){
-      return n.toLowerCase()===responsavel.toLowerCase();
-    });
-    if(!existe){
-      lists.responsaveis.push(responsavel);
-      lists.responsaveis.sort(function(a,b){return a.localeCompare(b,'pt-BR');});
-      localStorage.setItem('cemtec_lists_v5',JSON.stringify(lists));
-    }
-  }
-
   var agora=new Date().toISOString();
   var area=Number(padUnit.areaCoberta().toFixed(4));
   var visit={
@@ -1482,6 +1570,10 @@ async function saveVisit(mode){
     pdfUrl:''
   };
 
+  var aprendidoServidor=false;
+  var aprendidoResp=false;
+  aprendidoServidor=registrarLocal(servidor,departamento,unidade,responsavel);
+
   var btn=document.getElementById(mode==='signed'?'btnSaveSigned':'btnSavePending');
   var outroBtn=document.getElementById(mode==='signed'?'btnSavePending':'btnSaveSigned');
   var origText=btn.textContent;
@@ -1503,7 +1595,12 @@ async function saveVisit(mode){
         if(json.pdfUrl)visit.pdfUrl=json.pdfUrl;
         if(json.codigo)visit.assinaturaCodigo=json.codigo;
         if(json.aviso)console.warn('Aviso do Apps Script:',json.aviso);
-        showToast('✅ Ficha salva na Planilha e PDF gerado no Drive!');
+        aprendidoResp=Array.isArray(json.aprendido)&&json.aprendido.length>0;
+        if(aprendidoServidor||aprendidoResp){
+          showToast('✅ Ficha salva. Nomes novos gravados na planilha.');
+        }else{
+          showToast('✅ Ficha salva na Planilha e PDF gerado no Drive!');
+        }
       }else{
         showToast('⚠️ Erro: '+(json.message||'tente novamente'));
       }
@@ -1533,6 +1630,7 @@ async function saveVisit(mode){
   esconderHint('hintDepto');
   esconderHint('hintServ');
   esconderHint('hintUnidade');
+  esconderHint('hintResp');
   selectedObjetivos=[];
   renderObjPills();
   renderObjLista();
@@ -1649,7 +1747,7 @@ async function carregarParesDaPlanilha(){
       for(var r3=1;r3<rowsO.length;r3++){
         var obj=String(rowsO[r3][cO]||'').trim();
         if(!obj)continue;
-        var dep= (cOD>-1) ? String(rowsO[r3][cOD]||'').trim() : '';
+        var dep=(cOD>-1)?String(rowsO[r3][cOD]||'').trim():'';
         var ko=dep?normaliza(dep):'';
         if(!agO[ko])agO[ko]=[];
         if(agO[ko].indexOf(obj)===-1)agO[ko].push(obj);
@@ -2194,6 +2292,12 @@ window.addEventListener('DOMContentLoaded',function(){
         var atual=elUnid.value.trim();
         ultimaUnidade=atual;
         autoState.resp=false;
+        aplicarAutoResp();
+      });
+    }
+    var elResp=document.getElementById('fResponsavel');
+    if(elResp){
+      elResp.addEventListener('blur',function(){
         aplicarAutoResp();
       });
     }
