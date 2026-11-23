@@ -293,7 +293,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
   <div class="ph">
     <div class="pt">
       <h1>Ficha de Visita Digital</h1>
-      <p>Escolha o <strong>Departamento</strong> primeiro. Todos os campos aceitam digitação — o que for novo é salvo na planilha.</p>
+      <p>Escolha o <strong>Departamento</strong> primeiro. Todos os campos aceitam digitação.</p>
     </div>
   </div>
   <form id="visitForm" onsubmit="return false" novalidate>
@@ -453,7 +453,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <p style="font-size:13px;color:var(--mt);margin-bottom:12px">Preenchimentos automáticos: <strong id="autoFillLabel">Verificando...</strong></p>
     <p style="font-size:12px;color:var(--mt);margin-bottom:12px;line-height:1.55">
       Listas lidas das abas <strong>Servidores</strong>, <strong>Unidades</strong> e <strong>Objetivos</strong> (A = Objetivo, B = Departamento).
-      Valores novos digitados na ficha são gravados automaticamente nessas abas.
     </p>
     <div style="display:flex;flex-wrap:wrap;gap:10px">
       <button class="btn bp" onclick="syncTudo()">🔄 Sincronizar Listas &amp; Fichas</button>
@@ -537,27 +536,33 @@ const params=new URLSearchParams(window.location.search);
 const isProfessorMode=params.get('modo')==='ficha';
 const autoState={depto:false,serv:false,unidade:false,resp:false,prog:false};
 
+/* normaliza para exibir/comparar nomes */
 function normaliza(s){
   return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
 }
+/* chave de agrupamento — MESMA regra do Apps Script: só letras e números */
+function chave(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+}
 
-/* ============ COMBO — seleciona, fixa e NÃO reabre ============ */
+/* ============ COMBO ============ */
 const COMBO_FONTES={
   fDepartamento:function(){return lists.departamentos||[];},
   fServidor:function(){
     const dep=document.getElementById('fDepartamento');
-    const chave=dep?normaliza(dep.value):'';
-    if(!chave)return lists.servidores||[];
-    const lista=mapaServPorDepto[chave];
+    const k=dep?chave(dep.value):'';
+    if(!k)return lists.servidores||[];
+    const lista=mapaServPorDepto[k];
     return (lista&&lista.length)?lista.slice():(lists.servidores||[]);
   },
   fUnidade:function(){return lists.unidades||[];},
   fResponsavel:function(){
     const uni=document.getElementById('fUnidade');
-    const chave=uni?normaliza(uni.value):'';
-    if(!chave)return lists.responsaveis||[];
-    const lista=mapaRespPorUnidade[chave];
-    return (lista&&lista.length)?lista.slice():(lists.responsaveis||[]);
+    const k=uni?chave(uni.value):'';
+    if(!k)return lists.responsaveis||[];
+    const lista=mapaRespPorUnidade[k];
+    if(lista&&lista.length)return lista.slice();
+    return lists.responsaveis||[];
   }
 };
 const combos={};
@@ -605,7 +610,7 @@ function criarCombo(id){
   }
   function travar(ms){
     st.travado=true;
-    setTimeout(function(){st.travado=false;},ms||600);
+    setTimeout(function(){st.travado=false;},ms||700);
   }
   function filtrar(){
     const lista=todos();
@@ -642,7 +647,6 @@ function criarCombo(id){
       panel.style.maxHeight=Math.max(110,Math.min(altura,Math.max(130,abaixo)))+'px';
     }
   }
-
   function ligarNovo(){
     const elNovo=panel.querySelector('.citem.novo');
     if(!elNovo)return;
@@ -651,11 +655,11 @@ function criarCombo(id){
       fechar();
       travar(800);
       atualizarLimpar();
+      input.blur();
       input.dispatchEvent(new Event('input',{bubbles:true}));
       input.dispatchEvent(new Event('change',{bubbles:true}));
     });
   }
-
   function render(){
     st.itens=filtrar();
     st.idx=-1;
@@ -704,7 +708,6 @@ function criarCombo(id){
     }
     ligarNovo();
   }
-
   function escolher(i){
     const v=st.itens[i];
     if(v===undefined)return;
@@ -1127,12 +1130,12 @@ function validarFicha(modo){
 /* ============ OBJETIVOS ============ */
 function objetivosDoDepartamento(){
   var depEl=document.getElementById('fDepartamento');
-  var chave=depEl?normaliza(depEl.value):'';
+  var k=depEl?chave(depEl.value):'';
   var gerais=(mapaObjPorDepto['']||[]).slice();
-  if(!chave){
+  if(!k){
     return {lista:(lists.objetivos||[]).slice(),gerais:false,departamento:(depEl?depEl.value.trim():'')};
   }
-  var especificos=(mapaObjPorDepto[chave]||[]).slice();
+  var especificos=(mapaObjPorDepto[k]||[]).slice();
   var out=especificos.slice();
   gerais.forEach(function(o){ if(out.indexOf(o)===-1)out.push(o); });
   if(!out.length)return {lista:(lists.objetivos||[]).slice(),gerais:false,departamento:(depEl?depEl.value.trim():'')};
@@ -1258,23 +1261,23 @@ function mostrarHint(id,tipo,html){
   h.className=tipo==='ok'?'hint':'hint pend';
   h.innerHTML=html;
 }
-function preencherAuto(id,valor,chave){
+function preencherAuto(id,valor,chaveEstado){
   var el=document.getElementById(id);
   if(!el)return;
   autoState.prog=true;
   el.value=valor;
   el.classList.remove('err');
   autoState.prog=false;
-  if(chave)autoState[chave]=true;
+  if(chaveEstado)autoState[chaveEstado]=true;
   atualizarTodosCombos();
 }
-function limparAuto(id,chave){
+function limparAuto(id,chaveEstado){
   var el=document.getElementById(id);
   if(!el)return;
   autoState.prog=true;
   el.value='';
   autoState.prog=false;
-  if(chave)autoState[chave]=true;
+  if(chaveEstado)autoState[chaveEstado]=true;
   atualizarTodosCombos();
 }
 
@@ -1284,8 +1287,8 @@ function aplicarFiltroServidor(){
   var srv=document.getElementById('fServidor');
   esconderHint('hintServ');
   if(!dep){esconderHint('hintDepto');return;}
-  var chave=normaliza(dep);
-  var lista=mapaServPorDepto[chave]||[];
+  var k=chave(dep);
+  var lista=mapaServPorDepto[k]||[];
 
   if(!lista.length){
     mostrarHint('hintDepto','ok','✅ Setor sem servidores cadastrados — pode digitar um nome novo.');
@@ -1307,7 +1310,7 @@ function aplicarAutoDoServidor(){
   if(!srv)return;
   var depEl=document.getElementById('fDepartamento');
   if(!depEl.value.trim()||autoState.depto){
-    var alvo=mapaServidorDepto[normaliza(srv)];
+    var alvo=mapaServidorDepto[chave(srv)];
     if(alvo){
       preencherAuto('fDepartamento',alvo,'depto');
       aplicarFiltroServidor();
@@ -1352,13 +1355,13 @@ function aplicarAutoUnidade(){
   mostrarHint('hintUnidade','ok','✅ Unidade da última visita deste servidor.');
 }
 
-/* Unidade -> Responsável: sempre ajusta para o nome da escola */
+/* Unidade -> Responsável (chave corrigida) */
 function aplicarAutoResp(){
   var unidade=document.getElementById('fUnidade').value.trim();
   var respEl=document.getElementById('fResponsavel');
   if(!unidade){esconderHint('hintResp');return;}
 
-  var lista=mapaRespPorUnidade[normaliza(unidade)]||[];
+  var lista=mapaRespPorUnidade[chave(unidade)]||[];
 
   if(!lista.length){
     if(autoState.resp&&respEl.value.trim())limparAuto('fResponsavel','resp');
@@ -1387,52 +1390,50 @@ function aplicarAutoResp(){
     :'✅ Nome desta escola.');
 }
 
-/* ============ MAPAS (com cálculo próprio de reserva) ============ */
+/* ============ MAPAS — pares primeiro, chave única ============ */
 function montarMapas(){
   mapaServidorDepto={};
   mapaServPorDepto={};
   mapaRespPorUnidade={};
   mapaObjPorDepto={};
 
-  function addGrupo(mapa,chave,valor){
-    if(!chave||!valor)return;
-    if(!mapa[chave])mapa[chave]=[];
-    if(mapa[chave].indexOf(valor)===-1)mapa[chave].push(valor);
+  function addGrupo(mapa,k,valor){
+    if(!k||!valor)return;
+    if(!mapa[k])mapa[k]=[];
+    if(mapa[k].indexOf(valor)===-1)mapa[k].push(valor);
   }
 
+  /* 1. fonte principal: pares (1 para 1) — chave padronizada */
   (lists.paresServidor||[]).forEach(function(p){
-    if(p[0]&&p[1])mapaServidorDepto[normaliza(p[0])]=p[1];
+    if(!p||!p[0]||!p[1])return;
+    mapaServidorDepto[chave(p[0])]=p[1];
+    addGrupo(mapaServPorDepto,chave(p[1]),p[0]);
   });
+  (lists.paresUnidade||[]).forEach(function(p){
+    if(!p||!p[0]||!p[1])return;
+    addGrupo(mapaRespPorUnidade,chave(p[0]),p[1]);
+  });
+
+  /* 2. grupos vindos do servidor — mesma chave, só complementam */
   (lists.servidoresPorDepartamento||[]).forEach(function(par){
     if(!par||!par[0])return;
-    var k=normaliza(par[0]);
+    var k=chave(par[0]);
     (par[1]||[]).forEach(function(n){ addGrupo(mapaServPorDepto,k,n); });
   });
   (lists.responsaveisPorUnidade||[]).forEach(function(par){
     if(!par||!par[0])return;
-    var k=normaliza(par[0]);
+    var k=chave(par[0]);
     (par[1]||[]).forEach(function(n){ addGrupo(mapaRespPorUnidade,k,n); });
   });
   (lists.objetivosPorDepartamento||[]).forEach(function(par){
     if(!par)return;
-    var k=par[0]?normaliza(par[0]):'';
+    var k=par[0]?chave(par[0]):'';
     (par[1]||[]).forEach(function(o){ addGrupo(mapaObjPorDepto,k,o); });
   });
 
-  /* RESERVA: monta os grupos a partir dos pares, se os agrupados não vierem */
-  if(!Object.keys(mapaServPorDepto).length){
-    (lists.paresServidor||[]).forEach(function(p){
-      if(p[0]&&p[1])addGrupo(mapaServPorDepto,normaliza(p[1]),p[0]);
-    });
-  }
-  if(!Object.keys(mapaRespPorUnidade).length){
-    (lists.paresUnidade||[]).forEach(function(p){
-      if(p[0]&&p[1])addGrupo(mapaRespPorUnidade,normaliza(p[0]),p[1]);
-    });
-  }
-
+  var totEscolas=Object.keys(mapaRespPorUnidade).length;
   var s='Carregados: '+Object.keys(mapaServPorDepto).length+' setor(es), '+
-        Object.keys(mapaRespPorUnidade).length+' escola(s), '+
+        totEscolas+' escola(s), '+
         Object.keys(mapaObjPorDepto).length+' lista(s) de objetivos.';
   var lbl=document.getElementById('autoFillLabel');
   if(lbl)lbl.textContent=s;
@@ -1451,15 +1452,15 @@ function registrarLocal(servidor,departamento,unidade,responsavel){
   function addPar(lista,a,b){
     if(!a||!b)return false;
     var existe=lista.some(function(p){
-      return normaliza(p[0])===normaliza(a)&&normaliza(p[1])===normaliza(b);
+      return chave(p[0])===chave(a)&&chave(p[1])===chave(b);
     });
     if(existe)return false;
     lista.push([a,b]);
     return true;
   }
-  function addGrupo(lista,chave,valor){
-    if(!chave||!valor)return false;
-    var k=normaliza(chave);
+  function addGrupo(lista,grupo,valor){
+    if(!grupo||!valor)return false;
+    var k=chave(grupo);
     var achou=null;
     lista.forEach(function(p){ if(p[0]===k)achou=p; });
     if(!achou){ lista.push([k,[valor]]); return true; }
@@ -1721,21 +1722,14 @@ async function carregarParesDaPlanilha(){
     var cS=acharCol(headS,['servidor']);
     var cD=acharCol(headS,['departamento','setor']);
     if(cS>-1&&cD>-1){
-      var pS=[],agS={};
+      var pS=[];
       for(var r=1;r<rowsS.length;r++){
         var s=String(rowsS[r][cS]||'').trim();
         var d=String(rowsS[r][cD]||'').trim();
         if(!s||!d)continue;
         pS.push([s,d]);
-        var kd=normaliza(d);
-        if(!agS[kd])agS[kd]=[];
-        if(agS[kd].indexOf(s)===-1)agS[kd].push(s);
       }
-      if(pS.length){
-        lists.paresServidor=pS;
-        lists.servidoresPorDepartamento=Object.keys(agS).map(function(k){return [k,agS[k]];});
-        temAlgo=true;
-      }
+      if(pS.length){lists.paresServidor=pS;temAlgo=true;}
     }
   }
 
@@ -1745,21 +1739,14 @@ async function carregarParesDaPlanilha(){
     var cU=acharCol(headU,['unidade','escola']);
     var cR=acharCol(headU,['respons']);
     if(cU>-1&&cR>-1){
-      var pU=[],agU={};
+      var pU=[];
       for(var r2=1;r2<rowsU.length;r2++){
         var u=String(rowsU[r2][cU]||'').trim();
         var rr=String(rowsU[r2][cR]||'').trim();
         if(!u||!rr)continue;
         pU.push([u,rr]);
-        var ku=normaliza(u);
-        if(!agU[ku])agU[ku]=[];
-        if(agU[ku].indexOf(rr)===-1)agU[ku].push(rr);
       }
-      if(pU.length){
-        lists.paresUnidade=pU;
-        lists.responsaveisPorUnidade=Object.keys(agU).map(function(k){return [k,agU[k]];});
-        temAlgo=true;
-      }
+      if(pU.length){lists.paresUnidade=pU;temAlgo=true;}
     }
   }
 
@@ -1774,7 +1761,7 @@ async function carregarParesDaPlanilha(){
         var obj=String(rowsO[r3][cO]||'').trim();
         if(!obj)continue;
         var dep=(cOD>-1)?String(rowsO[r3][cOD]||'').trim():'';
-        var ko=dep?normaliza(dep):'';
+        var ko=dep?chave(dep):'';
         if(!agO[ko])agO[ko]=[];
         if(agO[ko].indexOf(obj)===-1)agO[ko].push(obj);
       }
