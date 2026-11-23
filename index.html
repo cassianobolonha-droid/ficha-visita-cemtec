@@ -1,1940 +1,2142 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Ficha de Visita Digital — CEMTEC | SEMED Sorriso</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <style>
-    :root {
-      --blue-dark: #003580; --blue-mid: #0056b3; --blue-light: #009FE3; --yellow: #FBC02D;
-      --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0;
-      --success: #16a34a; --warning: #d97706; --danger: #dc2626; --radius: 14px;
-      --shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-    .tricolor-bar { display: flex; height: 5px; width: 100%; }
-    .tricolor-bar .c1 { flex: 5; background: var(--blue-dark); }
-    .tricolor-bar .c2 { flex: 3; background: var(--blue-light); }
-    .tricolor-bar .c3 { flex: 2; background: var(--yellow); }
-    .pin-gate { position: fixed; inset: 0; background: linear-gradient(135deg, #003580 0%, #001f4d 100%); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 500; }
-    .pin-gate.open { display: flex; }
-    .pin-card { background: #fff; border-radius: 18px; padding: 28px 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.35); }
-    .pin-card img { height: 54px; margin: 0 auto 12px; object-fit: contain; }
-    .pin-card h2 { font-size: 19px; color: var(--blue-dark); margin-bottom: 6px; }
-    .pin-card p { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
-    .pin-input { width: 100%; padding: 14px; font-size: 22px; letter-spacing: 8px; text-align: center; border: 2px solid #cbd5e1; border-radius: 12px; margin-bottom: 12px; font-weight: 800; }
-    .pin-error { color: var(--danger); font-size: 12px; font-weight: 600; min-height: 18px; margin-bottom: 8px; }
-    .prof-topbar { display: none; background: var(--blue-dark); color: #fff; padding: 12px 18px; align-items: center; justify-content: space-between; gap: 12px; }
-    body.mode-professor .prof-topbar { display: flex; }
-    body.mode-professor .sidebar, body.mode-professor .mobile-header { display: none !important; }
-    body.mode-professor .main-content { max-width: 900px; }
-    .prof-acoes { display: flex; gap: 8px; flex-wrap: wrap; }
-    .app-shell { display: flex; flex: 1; min-height: calc(100vh - 5px); }
-    .sidebar { width: 270px; background: linear-gradient(180deg, var(--blue-dark) 0%, #002359 100%); color: #fff; display: flex; flex-direction: column; padding: 20px 16px; position: sticky; top: 0; height: calc(100vh - 5px); z-index: 40; transition: transform 0.25s ease; }
-    .brand-box { background: #fff; border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 16px; }
-    .brand-box img { max-height: 54px; max-width: 100%; object-fit: contain; display: block; margin: 0 auto 6px; }
-    .brand-sub { font-size: 10px; font-weight: 700; color: var(--blue-dark); text-transform: uppercase; border-top: 1px solid #e2e8f0; padding-top: 6px; }
-    .nav-list { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-    .nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border: none; border-radius: 10px; background: transparent; color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; }
-    .nav-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
-    .nav-btn.active { background: #fff; color: var(--blue-dark); }
-    .nav-btn .badge { margin-left: auto; background: var(--yellow); color: #1e293b; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
-    .sidebar-footer { font-size: 11px; color: rgba(255,255,255,0.7); border-top: 1px solid rgba(255,255,255,0.14); padding-top: 12px; line-height: 1.5; }
-    .mobile-header { display: none; background: var(--blue-dark); color: #fff; padding: 10px 14px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
-    .mobile-brand { display: flex; align-items: center; gap: 10px; }
-    .mobile-brand img { height: 34px; background: #fff; padding: 3px 6px; border-radius: 6px; }
-    .mobile-menu-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 18px; cursor: pointer; }
-    .main-content { flex: 1; padding: 24px 28px 40px; max-width: 1400px; width: 100%; margin: 0 auto; }
-    .page-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
-    .page-title h1 { font-size: 23px; font-weight: 800; color: var(--blue-dark); }
-    .page-title p { font-size: 13px; color: var(--muted); margin-top: 3px; }
-    .header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 15px; border-radius: 10px; font-size: 13px; font-weight: 600; border: 1px solid transparent; cursor: pointer; font-family: inherit; text-decoration: none; }
-    .btn-primary { background: var(--blue-dark); color: #fff; }
-    .btn-accent { background: var(--blue-light); color: #fff; }
-    .btn-success { background: var(--success); color: #fff; }
-    .btn-warning { background: var(--warning); color: #fff; }
-    .btn-danger { background: #fee2e2; color: var(--danger); border-color: #fecaca; }
-    .btn-outline { background: #fff; color: var(--text); border-color: var(--border); }
-    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
-    .btn:disabled { opacity: .6; cursor: not-allowed; }
-    .view-section { display: none; }
-    .view-section.active { display: block; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 18px; }
-    .card-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
-    .card-title { font-size: 16px; font-weight: 700; color: var(--blue-dark); }
-    .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 18px; }
-    .kpi-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; border-top: 4px solid var(--blue-dark); }
-    .kpi-card.c-light { border-top-color: var(--blue-light); }
-    .kpi-card.c-yellow { border-top-color: var(--yellow); }
-    .kpi-card.c-green { border-top-color: var(--success); }
-    .kpi-card.c-amber { border-top-color: var(--warning); }
-    .kpi-label { font-size: 12px; font-weight: 600; color: var(--muted); }
-    .kpi-value { font-size: 26px; font-weight: 800; margin: 6px 0 2px; }
-    .kpi-sub { font-size: 11px; color: var(--muted); }
-    .charts-grid { display: grid; grid-template-columns: 1.4fr 1fr 1.2fr; gap: 16px; margin-bottom: 18px; }
-    .chart-wrap { position: relative; height: 250px; }
-    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group.full { grid-column: 1 / -1; }
-    .linha-tripla { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-    .linha-tripla .input-row input { min-width: 0; }
-    .linha-tripla .input-row .btn { white-space: nowrap; padding: 6px 8px; }
-    label { font-size: 13px; font-weight: 600; color: #334155; display: flex; justify-content: space-between; }
-    label .obrig { color: var(--danger); font-weight: 800; margin-left: 2px; }
-    input[type="text"], input[type="date"], input[type="time"], input[type="url"], input[type="password"], select, textarea { width: 100%; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-family: inherit; background: #fff; transition: border-color .15s, background .15s; }
-    textarea { min-height: 92px; resize: vertical; }
-    .campo-erro { border-color: var(--danger) !important; background: #fef2f2 !important; }
-    .input-row { display: flex; gap: 8px; }
-    .input-row input { flex: 1; }
-    .auto-hint { font-size: 11px; margin-top: 2px; color: var(--success); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .auto-hint a { color: var(--blue-mid); font-weight: 700; cursor: pointer; text-decoration: underline; }
-    .auto-hint.pend { color: var(--muted); }
-
-    /* ---------- COMBO ---------- */
-    .combo { position: relative; width: 100%; }
-    .combo > input { padding-right: 70px; }
-    .combo-seta {
-      position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
-      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-      border: none; background: transparent; color: #94a3b8; font-size: 14px;
-      cursor: pointer; border-radius: 8px; line-height: 1;
-    }
-    .combo-seta:active { background: #f1f5f9; }
-    .combo-limpar {
-      position: absolute; right: 38px; top: 50%; transform: translateY(-50%);
-      width: 26px; height: 26px; display: none; align-items: center; justify-content: center;
-      border: none; background: #e2e8f0; color: #475569;
-      font-size: 16px; font-weight: 700; line-height: 1;
-      cursor: pointer; border-radius: 50%; padding: 0;
-    }
-    .combo-limpar:active { background: #cbd5e1; }
-    .combo.tem-valor .combo-limpar { display: flex; }
-    .combo-panel {
-      position: fixed; display: none; z-index: 300;
-      background: #fff; border: 1px solid var(--border); border-radius: 12px;
-      box-shadow: 0 14px 36px rgba(15,23,42,.22);
-      overflow-y: auto; overflow-x: hidden; padding: 6px;
-      -webkit-overflow-scrolling: touch;
-    }
-    .combo-panel.open { display: block; }
-    .combo-item {
-      padding: 10px 11px; font-size: 13px; line-height: 1.4;
-      border-radius: 8px; cursor: pointer; color: #334155;
-      word-break: break-word;
-    }
-    .combo-item:hover, .combo-item.ativo { background: #eff6ff; color: var(--blue-dark); font-weight: 600; }
-    .combo-item.atual { background: #e8f1fb; color: var(--blue-dark); font-weight: 700; }
-    .combo-vazio { padding: 14px; font-size: 12px; color: var(--muted); text-align: center; }
-    .combo-rodape { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 6px; }
-    .combo-btn-limpar {
-      width: 100%; padding: 9px; border: none; border-radius: 8px;
-      background: #fff; color: var(--danger); font-family: inherit;
-      font-size: 12px; font-weight: 700; cursor: pointer;
-    }
-    .combo-btn-limpar:active { background: #fef2f2; }
-
-    .obj-multi { position: relative; }
-    .obj-multi-btn { width: 100%; display: flex; align-items: center; gap: 8px; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; font-size: 14px; font-family: inherit; cursor: pointer; text-align: left; color: #475569; }
-    .obj-multi-btn .obj-caret { margin-left: auto; color: #94a3b8; }
-    .obj-count { background: var(--blue-dark); color: #fff; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
-    .obj-menu { display: none; position: absolute; z-index: 60; left: 0; right: 0; top: calc(100% + 4px); background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 32px rgba(15,23,42,.18); overflow: hidden; }
-    .obj-menu.open { display: block; }
-    .obj-menu-top { padding: 8px; border-bottom: 1px solid var(--border); }
-    .obj-menu-top input { padding: 8px 10px; font-size: 13px; }
-    .obj-list { max-height: 260px; overflow-y: auto; padding: 6px; }
-    .obj-opt { display: flex; align-items: flex-start; justify-content: flex-start; gap: 9px; padding: 8px 9px; border-radius: 8px; cursor: pointer; font-size: 12.5px; font-weight: 400; line-height: 1.45; color: #334155; text-align: left; }
-    .obj-opt span { flex: 1 1 auto; min-width: 0; text-align: left; }
-    .obj-opt:hover { background: #f1f5f9; }
-    .obj-opt.sel { background: #eff6ff; }
-    .obj-opt input { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 2px; accent-color: var(--blue-dark); }
-    .obj-menu-foot { display: flex; justify-content: space-between; gap: 8px; padding: 8px; border-top: 1px solid var(--border); background: #f8fafc; }
-    .obj-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-    .obj-pill { display: inline-flex; align-items: center; gap: 6px; background: #e8f1fb; color: var(--blue-dark); border: 1px solid #bfdbfe; padding: 5px 6px 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; line-height: 1.35; }
-    .obj-pill button { border: none; background: transparent; color: #64748b; cursor: pointer; font-size: 15px; line-height: 1; padding: 0 3px; }
-    .dica-objetivo { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .sig-box { border: 2px dashed #94a3b8; border-radius: 12px; background: #fff; overflow: hidden; position: relative; }
-    .sig-box.erro { border-color: var(--danger); background: #fef2f2; }
-    .sig-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; background: #f8fafc; border-bottom: 1px solid var(--border); }
-    .sig-group { display: flex; align-items: center; gap: 6px; }
-    .sig-label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; }
-    .color-dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
-    .color-dot.active { border-color: var(--yellow); transform: scale(1.12); }
-    .pen-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 8px; border: 1px solid var(--border); background: #fff; font-size: 11px; font-weight: 700; color: #475569; cursor: pointer; font-family: inherit; }
-    .pen-btn.active { border-color: var(--blue-dark); background: #e8f1fb; color: var(--blue-dark); }
-    .pen-bar { display: block; width: 14px; border-radius: 99px; background: currentColor; }
-    .sig-canvas { width: 100%; height: 200px; display: block; cursor: crosshair; touch-action: none; }
-    .sig-guide { position: absolute; left: 10%; right: 10%; bottom: 32px; border-bottom: 1px solid #cbd5e1; pointer-events: none; text-align: center; font-size: 11px; color: #94a3b8; }
-    .sig-aviso { font-size: 11px; color: var(--muted); background: #f8fafc; border: 1px solid var(--border); border-left: 3px solid var(--blue-light); border-radius: 8px; padding: 8px 11px; margin-bottom: 12px; line-height: 1.5; }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-    th { background: #f8fafc; color: #475569; font-weight: 700; font-size: 11px; text-transform: uppercase; }
-    .status-pill { display: inline-flex; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
-    .status-signed { background: #dcfce7; color: #166534; }
-    .status-pending { background: #fef3c7; color: #92400e; }
-    .resp-cell { font-size: 12px; color: #334155; }
-    .resp-vazio { color: #94a3b8; font-style: italic; }
-    .filters-bar { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    .filters-periodo { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px; }
-    .filters-periodo .campo-data { display: flex; flex-direction: column; gap: 5px; }
-    .filters-periodo .campo-data span { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; }
-    .periodo-atalhos { display: flex; gap: 6px; flex-wrap: wrap; }
-    .periodo-atalhos .btn { padding: 9px 11px; font-size: 12px; }
-    .periodo-atalhos .btn.ativo { background: var(--blue-dark); color: #fff; border-color: var(--blue-dark); }
-    .filtros-resumo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; color: #475569; padding: 9px 2px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
-    .filtros-resumo strong { color: var(--blue-dark); }
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.72); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100; }
-    .modal-backdrop.open { display: flex; }
-    .modal-card { background: #fff; border-radius: 16px; width: 100%; max-width: 860px; max-height: 94vh; overflow-y: auto; }
-    .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: #fff; z-index: 5; }
-    .modal-body { padding: 20px; }
-    .pdf-viewer { width: 100%; height: 78vh; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #f8fafc; }
-    .pdf-viewer iframe { width: 100%; height: 100%; border: 0; display: block; }
-    .pdf-legenda { font-size: 11px; color: var(--muted); margin-top: 8px; text-align: center; }
-    .fs-sig-modal { position: fixed; inset: 0; background: #fff; z-index: 200; display: none; flex-direction: column; width: 100%; height: 100dvh; overflow: hidden; }
-    .fs-sig-modal.open { display: flex; }
-    .fs-sig-top { background: var(--blue-dark); color: #fff; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-    .fs-sig-tools { padding: 8px 12px; background: #f8fafc; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; flex-shrink: 0; }
-    .fs-sig-canvas-wrap { flex: 1; min-height: 0; position: relative; width: 100%; overflow: hidden; background: #fff; }
-    #fsSigCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
-    .fs-sig-bottom { padding: 12px 16px; background: #f8fafc; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 10px; flex-shrink: 0; }
-    .a4-sheet { background: #fff; max-width: 794px; margin: 0 auto; padding: 34px 44px 24px; border: 1px solid #cbd5e1; font-family: 'Times New Roman', Georgia, serif; }
-    .a4-header { border-bottom: 2px solid var(--blue-dark); padding-bottom: 10px; margin-bottom: 18px; text-align: center; }
-    .a4-logos { font-family: Arial, sans-serif; font-weight: 800; color: var(--blue-dark); font-size: 14px; }
-    .a4-logos-sub { font-family: Arial, sans-serif; font-weight: 700; color: var(--blue-light); font-size: 12px; margin-top: 2px; }
-    .a4-title { text-align: center; font-size: 18px; font-weight: bold; color: var(--blue-dark); margin-bottom: 4px; }
-    .a4-field { display: flex; gap: 8px; margin-bottom: 12px; font-size: 14px; }
-    .a4-field-value { flex: 1; border-bottom: 1px solid #1f2937; padding: 0 6px 2px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; }
-    .a4-objective-box { margin: 8px 0 16px; min-height: 90px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 13px; background: #fafafa; white-space: pre-wrap; color: #000; }
-    .a4-sig-block { text-align: center; max-width: 340px; margin: 20px auto; }
-    .a4-sig-block img { max-height: 75px; margin-bottom: -6px; }
-    .a4-sig-line { border-top: 1px solid #1f2937; padding-top: 6px; font-size: 13px; }
-    .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all .25s; z-index: 600; max-width: 340px; line-height: 1.45; }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .siget { display: block; text-align: center; margin: 0 auto; max-width: 420px; }
-    .siget__traco {
-      display: block;
-      font-family: 'Caveat', 'Segoe Script', cursive;
-      font-size: 44px; line-height: 1.05;
-      color: #1c3d6e; opacity: .88;
-      transform: rotate(-3deg); transform-origin: center bottom;
-      padding: 0 6px 2px; white-space: nowrap;
-      user-select: none;
-    }
-    .siget__meta { font-family: 'Inter', sans-serif; font-size: 10px; line-height: 1.55; color: #5a6472; margin-top: 4px; }
-    .siget__meta strong { color: #334155; font-weight: 600; }
-    .siget__codigo {
-      font-family: ui-monospace, Consolas, monospace;
-      font-size: 10px; letter-spacing: .04em;
-      background: rgba(0,0,0,.045);
-      border: 1px solid #d8dde2; border-radius: 3px;
-      padding: 0 4px; color: #334155;
-    }
-    @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } .charts-grid { grid-template-columns: 1fr; } }
-    @media (max-width: 860px) {
-      .mobile-header { display: flex; }
-      .sidebar { position: fixed; left: 0; top: 5px; bottom: 0; transform: translateX(-100%); }
-      .sidebar.open { transform: translateX(0); }
-      .main-content { padding: 16px 14px 36px; }
-      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-      .form-grid, .filters-bar { grid-template-columns: 1fr; }
-      .linha-tripla { grid-template-columns: 1fr; }
-      .obj-list { max-height: 210px; }
-      .filters-periodo { grid-template-columns: 1fr 1fr; }
-      .periodo-atalhos { grid-column: 1 / -1; }
-      .periodo-atalhos .btn { flex: 1 1 auto; }
-      .combo-item { padding: 12px 12px; font-size: 14px; }
-    }
-    @media print {
-      .tricolor-bar, .sidebar, .mobile-header, .prof-topbar, .main-content, .modal-header, .no-print, .toast, .combo-panel { display: none !important; }
-      .modal-backdrop { position: static !important; background: none !important; padding: 0 !important; display: block !important; }
-      .modal-card { max-height: none !important; max-width: none !important; box-shadow: none !important; }
-      .a4-sheet { border: none !important; padding: 10mm !important; }
-      .siget__traco { color: #000 !important; opacity: 1 !important; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Ficha de Visita Digital — CEMTEC | SEMED Sorriso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--bd:#003580;--bm:#0056b3;--bl:#009FE3;--yl:#FBC02D;--bg:#f1f5f9;--tx:#0f172a;--mt:#64748b;--br:#e2e8f0;--ok:#16a34a;--wn:#d97706;--dg:#dc2626;--rd:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column}
+.tri{display:flex;height:5px;width:100%}
+.tri .c1{flex:5;background:var(--bd)}.tri .c2{flex:3;background:var(--bl)}.tri .c3{flex:2;background:var(--yl)}
+.pin{position:fixed;inset:0;background:linear-gradient(135deg,#003580,#001f4d);display:none;align-items:center;justify-content:center;padding:20px;z-index:500}
+.pin.open{display:flex}
+.pin-card{background:#fff;border-radius:18px;padding:28px 24px;width:100%;max-width:380px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,.35)}
+.pin-card img{height:54px;margin:0 auto 12px;object-fit:contain}
+.pin-card h2{font-size:19px;color:var(--bd);margin-bottom:6px}
+.pin-card p{font-size:13px;color:var(--mt);margin-bottom:18px}
+.pin-input{width:100%;padding:14px;font-size:22px;letter-spacing:8px;text-align:center;border:2px solid #cbd5e1;border-radius:12px;margin-bottom:12px;font-weight:800}
+.pin-err{color:var(--dg);font-size:12px;font-weight:600;min-height:18px;margin-bottom:8px}
+.ptop{display:none;background:var(--bd);color:#fff;padding:12px 18px;align-items:center;justify-content:space-between;gap:12px}
+body.prof .ptop{display:flex}
+body.prof .side,body.prof .mhead{display:none!important}
+body.prof .main{max-width:900px}
+.pacoes{display:flex;gap:8px;flex-wrap:wrap}
+.shell{display:flex;flex:1;min-height:calc(100vh - 5px)}
+.side{width:270px;background:linear-gradient(180deg,#003580,#002359);color:#fff;display:flex;flex-direction:column;padding:20px 16px;position:sticky;top:0;height:calc(100vh - 5px);z-index:40;transition:transform .25s}
+.brand{background:#fff;border-radius:12px;padding:12px;text-align:center;margin-bottom:16px}
+.brand img{max-height:54px;max-width:100%;object-fit:contain;display:block;margin:0 auto 6px}
+.brand-sub{font-size:10px;font-weight:700;color:var(--bd);text-transform:uppercase;border-top:1px solid #e2e8f0;padding-top:6px}
+.nav{display:flex;flex-direction:column;gap:6px;flex:1}
+.nbtn{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:none;border-radius:10px;background:transparent;color:rgba(255,255,255,.85);font-size:14px;font-weight:600;cursor:pointer;text-align:left}
+.nbtn:hover{background:rgba(255,255,255,.12);color:#fff}
+.nbtn.active{background:#fff;color:var(--bd)}
+.nbtn .bdg{margin-left:auto;background:var(--yl);color:#1e293b;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px}
+.sfoot{font-size:11px;color:rgba(255,255,255,.7);border-top:1px solid rgba(255,255,255,.14);padding-top:12px;line-height:1.5}
+.mhead{display:none;background:var(--bd);color:#fff;padding:10px 14px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.mbrand{display:flex;align-items:center;gap:10px}
+.mbrand img{height:34px;background:#fff;padding:3px 6px;border-radius:6px}
+.mmenu{background:rgba(255,255,255,.15);border:none;color:#fff;padding:8px 12px;border-radius:8px;font-size:18px;cursor:pointer}
+.main{flex:1;padding:24px 28px 40px;max-width:1400px;width:100%;margin:0 auto}
+.ph{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.pt h1{font-size:23px;font-weight:800;color:var(--bd)}
+.pt p{font-size:13px;color:var(--mt);margin-top:3px}
+.hacts{display:flex;flex-wrap:wrap;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 15px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid transparent;cursor:pointer;font-family:inherit;text-decoration:none}
+.bp{background:var(--bd);color:#fff}.ba{background:var(--bl);color:#fff}.bs{background:var(--ok);color:#fff}
+.bw{background:var(--wn);color:#fff}.bdx{background:#fee2e2;color:var(--dg);border-color:#fecaca}
+.bo{background:#fff;color:var(--tx);border-color:var(--br)}
+.sm{padding:6px 10px;font-size:12px;border-radius:8px}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.vs{display:none}.vs.active{display:block}
+.card{background:#fff;border:1px solid var(--br);border-radius:var(--rd);padding:20px;box-shadow:0 4px 20px rgba(15,23,42,.06);margin-bottom:18px}
+.ch{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.ct{font-size:16px;font-weight:700;color:var(--bd)}
+.kg{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px}
+.kc{background:#fff;border:1px solid var(--br);border-radius:var(--rd);padding:16px;border-top:4px solid var(--bd)}
+.kc.l{border-top-color:var(--bl)}.kc.y{border-top-color:var(--yl)}.kc.g{border-top-color:var(--ok)}.kc.a{border-top-color:var(--wn)}
+.kl{font-size:12px;font-weight:600;color:var(--mt)}
+.kv{font-size:26px;font-weight:800;margin:6px 0 2px}
+.ks{font-size:11px;color:var(--mt)}
+.cg{display:grid;grid-template-columns:1.4fr 1fr 1.2fr;gap:16px;margin-bottom:18px}
+.cw{position:relative;height:250px}
+.fg{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.gp{display:flex;flex-direction:column;gap:6px}
+.gp.full{grid-column:1/-1}
+.l3{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.l3 .ir input{min-width:0}
+.l3 .ir .btn{white-space:nowrap;padding:6px 8px}
+label{font-size:13px;font-weight:600;color:#334155;display:flex;justify-content:space-between}
+label .ob{color:var(--dg);font-weight:800;margin-left:2px}
+input[type=text],input[type=date],input[type=time],input[type=password],select,textarea{width:100%;padding:11px 13px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px;font-family:inherit;background:#fff;transition:border-color .15s,background .15s}
+textarea{min-height:92px;resize:vertical}
+.err{border-color:var(--dg)!important;background:#fef2f2!important}
+.ir{display:flex;gap:8px}.ir input{flex:1}
+.hint{font-size:11px;margin-top:2px;color:var(--ok);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.hint a{color:var(--bm);font-weight:700;cursor:pointer;text-decoration:underline}
+.hint.pend{color:var(--mt)}
+.combo{position:relative;width:100%}
+.combo>input{padding-right:70px}
+.cset{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:#94a3b8;font-size:14px;cursor:pointer;border-radius:8px;line-height:1}
+.cset:active{background:#f1f5f9}
+.clim{position:absolute;right:38px;top:50%;transform:translateY(-50%);width:26px;height:26px;display:none;align-items:center;justify-content:center;border:none;background:#e2e8f0;color:#475569;font-size:16px;font-weight:700;line-height:1;cursor:pointer;border-radius:50%;padding:0}
+.clim:active{background:#cbd5e1}
+.combo.tem .clim{display:flex}
+.cpan{position:fixed;display:none;z-index:300;background:#fff;border:1px solid var(--br);border-radius:12px;box-shadow:0 14px 36px rgba(15,23,42,.22);overflow-y:auto;overflow-x:hidden;padding:6px;-webkit-overflow-scrolling:touch}
+.cpan.open{display:block}
+.citem{padding:10px 11px;font-size:13px;line-height:1.4;border-radius:8px;cursor:pointer;color:#334155;word-break:break-word}
+.citem:hover,.citem.ativo{background:#eff6ff;color:var(--bd);font-weight:600}
+.citem.atual{background:#e8f1fb;color:var(--bd);font-weight:700}
+.cvazio{padding:14px;font-size:12px;color:var(--mt);text-align:center}
+.crod{border-top:1px solid var(--br);margin-top:6px;padding-top:6px}
+.cbtnl{width:100%;padding:9px;border:none;border-radius:8px;background:#fff;color:var(--dg);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.cbtnl:active{background:#fef2f2}
+.objm{position:relative}
+.objmb{width:100%;display:flex;align-items:center;gap:8px;padding:11px 13px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-size:14px;font-family:inherit;cursor:pointer;text-align:left;color:#475569}
+.objmb .oc{margin-left:auto;color:#94a3b8}
+.objc{background:var(--bd);color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px}
+.objmenu{display:none;position:absolute;z-index:60;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--br);border-radius:12px;box-shadow:0 12px 32px rgba(15,23,42,.18);overflow:hidden}
+.objmenu.open{display:block}
+.objtop{padding:8px;border-bottom:1px solid var(--br)}
+.objtop input{padding:8px 10px;font-size:13px}
+.objlist{max-height:260px;overflow-y:auto;padding:6px}
+.opt{display:flex;align-items:flex-start;justify-content:flex-start;gap:9px;padding:8px 9px;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:400;line-height:1.45;color:#334155;text-align:left}
+.opt span{flex:1 1 auto;min-width:0;text-align:left}
+.opt:hover{background:#f1f5f9}
+.opt.sel{background:#eff6ff}
+.opt input{flex:0 0 auto;width:16px;height:16px;margin-top:2px;accent-color:var(--bd)}
+.objfoot{display:flex;justify-content:space-between;gap:8px;padding:8px;border-top:1px solid var(--br);background:#f8fafc}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:#e8f1fb;color:var(--bd);border:1px solid #bfdbfe;padding:5px 6px 5px 10px;border-radius:999px;font-size:11.5px;font-weight:600;line-height:1.35}
+.pill button{border:none;background:transparent;color:#64748b;cursor:pointer;font-size:15px;line-height:1;padding:0 3px}
+.dica{font-size:11px;color:var(--mt);margin-top:2px}
+.sigbox{border:2px dashed #94a3b8;border-radius:12px;background:#fff;overflow:hidden;position:relative}
+.sigbox.err{border-color:var(--dg);background:#fef2f2}
+.sigtool{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:#f8fafc;border-bottom:1px solid var(--br)}
+.sigg{display:flex;align-items:center;gap:6px}
+.sigl{font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px}
+.cdot{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer}
+.cdot.active{border-color:var(--yl);transform:scale(1.12)}
+.pbtn{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:8px;border:1px solid var(--br);background:#fff;font-size:11px;font-weight:700;color:#475569;cursor:pointer;font-family:inherit}
+.pbtn.active{border-color:var(--bd);background:#e8f1fb;color:var(--bd)}
+.pbar{display:block;width:14px;border-radius:99px;background:currentColor}
+.sigcv{width:100%;height:200px;display:block;cursor:crosshair;touch-action:none}
+.sigguide{position:absolute;left:10%;right:10%;bottom:32px;border-bottom:1px solid #cbd5e1;pointer-events:none;text-align:center;font-size:11px;color:#94a3b8}
+.sigav{font-size:11px;color:var(--mt);background:#f8fafc;border:1px solid var(--br);border-left:3px solid var(--bl);border-radius:8px;padding:8px 11px;margin-bottom:12px;line-height:1.5}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--br)}
+th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transform:uppercase}
+.sp{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.sp.s{background:#dcfce7;color:#166534}
+.sp.p{background:#fef3c7;color:#92400e}
+.rc{font-size:12px;color:#334155}
+.rv{color:#94a3b8;font-style:italic}
+.fb{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.fp{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:10px}
+.fp .cd{display:flex;flex-direction:column;gap:5px}
+.fp .cd span{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase}
+.patal{display:flex;gap:6px;flex-wrap:wrap}
+.patal .btn{padding:9px 11px;font-size:12px}
+.patal .btn.ativo{background:var(--bd);color:#fff;border-color:var(--bd)}
+.fres{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:#475569;padding:9px 2px;border-bottom:1px solid var(--br);margin-bottom:8px}
+.fres strong{color:var(--bd)}
+.mbk{position:fixed;inset:0;background:rgba(15,23,42,.72);display:none;align-items:center;justify-content:center;padding:16px;z-index:100}
+.mbk.open{display:flex}
+.mcard{background:#fff;border-radius:16px;width:100%;max-width:860px;max-height:94vh;overflow-y:auto}
+.mhead2{padding:14px 18px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:5}
+.mbody{padding:20px}
+.pdfv{width:100%;height:78vh;border:1px solid var(--br);border-radius:12px;overflow:hidden;background:#f8fafc}
+.pdfv iframe{width:100%;height:100%;border:0;display:block}
+.pdfleg{font-size:11px;color:var(--mt);margin-top:8px;text-align:center}
+.fsig{position:fixed;inset:0;background:#fff;z-index:200;display:none;flex-direction:column;width:100%;height:100dvh;overflow:hidden}
+.fsig.open{display:flex}
+.fstop{background:var(--bd);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fstools{padding:8px 12px;background:#f8fafc;border-bottom:1px solid var(--br);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
+.fscw{flex:1;min-height:0;position:relative;width:100%;overflow:hidden;background:#fff}
+#fsSigCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.fsbot{padding:12px 16px;background:#f8fafc;border-top:1px solid var(--br);display:flex;justify-content:space-between;gap:10px;flex-shrink:0}
+.a4{background:#fff;max-width:794px;margin:0 auto;padding:34px 44px 24px;border:1px solid #cbd5e1;font-family:'Times New Roman',Georgia,serif}
+.a4h{border-bottom:2px solid var(--bd);padding-bottom:10px;margin-bottom:18px;text-align:center}
+.a4l{font-family:Arial,sans-serif;font-weight:800;color:var(--bd);font-size:14px}
+.a4ls{font-family:Arial,sans-serif;font-weight:700;color:var(--bl);font-size:12px;margin-top:2px}
+.a4t{text-align:center;font-size:18px;font-weight:bold;color:var(--bd);margin-bottom:4px}
+.a4f{display:flex;gap:8px;margin-bottom:12px;font-size:14px}
+.a4v{flex:1;border-bottom:1px solid #1f2937;padding:0 6px 2px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600}
+.a4obj{margin:8px 0 16px;min-height:90px;padding:8px;border:1px solid #cbd5e1;border-radius:4px;font-family:'Inter',sans-serif;font-size:13px;background:#fafafa;white-space:pre-wrap;color:#000}
+.a4sig{text-align:center;max-width:340px;margin:20px auto}
+.a4sig img{max-height:75px;margin-bottom:-6px}
+.a4line{border-top:1px solid #1f2937;padding-top:6px;font-size:13px}
+.toast{position:fixed;bottom:20px;right:20px;background:#0f172a;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;transform:translateY(100px);opacity:0;transition:all .25s;z-index:600;max-width:340px;line-height:1.45}
+.toast.show{transform:translateY(0);opacity:1}
+.siget{display:block;text-align:center;margin:0 auto;max-width:420px}
+.siget__traco{display:block;font-family:'Caveat','Segoe Script',cursive;font-size:44px;line-height:1.05;color:#1c3d6e;opacity:.88;transform:rotate(-3deg);transform-origin:center bottom;padding:0 6px 2px;white-space:nowrap;user-select:none}
+.siget__meta{font-family:'Inter',sans-serif;font-size:10px;line-height:1.55;color:#5a6472;margin-top:4px}
+.siget__meta strong{color:#334155;font-weight:600}
+.siget__cod{font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.04em;background:rgba(0,0,0,.045);border:1px solid #d8dde2;border-radius:3px;padding:0 4px;color:#334155}
+@media(max-width:1100px){.kg{grid-template-columns:repeat(3,1fr)}.cg{grid-template-columns:1fr}}
+@media(max-width:860px){
+.mhead{display:flex}
+.side{position:fixed;left:0;top:5px;bottom:0;transform:translateX(-100%)}
+.side.open{transform:translateX(0)}
+.main{padding:16px 14px 36px}
+.kg{grid-template-columns:repeat(2,1fr)}
+.fg,.fb{grid-template-columns:1fr}
+.l3{grid-template-columns:1fr}
+.objlist{max-height:210px}
+.fp{grid-template-columns:1fr 1fr}
+.patal{grid-column:1/-1}
+.patal .btn{flex:1 1 auto}
+.citem{padding:12px;font-size:14px}
+}
+@media print{
+.tri,.side,.mhead,.ptop,.main,.mhead2,.no-print,.toast,.cpan{display:none!important}
+.mbk{position:static!important;background:none!important;padding:0!important;display:block!important}
+.mcard{max-height:none!important;max-width:none!important;box-shadow:none!important}
+.a4{border:none!important;padding:10mm!important}
+.siget__traco{color:#000!important;opacity:1!important}
+}
+</style>
 </head>
 <body>
-  <div class="tricolor-bar"><div class="c1"></div><div class="c2"></div><div class="c3"></div></div>
-  <div class="pin-gate" id="pinGate">
-    <div class="pin-card">
-      <img class="dynamic-logo" alt="CEMTEC" />
-      <h2>Acesso do Coordenador</h2>
-      <p>Digite o PIN do setor para abrir o Dashboard e os Relatórios Gerais.</p>
-      <input type="password" id="pinInput" class="pin-input" maxlength="8" placeholder="••••" onkeydown="if(event.key==='Enter') verifyPin()" />
-      <div class="pin-error" id="pinError"></div>
-      <button class="btn btn-primary" style="width:100%;margin-bottom:10px;" onclick="verifyPin()">🔓 Entrar no Painel Geral</button>
-      <button class="btn btn-outline" style="width:100%;" onclick="enterProfessorMode()">✍️ Sou Professor (Abrir só a Ficha)</button>
+<div class="tri"><div class="c1"></div><div class="c2"></div><div class="c3"></div></div>
+
+<div class="pin" id="pinGate">
+  <div class="pin-card">
+    <img class="dlogo" alt="CEMTEC" />
+    <h2>Acesso do Coordenador</h2>
+    <p>Digite o PIN do setor para abrir o Dashboard e os Relatórios Gerais.</p>
+    <input type="password" id="pinInput" class="pin-input" maxlength="8" placeholder="••••" onkeydown="if(event.key==='Enter')verifyPin()" />
+    <div class="pin-err" id="pinError"></div>
+    <button class="btn bp" style="width:100%;margin-bottom:10px" onclick="verifyPin()">🔓 Entrar no Painel Geral</button>
+    <button class="btn bo" style="width:100%" onclick="enterProfessorMode()">✍️ Sou Professor (Abrir só a Ficha)</button>
+  </div>
+</div>
+
+<div class="ptop">
+  <div style="display:flex;align-items:center;gap:10px">
+    <img class="dlogo" style="height:34px;background:#fff;padding:3px 6px;border-radius:6px" alt="CEMTEC" />
+    <div>
+      <div style="font-weight:800;font-size:14px">Ficha de Visita — CEMTEC / SEMED</div>
+      <div style="font-size:11px;opacity:.85">Modo Professor (Envio direto para a Coordenação)</div>
     </div>
   </div>
-  <div class="prof-topbar">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <img class="dynamic-logo" style="height:34px;background:#fff;padding:3px 6px;border-radius:6px;" alt="CEMTEC" />
-      <div>
-        <div style="font-weight:800;font-size:14px;">Ficha de Visita — CEMTEC / SEMED</div>
-        <div style="font-size:11px;opacity:.85;">Modo Professor (Envio direto para a Coordenação)</div>
-      </div>
-    </div>
-    <div class="prof-acoes">
-      <button class="btn btn-outline btn-sm" onclick="requestCoordinatorAccess()">🔒 Coordenador</button>
-      <button class="btn btn-outline btn-sm" onclick="sairSistema()">🚪 Sair</button>
+  <div class="pacoes">
+    <button class="btn bo sm" onclick="requestCoordinatorAccess()">🔒 Coordenador</button>
+    <button class="btn bo sm" onclick="sairSistema()">🚪 Sair</button>
+  </div>
+</div>
+
+<header class="mhead">
+  <div class="mbrand">
+    <img class="dlogo" alt="CEMTEC" />
+    <div><div style="font-weight:800;font-size:14px">CEMTEC / SEMED</div><div style="font-size:11px;opacity:.8">Painel Coordenador</div></div>
+  </div>
+  <button class="mmenu" onclick="toggleSidebar()">☰</button>
+</header>
+
+<div class="shell">
+<aside class="side" id="sidebar">
+  <div class="brand">
+    <img class="dlogo" alt="CEMTEC" />
+    <div class="brand-sub">SEMED • Secretaria Municipal de Educação</div>
+  </div>
+  <nav class="nav">
+    <button class="nbtn active" data-view="dashboard" onclick="switchView('dashboard')">📊 Dashboard</button>
+    <button class="nbtn" data-view="new" onclick="switchView('new')">✍️ Nova Ficha</button>
+    <button class="nbtn" data-view="reports" onclick="switchView('reports')">📋 Relatórios &amp; PDFs <span class="bdg" id="navPendingBadge">0</span></button>
+    <button class="nbtn" data-view="lists" onclick="switchView('lists')">⚙️ Planilha &amp; Links</button>
+  </nav>
+  <div class="sfoot">
+    <button class="btn ba sm" style="width:100%;margin-bottom:8px" onclick="copyProfessorLink()">🔗 Link p/ Professores</button>
+    <button class="btn bo sm" style="width:100%;margin-bottom:10px" onclick="sairSistema()">🚪 Sair do Sistema</button>
+    <strong>Prefeitura de Sorriso - MT</strong><br/>CEMTEC • Robótica e Tecnologia
+  </div>
+</aside>
+
+<main class="main">
+<section class="vs active" id="view-dashboard">
+  <div class="ph">
+    <div class="pt"><h1>Dashboard Geral — Coordenação</h1><p>Acompanhamento das fichas enviadas pelos professores em tempo real.</p></div>
+    <div class="hacts">
+      <button class="btn bo" onclick="syncVisitsFromCloud()">🔄 Atualizar da Planilha</button>
+      <button class="btn ba" onclick="copyProfessorLink()">🔗 Link dos Professores</button>
+      <button class="btn bp" onclick="switchView('new')">+ Nova Ficha</button>
+      <button class="btn bdx" onclick="sairSistema()">🚪 Sair</button>
     </div>
   </div>
-  <header class="mobile-header">
-    <div class="mobile-brand">
-      <img class="dynamic-logo" alt="CEMTEC" />
-      <div><div style="font-weight:800;font-size:14px;">CEMTEC / SEMED</div><div style="font-size:11px;opacity:.8;">Painel Coordenador</div></div>
-    </div>
-    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
-  </header>
-  <div class="app-shell">
-    <aside class="sidebar" id="sidebar">
-      <div class="brand-box">
-        <img class="dynamic-logo" alt="CEMTEC" />
-        <div class="brand-sub">SEMED • Secretaria Municipal de Educação</div>
-      </div>
-      <nav class="nav-list">
-        <button class="nav-btn active" data-view="dashboard" onclick="switchView('dashboard')">📊 Dashboard</button>
-        <button class="nav-btn" data-view="new" onclick="switchView('new')">✍️ Nova Ficha</button>
-        <button class="nav-btn" data-view="reports" onclick="switchView('reports')">📋 Relatórios &amp; PDFs <span class="badge" id="navPendingBadge">0</span></button>
-        <button class="nav-btn" data-view="lists" onclick="switchView('lists')">⚙️ Planilha &amp; Links</button>
-      </nav>
-      <div class="sidebar-footer">
-        <button class="btn btn-accent btn-sm" style="width:100%;margin-bottom:8px;" onclick="copyProfessorLink()">🔗 Link p/ Professores</button>
-        <button class="btn btn-outline btn-sm" style="width:100%;margin-bottom:10px;" onclick="sairSistema()">🚪 Sair do Sistema</button>
-        <strong>Prefeitura de Sorriso - MT</strong><br/>CEMTEC • Robótica e Tecnologia
-      </div>
-    </aside>
-    <main class="main-content">
-      <section class="view-section active" id="view-dashboard">
-        <div class="page-header">
-          <div class="page-title">
-            <h1>Dashboard Geral — Coordenação</h1>
-            <p>Acompanhamento das fichas enviadas pelos professores em tempo real.</p>
-          </div>
-          <div class="header-actions">
-            <button class="btn btn-outline" onclick="syncVisitsFromCloud()">🔄 Atualizar da Planilha</button>
-            <button class="btn btn-accent" onclick="copyProfessorLink()">🔗 Link dos Professores</button>
-            <button class="btn btn-primary" onclick="switchView('new')">+ Nova Ficha</button>
-            <button class="btn btn-danger" onclick="sairSistema()">🚪 Sair</button>
-          </div>
-        </div>
-        <div class="kpi-grid">
-          <div class="kpi-card"><div class="kpi-label">Total de Visitas</div><div class="kpi-value" id="kpiTotal">0</div><div class="kpi-sub">Registros na base</div></div>
-          <div class="kpi-card c-light"><div class="kpi-label">Visitas Hoje</div><div class="kpi-value" id="kpiToday">0</div><div class="kpi-sub" id="kpiTodayDate">—</div></div>
-          <div class="kpi-card c-yellow"><div class="kpi-label">Unidades Atendidas</div><div class="kpi-value" id="kpiUnits">0</div><div class="kpi-sub">Escolas distintas</div></div>
-          <div class="kpi-card c-green"><div class="kpi-label">Taxa de Assinatura</div><div class="kpi-value" id="kpiSignedRate">0%</div><div class="kpi-sub" id="kpiPendingText">0 pendentes</div></div>
-          <div class="kpi-card c-amber"><div class="kpi-label">Tempo Médio</div><div class="kpi-value" id="kpiAvgTime">0 min</div><div class="kpi-sub">Permanência</div></div>
-        </div>
-        <div class="charts-grid">
-          <div class="card"><div class="card-title" style="margin-bottom:10px;">Visitas por Unidade</div><div class="chart-wrap"><canvas id="chartUnits"></canvas></div></div>
-          <div class="card"><div class="card-title" style="margin-bottom:10px;">Status das Assinaturas</div><div class="chart-wrap"><canvas id="chartStatus"></canvas></div></div>
-          <div class="card"><div class="card-title" style="margin-bottom:10px;">Visitas por Departamento</div><div class="chart-wrap"><canvas id="chartDepts"></canvas></div></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">Últimas Visitas</div><button class="btn btn-outline btn-sm" onclick="switchView('reports')">Ver todas →</button></div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Protocolo</th><th>Data</th><th>Servidor</th><th>Unidade</th><th>Responsável</th><th>Status</th><th>Ações</th></tr></thead>
-              <tbody id="recentVisitsBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-      <section class="view-section" id="view-new">
-        <div class="page-header">
-          <div class="page-title">
-            <h1>Ficha de Visita Digital</h1>
-            <p>Todos os campos com <span style="color:var(--danger);font-weight:800;">*</span> são obrigatórios. A ficha só é enviada com tudo preenchido.</p>
-          </div>
-        </div>
-        <form id="visitForm" onsubmit="return false;" novalidate>
-          <div class="card">
-            <div class="card-title" style="margin-bottom:14px;">1. Dados da Visita</div>
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Nome do Servidor <span class="obrig">*</span></label>
-                <input type="text" id="fServidor" placeholder="Selecione ou digite..." autocomplete="off" />
-              </div>
-              <div class="form-group">
-                <label>Departamento <span class="obrig">*</span></label>
-                <input type="text" id="fDepartamento" placeholder="Selecione ou digite..." autocomplete="off" />
-                <div class="auto-hint pend" id="hintDepto" hidden></div>
-              </div>
-              <div class="form-group">
-                <label>Unidade / Escola / Destino <span class="obrig">*</span></label>
-                <input type="text" id="fUnidade" placeholder="Selecione ou digite..." autocomplete="off" />
-                <div class="auto-hint pend" id="hintUnidade" hidden></div>
-              </div>
-              <div class="form-group">
-                <label>Responsável pela Escola <span class="obrig">*</span></label>
-                <input type="text" id="fResponsavel" placeholder="Selecione na lista ou digite o nome de quem vai assinar..." autocomplete="off" />
-                <div class="auto-hint pend" id="hintResp" hidden></div>
-                <div class="dica-objetivo">O automático só sugere — você pode trocar quando outro responsável assinar.</div>
-              </div>
-              <div class="linha-tripla">
-                <div class="form-group">
-                  <label>Data da Visita <span class="obrig">*</span></label>
-                  <input type="date" id="fData" />
-                </div>
-                <div class="form-group">
-                  <label>Horário de Entrada <span class="obrig">*</span></label>
-                  <div class="input-row">
-                    <input type="time" id="fEntrada" />
-                    <button type="button" class="btn btn-outline btn-sm" onclick="setNowTime('fEntrada')">Agora</button>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label>Horário de Saída <span class="obrig">*</span></label>
-                  <div class="input-row">
-                    <input type="time" id="fSaida" />
-                    <button type="button" class="btn btn-outline btn-sm" onclick="setNowTime('fSaida')">Agora</button>
-                  </div>
-                </div>
-              </div>
-              <div class="form-group full">
-                <label>Objetivo da Visita <span class="obrig">*</span> <span id="objCounter" style="font-weight:500;color:var(--muted);">0 caracteres</span></label>
-                <div class="obj-multi">
-                  <button type="button" class="obj-multi-btn" id="objMultiBtn" onclick="toggleObjMenu(event)">
-                    <span>☑️ Selecionar objetivos da lista</span>
-                    <span class="obj-count" id="objCount" hidden>0</span>
-                    <span class="obj-caret">▾</span>
-                  </button>
-                  <div class="obj-menu" id="objMenu">
-                    <div class="obj-menu-top">
-                      <input type="text" id="objSearch" placeholder="🔍 Buscar objetivo..." oninput="renderObjLista()" />
-                    </div>
-                    <div class="obj-list" id="objLista"></div>
-                    <div class="obj-menu-foot">
-                      <button type="button" class="btn btn-outline btn-sm" onclick="limparObjetivos()">Limpar seleção</button>
-                      <button type="button" class="btn btn-primary btn-sm" onclick="fecharObjMenu()">Concluir</button>
-                    </div>
-                  </div>
-                </div>
-                <div class="obj-pills" id="objPills"></div>
-                <textarea id="fObjetivo" placeholder="Detalhes adicionais (opcional): escreva o que mais foi feito nesta visita..." oninput="atualizarContadorObjetivo()"></textarea>
-                <div class="dica-objetivo">💡 Marque os objetivos na lista. Mínimo de 25 caracteres. Se precisar de algo diferente, escreva no campo acima.</div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">2. Assinatura do Responsável pela Unidade <span class="obrig">*</span></div>
-              <button type="button" class="btn btn-accent btn-sm" onclick="openFullscreenSig()">📱 Assinar em Tela Cheia</button>
-            </div>
-            <div class="sig-aviso">
-              Ao assinar, você concorda com o registro eletrônico desta ficha, incluindo data, hora e código de verificação.
-            </div>
-            <div class="sig-box" id="sigBox">
-              <div class="sig-toolbar">
-                <div class="sig-group">
-                  <span class="sig-label">Cor</span>
-                  <button type="button" class="color-dot" style="background:#003580;" title="Azul" onclick="setPenColor('#003580', this, 'unit')"></button>
-                  <button type="button" class="color-dot active" style="background:#000000;" title="Preto" onclick="setPenColor('#000000', this, 'unit')"></button>
-                </div>
-                <div class="sig-group">
-                  <span class="sig-label">Ponta</span>
-                  <button type="button" class="pen-btn active" onclick="setPenWidth(2, this, 'unit')"><span class="pen-bar" style="height:1px;"></span>Fina</button>
-                  <button type="button" class="pen-btn" onclick="setPenWidth(3.5, this, 'unit')"><span class="pen-bar" style="height:3px;"></span>Média</button>
-                  <button type="button" class="pen-btn" onclick="setPenWidth(6, this, 'unit')"><span class="pen-bar" style="height:5px;"></span>Grossa</button>
-                </div>
-                <div class="sig-group">
-                  <button type="button" class="btn btn-outline btn-sm" onclick="padUnit.undo()">↩ Desfazer</button>
-                  <button type="button" class="btn btn-outline btn-sm" onclick="padUnit.clear()">🗑 Limpar</button>
-                </div>
-              </div>
-              <canvas id="sigCanvasUnit" class="sig-canvas"></canvas>
-              <div class="sig-guide">Assine acima desta linha</div>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;margin-top:18px;">
-              <button type="button" class="btn btn-warning" id="btnSavePending" onclick="saveVisit('pending')">⏳ Salvar Pendente</button>
-              <button type="button" class="btn btn-success" id="btnSaveSigned" onclick="saveVisit('signed')">✅ Enviar Ficha Assinada (PDF + Drive)</button>
-            </div>
-          </div>
-        </form>
-      </section>
-      <section class="view-section" id="view-reports">
-        <div class="page-header">
-          <div class="page-title"><h1>Relatórios &amp; PDFs no Drive</h1><p>Todas as fichas sincronizadas com link direto para o PDF oficial.</p></div>
-          <div class="header-actions">
-            <button class="btn btn-outline" onclick="syncVisitsFromCloud()">🔄 Atualizar</button>
-            <button class="btn btn-primary" onclick="exportCSV()">📥 Exportar CSV</button>
-            <button class="btn btn-danger" onclick="sairSistema()">🚪 Sair</button>
-          </div>
-        </div>
-        <div class="card">
-          <div class="filters-bar">
-            <input type="text" id="filterSearch" placeholder="🔍 Buscar servidor, escola, responsável ou protocolo..." oninput="renderReportsTable()" />
-            <select id="filterUnit" onchange="renderReportsTable()"><option value="">Todas as Unidades</option></select>
-            <select id="filterDept" onchange="renderReportsTable()"><option value="">Todos os Departamentos</option></select>
-            <select id="filterStatus" onchange="renderReportsTable()"><option value="">Todos os Status</option><option value="signed">✅ Assinadas</option><option value="pending">⏳ Pendentes</option></select>
-          </div>
-          <div class="filters-periodo">
-            <div class="campo-data">
-              <span>De</span>
-              <input type="date" id="filterDe" onchange="marcarAtalho('')" />
-            </div>
-            <div class="campo-data">
-              <span>Até</span>
-              <input type="date" id="filterAte" onchange="marcarAtalho('')" />
-            </div>
-            <div class="periodo-atalhos">
-              <button type="button" class="btn btn-outline" id="btHoje" onclick="setPeriodo('hoje')">Hoje</button>
-              <button type="button" class="btn btn-outline" id="bt7" onclick="setPeriodo('7')">7 dias</button>
-              <button type="button" class="btn btn-outline" id="btMes" onclick="setPeriodo('mes')">Este mês</button>
-            </div>
-          </div>
-          <div class="filtros-resumo">
-            <div id="filtrosResumo">—</div>
-            <button class="btn btn-outline btn-sm" onclick="setPeriodo('limpar')">Limpar filtros</button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Protocolo</th><th>Data</th><th>Servidor</th><th>Unidade</th><th>Responsável</th><th>Horário</th><th>Status</th><th>Ações</th></tr></thead>
-              <tbody id="reportsTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-      <section class="view-section" id="view-lists">
-        <div class="page-header">
-          <div class="page-title"><h1>Planilha, Drive &amp; Links de Acesso</h1><p>Gerencie a integração com o Google Drive e compartilhe o link exclusivo dos professores.</p></div>
-          <div class="header-actions">
-            <button class="btn btn-danger" onclick="sairSistema()">🚪 Sair</button>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-title" style="margin-bottom:10px;">🔗 Link Exclusivo para Professores (somente a ficha)</div>
-          <div class="input-row">
-            <input type="text" id="profLinkDisplay" readonly />
-            <button class="btn btn-primary" onclick="copyProfessorLink()">📋 Copiar Link</button>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-title" style="margin-bottom:10px;">☁️ Sincronização com Google Sheets &amp; Drive</div>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Status da integração: <strong id="cloudStatusLabel">Verificando...</strong></p>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Preenchimentos automáticos: <strong id="autoFillLabel">Verificando...</strong></p>
-          <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.55;">
-            Listas lidas das abas <strong>Servidores</strong>, <strong>Unidades</strong> e <strong>Objetivos</strong>.
-          </p>
-          <div style="display:flex;flex-wrap:wrap;gap:10px;">
-            <button class="btn btn-primary" onclick="syncTudo()">🔄 Sincronizar Listas &amp; Fichas</button>
-            <a href="https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit" target="_blank" class="btn btn-outline">Abrir Planilha ↗</a>
-            <a href="https://drive.google.com/drive/folders/1WyXDmpA_PBzXrrHUxr5yOByyq0ofLmlK" target="_blank" class="btn btn-outline">Abrir Pasta de PDFs no Drive ↗</a>
-          </div>
-        </div>
-      </section>
-    </main>
+  <div class="kg">
+    <div class="kc"><div class="kl">Total de Visitas</div><div class="kv" id="kpiTotal">0</div><div class="ks">Registros na base</div></div>
+    <div class="kc l"><div class="kl">Visitas Hoje</div><div class="kv" id="kpiToday">0</div><div class="ks" id="kpiTodayDate">—</div></div>
+    <div class="kc y"><div class="kl">Unidades Atendidas</div><div class="kv" id="kpiUnits">0</div><div class="ks">Escolas distintas</div></div>
+    <div class="kc g"><div class="kl">Taxa de Assinatura</div><div class="kv" id="kpiSignedRate">0%</div><div class="ks" id="kpiPendingText">0 pendentes</div></div>
+    <div class="kc a"><div class="kl">Tempo Médio</div><div class="kv" id="kpiAvgTime">0 min</div><div class="ks">Permanência</div></div>
   </div>
-  <div class="modal-backdrop" id="a4Modal">
-    <div class="modal-card">
-      <div class="modal-header no-print">
-        <strong style="color:var(--blue-dark);" id="a4ModalTitle">Comprovante — Ficha de Visita</strong>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <a id="modalDrivePdfBtn" href="#" target="_blank" class="btn btn-success btn-sm" style="display:none;">📁 Abrir PDF no Drive</a>
-          <button id="btnPrintA4" class="btn btn-primary btn-sm" onclick="window.print()">🖨️ Imprimir / PDF</button>
-          <button class="btn btn-outline btn-sm" onclick="document.getElementById('a4Modal').classList.remove('open')">Fechar ✕</button>
-        </div>
-      </div>
-      <div class="modal-body" id="a4ModalBody"></div>
+  <div class="cg">
+    <div class="card"><div class="ct" style="margin-bottom:10px">Visitas por Unidade</div><div class="cw"><canvas id="chartUnits"></canvas></div></div>
+    <div class="card"><div class="ct" style="margin-bottom:10px">Status das Assinaturas</div><div class="cw"><canvas id="chartStatus"></canvas></div></div>
+    <div class="card"><div class="ct" style="margin-bottom:10px">Visitas por Departamento</div><div class="cw"><canvas id="chartDepts"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="ch"><div class="ct">Últimas Visitas</div><button class="btn bo sm" onclick="switchView('reports')">Ver todas →</button></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Protocolo</th><th>Data</th><th>Servidor</th><th>Unidade</th><th>Responsável</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody id="recentVisitsBody"></tbody>
+      </table>
     </div>
   </div>
-  <div class="fs-sig-modal" id="fsSigModal">
-    <div class="fs-sig-top">
-      <strong>Assinatura Digital (Tela Cheia)</strong>
-      <button class="btn btn-outline btn-sm" onclick="document.getElementById('fsSigModal').classList.remove('open')">Cancelar</button>
-    </div>
-    <div class="fs-sig-tools">
-      <div class="sig-group">
-        <span class="sig-label">Cor</span>
-        <button type="button" class="color-dot" style="background:#003580;" title="Azul" onclick="setPenColor('#003580', this, 'fs')"></button>
-        <button type="button" class="color-dot active" style="background:#000000;" title="Preto" onclick="setPenColor('#000000', this, 'fs')"></button>
-      </div>
-      <div class="sig-group">
-        <span class="sig-label">Ponta</span>
-        <button type="button" class="pen-btn active" onclick="setPenWidth(2, this, 'fs')"><span class="pen-bar" style="height:1px;"></span>Fina</button>
-        <button type="button" class="pen-btn" onclick="setPenWidth(3.5, this, 'fs')"><span class="pen-bar" style="height:3px;"></span>Média</button>
-        <button type="button" class="pen-btn" onclick="setPenWidth(6, this, 'fs')"><span class="pen-bar" style="height:5px;"></span>Grossa</button>
-      </div>
-    </div>
-    <div class="fs-sig-canvas-wrap"><canvas id="fsSigCanvas"></canvas><div class="sig-guide">Assine acima desta linha</div></div>
-    <div class="fs-sig-bottom">
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-outline btn-sm" onclick="padFs.undo()">↩ Desfazer</button>
-        <button class="btn btn-outline btn-sm" onclick="padFs.clear()">🗑 Limpar</button>
-      </div>
-      <button class="btn btn-success" onclick="confirmFullscreenSig()">✅ Confirmar Assinatura</button>
+</section>
+
+<section class="vs" id="view-new">
+  <div class="ph">
+    <div class="pt">
+      <h1>Ficha de Visita Digital</h1>
+      <p>Todos os campos com <span style="color:var(--dg);font-weight:800">*</span> são obrigatórios. A ficha só é enviada com tudo preenchido.</p>
     </div>
   </div>
-  <div class="toast" id="toast"></div>
-  <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec';
-    const SHEET_ID = '1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU';
-    const COORDINATOR_PIN = '2026';
-    const DRIVE_LOGO_ID = '1Wr0oaQn3PFDETlL2jskRZJlaZdeVxRCW';
-    const LOGO_URL = 'https://lh3.googleusercontent.com/d/' + DRIVE_LOGO_ID;
-    const OBJETIVO_MIN_CHARS = 25;
-    const AREA_MINIMA_ASSINATURA = 0.02;
-    const EXIGIR_TUDO_NO_PENDENTE = true;
-    const DEFAULT_LISTS = {
-      servidores: [], departamentos: [], unidades: [], objetivos: [], responsaveis: []
-    };
-    let visits = JSON.parse(localStorage.getItem('cemtec_visits_v5') || '[]').map(function (v) {
-      return Object.assign({}, v, { entrada: formatTimeClean(v.entrada), saida: formatTimeClean(v.saida) });
+  <form id="visitForm" onsubmit="return false" novalidate>
+    <div class="card">
+      <div class="ct" style="margin-bottom:14px">1. Dados da Visita</div>
+      <div class="fg">
+        <div class="gp">
+          <label>Nome do Servidor <span class="ob">*</span></label>
+          <input type="text" id="fServidor" placeholder="Selecione ou digite..." autocomplete="off" />
+        </div>
+        <div class="gp">
+          <label>Departamento <span class="ob">*</span></label>
+          <input type="text" id="fDepartamento" placeholder="Selecione ou digite..." autocomplete="off" />
+          <div class="hint pend" id="hintDepto" hidden></div>
+        </div>
+        <div class="gp">
+          <label>Unidade / Escola / Destino <span class="ob">*</span></label>
+          <input type="text" id="fUnidade" placeholder="Selecione ou digite..." autocomplete="off" />
+          <div class="hint pend" id="hintUnidade" hidden></div>
+        </div>
+        <div class="gp">
+          <label>Responsável pela Escola <span class="ob">*</span></label>
+          <input type="text" id="fResponsavel" placeholder="Selecione na lista ou digite o nome de quem vai assinar..." autocomplete="off" />
+          <div class="hint pend" id="hintResp" hidden></div>
+          <div class="dica">O automático só sugere — você pode trocar quando outro responsável assinar.</div>
+        </div>
+        <div class="l3">
+          <div class="gp">
+            <label>Data da Visita <span class="ob">*</span></label>
+            <input type="date" id="fData" />
+          </div>
+          <div class="gp">
+            <label>Horário de Entrada <span class="ob">*</span></label>
+            <div class="ir">
+              <input type="time" id="fEntrada" />
+              <button type="button" class="btn bo sm" onclick="setNowTime('fEntrada')">Agora</button>
+            </div>
+          </div>
+          <div class="gp">
+            <label>Horário de Saída <span class="ob">*</span></label>
+            <div class="ir">
+              <input type="time" id="fSaida" />
+              <button type="button" class="btn bo sm" onclick="setNowTime('fSaida')">Agora</button>
+            </div>
+          </div>
+        </div>
+        <div class="gp full">
+          <label>Objetivo da Visita <span class="ob">*</span> <span id="objCounter" style="font-weight:500;color:var(--mt)">0 caracteres</span></label>
+          <div class="objm">
+            <button type="button" class="objmb" id="objMultiBtn" onclick="toggleObjMenu(event)">
+              <span>☑️ Selecionar objetivos da lista</span>
+              <span class="objc" id="objCount" hidden>0</span>
+              <span class="oc">▾</span>
+            </button>
+            <div class="objmenu" id="objMenu">
+              <div class="objtop"><input type="text" id="objSearch" placeholder="🔍 Buscar objetivo..." oninput="renderObjLista()" /></div>
+              <div class="objlist" id="objLista"></div>
+              <div class="objfoot">
+                <button type="button" class="btn bo sm" onclick="limparObjetivos()">Limpar seleção</button>
+                <button type="button" class="btn bp sm" onclick="fecharObjMenu()">Concluir</button>
+              </div>
+            </div>
+          </div>
+          <div class="pills" id="objPills"></div>
+          <textarea id="fObjetivo" placeholder="Detalhes adicionais (opcional): escreva o que mais foi feito nesta visita..." oninput="atualizarContadorObjetivo()"></textarea>
+          <div class="dica">💡 Marque os objetivos na lista. Mínimo de 25 caracteres. Se precisar de algo diferente, escreva no campo acima.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch">
+        <div class="ct">2. Assinatura do Responsável pela Unidade <span class="ob">*</span></div>
+        <button type="button" class="btn ba sm" onclick="openFullscreenSig()">📱 Assinar em Tela Cheia</button>
+      </div>
+      <div class="sigav">Ao assinar, você concorda com o registro eletrônico desta ficha, incluindo data, hora e código de verificação.</div>
+      <div class="sigbox" id="sigBox">
+        <div class="sigtool">
+          <div class="sigg">
+            <span class="sigl">Cor</span>
+            <button type="button" class="cdot" style="background:#003580" title="Azul" onclick="setPenColor('#003580',this,'unit')"></button>
+            <button type="button" class="cdot active" style="background:#000000" title="Preto" onclick="setPenColor('#000000',this,'unit')"></button>
+          </div>
+          <div class="sigg">
+            <span class="sigl">Ponta</span>
+            <button type="button" class="pbtn active" onclick="setPenWidth(2,this,'unit')"><span class="pbar" style="height:1px"></span>Fina</button>
+            <button type="button" class="pbtn" onclick="setPenWidth(3.5,this,'unit')"><span class="pbar" style="height:3px"></span>Média</button>
+            <button type="button" class="pbtn" onclick="setPenWidth(6,this,'unit')"><span class="pbar" style="height:5px"></span>Grossa</button>
+          </div>
+          <div class="sigg">
+            <button type="button" class="btn bo sm" onclick="padUnit.undo()">↩ Desfazer</button>
+            <button type="button" class="btn bo sm" onclick="padUnit.clear()">🗑 Limpar</button>
+          </div>
+        </div>
+        <canvas id="sigCanvasUnit" class="sigcv"></canvas>
+        <div class="sigguide">Assine acima desta linha</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;margin-top:18px">
+        <button type="button" class="btn bw" id="btnSavePending" onclick="saveVisit('pending')">⏳ Salvar Pendente</button>
+        <button type="button" class="btn bs" id="btnSaveSigned" onclick="saveVisit('signed')">✅ Enviar Ficha Assinada (PDF + Drive)</button>
+      </div>
+    </div>
+  </form>
+</section>
+
+<section class="vs" id="view-reports">
+  <div class="ph">
+    <div class="pt"><h1>Relatórios &amp; PDFs no Drive</h1><p>Todas as fichas sincronizadas com link direto para o PDF oficial.</p></div>
+    <div class="hacts">
+      <button class="btn bo" onclick="syncVisitsFromCloud()">🔄 Atualizar</button>
+      <button class="btn bp" onclick="exportCSV()">📥 Exportar CSV</button>
+      <button class="btn bdx" onclick="sairSistema()">🚪 Sair</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="fb">
+      <input type="text" id="filterSearch" placeholder="🔍 Buscar servidor, escola, responsável ou protocolo..." oninput="renderReportsTable()" />
+      <select id="filterUnit" onchange="renderReportsTable()"><option value="">Todas as Unidades</option></select>
+      <select id="filterDept" onchange="renderReportsTable()"><option value="">Todos os Departamentos</option></select>
+      <select id="filterStatus" onchange="renderReportsTable()"><option value="">Todos os Status</option><option value="signed">✅ Assinadas</option><option value="pending">⏳ Pendentes</option></select>
+    </div>
+    <div class="fp">
+      <div class="cd"><span>De</span><input type="date" id="filterDe" onchange="marcarAtalho('')" /></div>
+      <div class="cd"><span>Até</span><input type="date" id="filterAte" onchange="marcarAtalho('')" /></div>
+      <div class="patal">
+        <button type="button" class="btn bo" id="btHoje" onclick="setPeriodo('hoje')">Hoje</button>
+        <button type="button" class="btn bo" id="bt7" onclick="setPeriodo('7')">7 dias</button>
+        <button type="button" class="btn bo" id="btMes" onclick="setPeriodo('mes')">Este mês</button>
+      </div>
+    </div>
+    <div class="fres">
+      <div id="filtrosResumo">—</div>
+      <button class="btn bo sm" onclick="setPeriodo('limpar')">Limpar filtros</button>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Protocolo</th><th>Data</th><th>Servidor</th><th>Unidade</th><th>Responsável</th><th>Horário</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody id="reportsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="vs" id="view-lists">
+  <div class="ph">
+    <div class="pt"><h1>Planilha, Drive &amp; Links de Acesso</h1><p>Gerencie a integração com o Google Drive e compartilhe o link exclusivo dos professores.</p></div>
+    <div class="hacts"><button class="btn bdx" onclick="sairSistema()">🚪 Sair</button></div>
+  </div>
+  <div class="card">
+    <div class="ct" style="margin-bottom:10px">🔗 Link Exclusivo para Professores (somente a ficha)</div>
+    <div class="ir">
+      <input type="text" id="profLinkDisplay" readonly />
+      <button class="btn bp" onclick="copyProfessorLink()">📋 Copiar Link</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct" style="margin-bottom:10px">☁️ Sincronização com Google Sheets &amp; Drive</div>
+    <p style="font-size:13px;color:var(--mt);margin-bottom:12px">Status da integração: <strong id="cloudStatusLabel">Verificando...</strong></p>
+    <p style="font-size:13px;color:var(--mt);margin-bottom:12px">Preenchimentos automáticos: <strong id="autoFillLabel">Verificando...</strong></p>
+    <p style="font-size:12px;color:var(--mt);margin-bottom:12px;line-height:1.55">Listas lidas das abas <strong>Servidores</strong>, <strong>Unidades</strong> e <strong>Objetivos</strong>.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      <button class="btn bp" onclick="syncTudo()">🔄 Sincronizar Listas &amp; Fichas</button>
+      <a href="https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit" target="_blank" class="btn bo">Abrir Planilha ↗</a>
+      <a href="https://drive.google.com/drive/folders/1WyXDmpA_PBzXrrHUxr5yOByyq0ofLmlK" target="_blank" class="btn bo">Abrir Pasta de PDFs no Drive ↗</a>
+    </div>
+  </div>
+</section>
+</main>
+</div>
+
+<div class="mbk" id="a4Modal">
+  <div class="mcard">
+    <div class="mhead2 no-print">
+      <strong style="color:var(--bd)" id="a4ModalTitle">Comprovante — Ficha de Visita</strong>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a id="modalDrivePdfBtn" href="#" target="_blank" class="btn bs sm" style="display:none">📁 Abrir PDF no Drive</a>
+        <button id="btnPrintA4" class="btn bp sm" onclick="window.print()">🖨️ Imprimir / PDF</button>
+        <button class="btn bo sm" onclick="document.getElementById('a4Modal').classList.remove('open')">Fechar ✕</button>
+      </div>
+    </div>
+    <div class="mbody" id="a4ModalBody"></div>
+  </div>
+</div>
+
+<div class="fsig" id="fsSigModal">
+  <div class="fstop">
+    <strong>Assinatura Digital (Tela Cheia)</strong>
+    <button class="btn bo sm" onclick="document.getElementById('fsSigModal').classList.remove('open')">Cancelar</button>
+  </div>
+  <div class="fstools">
+    <div class="sigg">
+      <span class="sigl">Cor</span>
+      <button type="button" class="cdot" style="background:#003580" title="Azul" onclick="setPenColor('#003580',this,'fs')"></button>
+      <button type="button" class="cdot active" style="background:#000000" title="Preto" onclick="setPenColor('#000000',this,'fs')"></button>
+    </div>
+    <div class="sigg">
+      <span class="sigl">Ponta</span>
+      <button type="button" class="pbtn active" onclick="setPenWidth(2,this,'fs')"><span class="pbar" style="height:1px"></span>Fina</button>
+      <button type="button" class="pbtn" onclick="setPenWidth(3.5,this,'fs')"><span class="pbar" style="height:3px"></span>Média</button>
+      <button type="button" class="pbtn" onclick="setPenWidth(6,this,'fs')"><span class="pbar" style="height:5px"></span>Grossa</button>
+    </div>
+  </div>
+  <div class="fscw"><canvas id="fsSigCanvas"></canvas><div class="sigguide">Assine acima desta linha</div></div>
+  <div class="fsbot">
+    <div style="display:flex;gap:8px">
+      <button class="btn bo sm" onclick="padFs.undo()">↩ Desfazer</button>
+      <button class="btn bo sm" onclick="padFs.clear()">🗑 Limpar</button>
+    </div>
+    <button class="btn bs" onclick="confirmFullscreenSig()">✅ Confirmar Assinatura</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec';
+const SHEET_ID='1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU';
+const COORDINATOR_PIN='2026';
+const DRIVE_LOGO_ID='1Wr0oaQn3PFDETlL2jskRZJlaZdeVxRCW';
+const LOGO_URL='https://lh3.googleusercontent.com/d/'+DRIVE_LOGO_ID;
+const OBJETIVO_MIN_CHARS=25;
+const AREA_MINIMA_ASSINATURA=0.02;
+const EXIGIR_TUDO_NO_PENDENTE=true;
+const DEFAULT_LISTS={servidores:[],departamentos:[],unidades:[],objetivos:[],responsaveis:[]};
+
+let visits=JSON.parse(localStorage.getItem('cemtec_visits_v5')||'[]').map(function(v){
+  return Object.assign({},v,{entrada:formatTimeClean(v.entrada),saida:formatTimeClean(v.saida)});
+});
+let lists=JSON.parse(localStorage.getItem('cemtec_lists_v5')||'null')||JSON.parse(JSON.stringify(DEFAULT_LISTS));
+if(!Array.isArray(lists.responsaveis))lists.responsaveis=[];
+if(!Array.isArray(lists.paresServidor))lists.paresServidor=[];
+if(!Array.isArray(lists.paresUnidade))lists.paresUnidade=[];
+let mapaServidorDepto={};
+let mapaUnidadeResp={};
+let selectedObjetivos=[];
+let padUnit,padFs,charts={};
+let enviando=false;
+const params=new URLSearchParams(window.location.search);
+const isProfessorMode=params.get('modo')==='ficha';
+const autoState={depto:false,unidade:false,resp:false,prog:false};
+
+/* ============ COMBO ============ */
+const COMBO_FONTES={
+  fServidor:function(){return lists.servidores||[];},
+  fDepartamento:function(){return lists.departamentos||[];},
+  fUnidade:function(){return lists.unidades||[];},
+  fResponsavel:function(){return lists.responsaveis||[];}
+};
+const combos={};
+
+function criarCombo(id){
+  const input=document.getElementById(id);
+  if(!input||input._combo)return;
+
+  const wrap=document.createElement('div');
+  wrap.className='combo';
+  input.parentNode.insertBefore(wrap,input);
+  wrap.appendChild(input);
+  input.setAttribute('autocomplete','off');
+  input.removeAttribute('list');
+
+  const limpar=document.createElement('button');
+  limpar.type='button';
+  limpar.className='clim';
+  limpar.tabIndex=-1;
+  limpar.setAttribute('aria-label','Limpar campo');
+  limpar.title='Limpar e escolher de novo';
+  limpar.textContent='×';
+  wrap.appendChild(limpar);
+
+  const seta=document.createElement('button');
+  seta.type='button';
+  seta.className='cset';
+  seta.tabIndex=-1;
+  seta.setAttribute('aria-label','Abrir lista');
+  seta.textContent='▾';
+  wrap.appendChild(seta);
+
+  const panel=document.createElement('div');
+  panel.className='cpan';
+  document.body.appendChild(panel);
+
+  const st={aberto:false,idx:-1,itens:[],digitou:false,programatico:false};
+
+  function todos(){
+    const fn=COMBO_FONTES[id];
+    return fn?fn().slice():[];
+  }
+  function atualizarLimpar(){
+    wrap.classList.toggle('tem',String(input.value||'').trim()!=='');
+  }
+  function filtrar(){
+    const lista=todos();
+    if(!st.digitou)return lista;
+    const q=normaliza(input.value);
+    if(!q)return lista;
+    const comeca=[],contem=[];
+    lista.forEach(function(o){
+      const n=normaliza(o);
+      if(n.indexOf(q)===0)comeca.push(o);
+      else if(n.indexOf(q)!==-1)contem.push(o);
     });
-    let lists = JSON.parse(localStorage.getItem('cemtec_lists_v5') || 'null') || JSON.parse(JSON.stringify(DEFAULT_LISTS));
-    if (!Array.isArray(lists.responsaveis)) lists.responsaveis = [];
-    if (!Array.isArray(lists.paresServidor)) lists.paresServidor = [];
-    if (!Array.isArray(lists.paresUnidade)) lists.paresUnidade = [];
-    let mapaServidorDepto = {};
-    let mapaUnidadeResp = {};
-    let selectedObjetivos = [];
-    let padUnit, padFs, charts = {};
-    let enviando = false;
-    const params = new URLSearchParams(window.location.search);
-    const isProfessorMode = params.get('modo') === 'ficha';
-
-    const autoState = { depto: false, unidade: false, resp: false, prog: false };
-
-    /* ============================================================
-       COMBO
-       ============================================================ */
-    const COMBO_FONTES = {
-      fServidor:     function () { return lists.servidores || []; },
-      fDepartamento: function () { return lists.departamentos || []; },
-      fUnidade:      function () { return lists.unidades || []; },
-      fResponsavel:  function () { return lists.responsaveis || []; }
-    };
-    const combos = {};
-
-    function criarCombo(id) {
-      const input = document.getElementById(id);
-      if (!input || input._combo) return;
-
-      const wrap = document.createElement('div');
-      wrap.className = 'combo';
-      input.parentNode.insertBefore(wrap, input);
-      wrap.appendChild(input);
-      input.setAttribute('autocomplete', 'off');
-      input.removeAttribute('list');
-
-      const limpar = document.createElement('button');
-      limpar.type = 'button';
-      limpar.className = 'combo-limpar';
-      limpar.tabIndex = -1;
-      limpar.setAttribute('aria-label', 'Limpar campo');
-      limpar.title = 'Limpar e escolher de novo';
-      limpar.textContent = '×';
-      wrap.appendChild(limpar);
-
-      const seta = document.createElement('button');
-      seta.type = 'button';
-      seta.className = 'combo-seta';
-      seta.tabIndex = -1;
-      seta.setAttribute('aria-label', 'Abrir lista');
-      seta.textContent = '▾';
-      wrap.appendChild(seta);
-
-      const panel = document.createElement('div');
-      panel.className = 'combo-panel';
-      document.body.appendChild(panel);
-
-      const st = { aberto: false, idx: -1, itens: [], digitou: false, programatico: false };
-
-      function todos() {
-        const fn = COMBO_FONTES[id];
-        const arr = fn ? fn() : [];
-        return arr.slice();
-      }
-
-      function atualizarLimpar() {
-        wrap.classList.toggle('tem-valor', String(input.value || '').trim() !== '');
-      }
-
-      function filtrar() {
-        const lista = todos();
-        if (!st.digitou) return lista;
-        const q = normaliza(input.value);
-        if (!q) return lista;
-        const comeca = [], contem = [];
-        lista.forEach(function (o) {
-          const n = normaliza(o);
-          if (n.indexOf(q) === 0) comeca.push(o);
-          else if (n.indexOf(q) !== -1) contem.push(o);
-        });
-        return comeca.concat(contem);
-      }
-
-      function posicionar() {
-        if (!st.aberto) return;
-        const v = window.visualViewport;
-        const vh = v ? v.height : window.innerHeight;
-        const vtop = v ? v.offsetTop : 0;
-        const r = input.getBoundingClientRect();
-        const largura = Math.min(Math.max(r.width, 200), window.innerWidth - 16);
-
-        panel.style.width = largura + 'px';
-        panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - largura - 8)) + 'px';
-
-        const abaixo = (vtop + vh) - r.bottom - 8;
-        const acima  = r.top - vtop - 8;
-        const altura = Math.min(280, Math.max(150, st.itens.length * 44 + 12));
-
-        if (abaixo < 160 && acima > abaixo) {
-          panel.style.top = 'auto';
-          panel.style.bottom = (window.innerHeight - r.top + 6) + 'px';
-          panel.style.maxHeight = Math.max(110, Math.min(altura, acima)) + 'px';
-        } else {
-          panel.style.bottom = 'auto';
-          panel.style.top = (r.bottom + 6) + 'px';
-          panel.style.maxHeight = Math.max(110, Math.min(altura, Math.max(130, abaixo))) + 'px';
-        }
-      }
-
-      function render() {
-        st.itens = filtrar();
-        st.idx = -1;
-        atualizarLimpar();
-
-        if (!st.itens.length) {
-          panel.innerHTML = '<div class="combo-vazio">Nenhuma opção encontrada.</div>';
-          return;
-        }
-
-        const atual = normaliza(input.value);
-        let html = st.itens.map(function (o, i) {
-          const eh = (normaliza(o) === atual && String(input.value || '').trim()) ? ' atual' : '';
-          return '<div class="combo-item' + eh + '" data-i="' + i + '">' + esc(o) + '</div>';
-        }).join('');
-
-        if (String(input.value || '').trim()) {
-          html += '<div class="combo-rodape">' +
-                    '<button type="button" class="combo-btn-limpar">Limpar campo e escolher de novo</button>' +
-                  '</div>';
-        }
-
-        panel.innerHTML = html;
-
-        panel.querySelectorAll('.combo-item').forEach(function (el) {
-          el.addEventListener('pointerdown', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            escolher(Number(el.getAttribute('data-i')));
-          });
-        });
-
-        const bLimpar = panel.querySelector('.combo-btn-limpar');
-        if (bLimpar) {
-          bLimpar.addEventListener('pointerdown', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            limparCampo();
-          });
-        }
-      }
-
-      function escolher(i) {
-        const v = st.itens[i];
-        if (v === undefined) return;
-        st.programatico = true;
-        input.value = v;
-        input.classList.remove('campo-erro');
-        st.programatico = false;
-        st.digitou = false;
-        fechar();
-        atualizarLimpar();
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-
-      function limparCampo() {
-        st.programatico = true;
-        input.value = '';
-        st.programatico = false;
-        input.classList.remove('campo-erro');
-        st.digitou = false;
-        atualizarLimpar();
-        render();
-        posicionar();
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.dispatchEvent(new Event('change', { bubbles: true }));
-        setTimeout(function () { try { input.focus(); } catch (e) {} }, 10);
-      }
-
-      function abrir(mostrarTudo) {
-        if (mostrarTudo !== false) st.digitou = false;
-        st.aberto = true;
-        render();
-        panel.classList.add('open');
-        posicionar();
-      }
-
-      function fechar() {
-        st.aberto = false;
-        st.idx = -1;
-        panel.classList.remove('open');
-      }
-
-      function mover(d) {
-        if (!st.itens.length) return;
-        st.idx = (st.idx + d + st.itens.length) % st.itens.length;
-        panel.querySelectorAll('.combo-item').forEach(function (el, i) {
-          el.classList.toggle('ativo', i === st.idx);
-          if (i === st.idx) { try { el.scrollIntoView({ block: 'nearest' }); } catch (e) {} }
-        });
-      }
-
-      input.addEventListener('focus', function () {
-        st.digitou = false;
-        setTimeout(function () {
-          if (document.activeElement === input) abrir(true);
-        }, 30);
+    return comeca.concat(contem);
+  }
+  function posicionar(){
+    if(!st.aberto)return;
+    const v=window.visualViewport;
+    const vh=v?v.height:window.innerHeight;
+    const vtop=v?v.offsetTop:0;
+    const r=input.getBoundingClientRect();
+    const largura=Math.min(Math.max(r.width,200),window.innerWidth-16);
+    panel.style.width=largura+'px';
+    panel.style.left=Math.max(8,Math.min(r.left,window.innerWidth-largura-8))+'px';
+    const abaixo=(vtop+vh)-r.bottom-8;
+    const acima=r.top-vtop-8;
+    const altura=Math.min(280,Math.max(150,st.itens.length*44+12));
+    if(abaixo<160&&acima>abaixo){
+      panel.style.top='auto';
+      panel.style.bottom=(window.innerHeight-r.top+6)+'px';
+      panel.style.maxHeight=Math.max(110,Math.min(altura,acima))+'px';
+    }else{
+      panel.style.bottom='auto';
+      panel.style.top=(r.bottom+6)+'px';
+      panel.style.maxHeight=Math.max(110,Math.min(altura,Math.max(130,abaixo)))+'px';
+    }
+  }
+  function render(){
+    st.itens=filtrar();
+    st.idx=-1;
+    atualizarLimpar();
+    if(!st.itens.length){
+      panel.innerHTML='<div class="cvazio">Nenhuma opção encontrada.</div>';
+      return;
+    }
+    const atual=normaliza(input.value);
+    let html=st.itens.map(function(o,i){
+      const eh=(normaliza(o)===atual&&String(input.value||'').trim())?' atual':'';
+      return '<div class="citem'+eh+'" data-i="'+i+'">'+esc(o)+'</div>';
+    }).join('');
+    if(String(input.value||'').trim()){
+      html+='<div class="crod"><button type="button" class="cbtnl">Limpar campo e escolher de novo</button></div>';
+    }
+    panel.innerHTML=html;
+    panel.querySelectorAll('.citem').forEach(function(el){
+      el.addEventListener('pointerdown',function(e){
+        e.preventDefault();e.stopPropagation();
+        escolher(Number(el.getAttribute('data-i')));
       });
-
-      input.addEventListener('click', function () { abrir(true); });
-
-      input.addEventListener('input', function () {
-        if (st.programatico) { atualizarLimpar(); return; }
-        st.digitou = true;
-        if (!st.aberto) abrir(false);
-        else { render(); posicionar(); }
-      });
-
-      input.addEventListener('change', atualizarLimpar);
-
-      seta.addEventListener('pointerdown', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (st.aberto) { fechar(); }
-        else { input.focus(); setTimeout(function () { abrir(true); }, 60); }
-      });
-
-      limpar.addEventListener('pointerdown', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
+    });
+    const bLimpar=panel.querySelector('.cbtnl');
+    if(bLimpar){
+      bLimpar.addEventListener('pointerdown',function(e){
+        e.preventDefault();e.stopPropagation();
         limparCampo();
       });
+    }
+  }
+  function escolher(i){
+    const v=st.itens[i];
+    if(v===undefined)return;
+    st.programatico=true;
+    input.value=v;
+    input.classList.remove('err');
+    st.programatico=false;
+    st.digitou=false;
+    fechar();
+    atualizarLimpar();
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+    input.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  function limparCampo(){
+    st.programatico=true;
+    input.value='';
+    st.programatico=false;
+    input.classList.remove('err');
+    st.digitou=false;
+    atualizarLimpar();
+    render();
+    posicionar();
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+    input.dispatchEvent(new Event('change',{bubbles:true}));
+    setTimeout(function(){try{input.focus();}catch(e){}},10);
+  }
+  function abrir(mostrarTudo){
+    if(mostrarTudo!==false)st.digitou=false;
+    st.aberto=true;
+    render();
+    panel.classList.add('open');
+    posicionar();
+  }
+  function fechar(){
+    st.aberto=false;
+    st.idx=-1;
+    panel.classList.remove('open');
+  }
+  function mover(d){
+    if(!st.itens.length)return;
+    st.idx=(st.idx+d+st.itens.length)%st.itens.length;
+    panel.querySelectorAll('.citem').forEach(function(el,i){
+      el.classList.toggle('ativo',i===st.idx);
+      if(i===st.idx){try{el.scrollIntoView({block:'nearest'});}catch(e){}}
+    });
+  }
 
-      input.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowDown') { e.preventDefault(); if (!st.aberto) abrir(true); setTimeout(function () { mover(1); }, 10); return; }
-        if (e.key === 'ArrowUp')   { e.preventDefault(); if (!st.aberto) abrir(true); setTimeout(function () { mover(-1); }, 10); return; }
-        if (e.key === 'Enter') {
-          if (st.aberto && st.idx >= 0) { e.preventDefault(); escolher(st.idx); }
-          else if (st.aberto) { e.preventDefault(); fechar(); }
-          return;
-        }
-        if (e.key === 'Escape') { fechar(); }
-      });
+  input.addEventListener('focus',function(){
+    st.digitou=false;
+    setTimeout(function(){if(document.activeElement===input)abrir(true);},30);
+  });
+  input.addEventListener('click',function(){abrir(true);});
+  input.addEventListener('input',function(){
+    if(st.programatico){atualizarLimpar();return;}
+    st.digitou=true;
+    if(!st.aberto)abrir(false);
+    else{render();posicionar();}
+  });
+  input.addEventListener('change',atualizarLimpar);
+  seta.addEventListener('pointerdown',function(e){
+    e.preventDefault();e.stopPropagation();
+    if(st.aberto){fechar();}
+    else{input.focus();setTimeout(function(){abrir(true);},60);}
+  });
+  limpar.addEventListener('pointerdown',function(e){
+    e.preventDefault();e.stopPropagation();
+    limparCampo();
+  });
+  input.addEventListener('keydown',function(e){
+    if(e.key==='ArrowDown'){e.preventDefault();if(!st.aberto)abrir(true);setTimeout(function(){mover(1);},10);return;}
+    if(e.key==='ArrowUp'){e.preventDefault();if(!st.aberto)abrir(true);setTimeout(function(){mover(-1);},10);return;}
+    if(e.key==='Enter'){
+      if(st.aberto&&st.idx>=0){e.preventDefault();escolher(st.idx);}
+      else if(st.aberto){e.preventDefault();fechar();}
+      return;
+    }
+    if(e.key==='Escape'){fechar();}
+  });
+  document.addEventListener('pointerdown',function(e){
+    if(!st.aberto)return;
+    if(wrap.contains(e.target)||panel.contains(e.target))return;
+    fechar();
+  });
+  window.addEventListener('scroll',function(){if(st.aberto)posicionar();},true);
+  window.addEventListener('resize',function(){if(st.aberto)posicionar();});
+  window.addEventListener('orientationchange',function(){
+    setTimeout(function(){if(st.aberto)posicionar();},300);
+  });
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',function(){if(st.aberto)posicionar();});
+    window.visualViewport.addEventListener('scroll',function(){if(st.aberto)posicionar();});
+  }
 
-      document.addEventListener('pointerdown', function (e) {
-        if (!st.aberto) return;
-        if (wrap.contains(e.target) || panel.contains(e.target)) return;
-        fechar();
-      });
+  atualizarLimpar();
+  input._combo={abrir:abrir,fechar:fechar,limpar:limparCampo};
+  combos[id]=input._combo;
+}
 
-      window.addEventListener('scroll', function () { if (st.aberto) posicionar(); }, true);
-      window.addEventListener('resize', function () { if (st.aberto) posicionar(); });
-      window.addEventListener('orientationchange', function () {
-        setTimeout(function () { if (st.aberto) posicionar(); }, 300);
-      });
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', function () { if (st.aberto) posicionar(); });
-        window.visualViewport.addEventListener('scroll', function () { if (st.aberto) posicionar(); });
-      }
+function criarCombos(){
+  Object.keys(COMBO_FONTES).forEach(criarCombo);
+}
+function fecharTodosCombos(){
+  Object.keys(combos).forEach(function(k){
+    try{combos[k].fechar();}catch(e){}
+  });
+}
+function atualizarTodosCombos(){
+  document.querySelectorAll('.combo').forEach(function(w){
+    const i=w.querySelector('input');
+    if(i)w.classList.toggle('tem',String(i.value||'').trim()!=='');
+  });
+}
 
-      atualizarLimpar();
-      input._combo = { abrir: abrir, fechar: fechar, limpar: limparCampo };
-      combos[id] = input._combo;
-    }
+/* ============ SESSÃO ============ */
+function getModoSalvo(){
+  try{return sessionStorage.getItem('cemtec_modo')||'';}catch(e){return '';}
+}
+function setModoSalvo(m){
+  try{sessionStorage.setItem('cemtec_modo',m);}catch(e){}
+}
+function sairSistema(){
+  try{
+    sessionStorage.removeItem('cemtec_coord_auth');
+    sessionStorage.removeItem('cemtec_modo');
+  }catch(e){}
+  fecharTodosCombos();
+  document.body.classList.remove('prof');
+  var base=window.location.href.split('?')[0];
+  if(window.location.search){
+    window.location.replace(base);
+    return;
+  }
+  var gate=document.getElementById('pinGate');
+  if(gate)gate.classList.add('open');
+  var pin=document.getElementById('pinInput');
+  var err=document.getElementById('pinError');
+  if(err)err.textContent='';
+  if(pin){pin.value='';setTimeout(function(){pin.focus();},100);}
+}
 
-    function criarCombos() {
-      Object.keys(COMBO_FONTES).forEach(criarCombo);
+/* ============ ASSINATURA ============ */
+class SignaturePad{
+  constructor(canvas){
+    this.canvas=canvas;
+    this.ctx=canvas.getContext('2d');
+    this.color='#000000';
+    this.width=2;
+    this.strokes=[];
+    this.drawing=false;
+    this.w=0;this.h=0;
+    this.bind();
+    this.resize();
+    if(window.ResizeObserver){
+      var self=this;
+      this._ro=new ResizeObserver(function(){self.resize();});
+      this._ro.observe(canvas);
     }
-
-    function fecharTodosCombos() {
-      Object.keys(combos).forEach(function (k) {
-        try { combos[k].fechar(); } catch (e) {}
-      });
-    }
-
-    function atualizarTodosCombos() {
-      document.querySelectorAll('.combo').forEach(function (w) {
-        const i = w.querySelector('input');
-        if (i) w.classList.toggle('tem-valor', String(i.value || '').trim() !== '');
-      });
-    }
-
-    /* ============================================================
-       SESSÃO / MODO
-       ============================================================ */
-    function getModoSalvo() {
-      try { return sessionStorage.getItem('cemtec_modo') || ''; } catch (e) { return ''; }
-    }
-    function setModoSalvo(m) {
-      try { sessionStorage.setItem('cemtec_modo', m); } catch (e) {}
-    }
-    function sairSistema() {
-      try {
-        sessionStorage.removeItem('cemtec_coord_auth');
-        sessionStorage.removeItem('cemtec_modo');
-      } catch (e) {}
-      fecharTodosCombos();
-      document.body.classList.remove('mode-professor');
-      var base = window.location.href.split('?')[0];
-      if (window.location.search) {
-        window.location.replace(base);
-        return;
-      }
-      var gate = document.getElementById('pinGate');
-      if (gate) gate.classList.add('open');
-      var pin = document.getElementById('pinInput');
-      var err = document.getElementById('pinError');
-      if (err) err.textContent = '';
-      if (pin) { pin.value = ''; setTimeout(function () { pin.focus(); }, 100); }
-    }
-
-    /* ============================================================
-       ASSINATURA
-       ============================================================ */
-    class SignaturePad {
-      constructor(canvas) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
-        this.color = '#000000';
-        this.width = 2;
-        this.strokes = [];
-        this.drawing = false;
-        this.w = 0;
-        this.h = 0;
-        this.bind();
-        this.resize();
-        if (window.ResizeObserver) {
-          var self = this;
-          this._ro = new ResizeObserver(function () { self.resize(); });
-          this._ro.observe(canvas);
-        }
-      }
-      resize() {
-        var r = this.canvas.getBoundingClientRect();
-        var w = Math.round(r.width || this.canvas.clientWidth || 0);
-        var h = Math.round(r.height || this.canvas.clientHeight || 0);
-        if (!w || !h) return;
-        var dpr = Math.min(window.devicePixelRatio || 1, 3);
-        this.canvas.width = Math.round(w * dpr);
-        this.canvas.height = Math.round(h * dpr);
-        this.w = w; this.h = h;
-        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        this.redraw();
-      }
-      pt(e) {
-        var r = this.canvas.getBoundingClientRect();
-        var bw = r.width || 1, bh = r.height || 1;
-        var x = (e.clientX - r.left) / bw;
-        var y = (e.clientY - r.top) / bh;
-        return { x: Math.min(Math.max(x, 0), 1), y: Math.min(Math.max(y, 0), 1) };
-      }
-      bind() {
-        var self = this;
-        this.canvas.addEventListener('pointerdown', function (e) {
-          e.preventDefault();
-          try { self.canvas.setPointerCapture(e.pointerId); } catch (err) {}
-          if (!self.w || !self.h) self.resize();
-          self.drawing = true;
-          self.strokes.push({ color: self.color, width: self.width, points: [self.pt(e)] });
-          limparErroAssinatura();
-          self.redraw();
-        });
-        this.canvas.addEventListener('pointermove', function (e) {
-          if (!self.drawing) return;
-          e.preventDefault();
-          var evts = (e.getCoalescedEvents && e.getCoalescedEvents().length) ? e.getCoalescedEvents() : [e];
-          var s = self.strokes[self.strokes.length - 1];
-          for (var i = 0; i < evts.length; i++) s.points.push(self.pt(evts[i]));
-          self.redraw();
-        });
-        var stop = function () { self.drawing = false; };
-        this.canvas.addEventListener('pointerup', stop);
-        this.canvas.addEventListener('pointercancel', stop);
-        this.canvas.addEventListener('pointerleave', stop);
-      }
-      redraw() {
-        var w = this.w || this.canvas.clientWidth || 0;
-        var h = this.h || this.canvas.clientHeight || 0;
-        if (!w || !h) return;
-        this.ctx.clearRect(0, 0, w, h);
-        this.ctx.lineCap = 'round';
-        this.ctx.lineJoin = 'round';
-        for (var i = 0; i < this.strokes.length; i++) {
-          var s = this.strokes[i];
-          var lw = s.width || this.width;
-          this.ctx.strokeStyle = s.color || this.color;
-          this.ctx.fillStyle = s.color || this.color;
-          this.ctx.lineWidth = lw;
-          if (s.points.length === 1) {
-            var p = s.points[0];
-            this.ctx.beginPath();
-            this.ctx.arc(p.x * w, p.y * h, lw / 2, 0, Math.PI * 2);
-            this.ctx.fill();
-            continue;
-          }
-          this.ctx.beginPath();
-          this.ctx.moveTo(s.points[0].x * w, s.points[0].y * h);
-          for (var j = 1; j < s.points.length; j++) {
-            this.ctx.lineTo(s.points[j].x * w, s.points[j].y * h);
-          }
-          this.ctx.stroke();
-        }
-      }
-      undo() { this.strokes.pop(); this.redraw(); }
-      clear() { this.strokes = []; this.redraw(); }
-      isEmpty() { return this.strokes.length === 0; }
-      areaCoberta() {
-        if (!this.strokes.length) return 0;
-        var minX = 1, minY = 1, maxX = 0, maxY = 0;
-        this.strokes.forEach(function (s) {
-          s.points.forEach(function (p) {
-            if (p.x < minX) minX = p.x;
-            if (p.x > maxX) maxX = p.x;
-            if (p.y < minY) minY = p.y;
-            if (p.y > maxY) maxY = p.y;
-          });
-        });
-        return (maxX - minX) * (maxY - minY);
-      }
-      totalPontos() {
-        return this.strokes.reduce(function (acc, s) { return acc + s.points.length; }, 0);
-      }
-      copyFrom(other) {
-        this.clear();
-        for (var i = 0; i < other.strokes.length; i++) {
-          var s = other.strokes[i];
-          var pts = [];
-          for (var j = 0; j < s.points.length; j++) pts.push({ x: s.points[j].x, y: s.points[j].y });
-          this.strokes.push({ color: s.color, width: s.width, points: pts });
-        }
-        this.width = other.width;
-        if (!this.w || !this.h) this.resize();
-        this.redraw();
-      }
-      toDataURL() {
-        if (this.isEmpty()) return '';
-        var padW = this.w || this.canvas.clientWidth || 600;
-        var padH = this.h || this.canvas.clientHeight || 200;
-        var minX = 1, minY = 1, maxX = 0, maxY = 0;
-        for (var i = 0; i < this.strokes.length; i++) {
-          var pts = this.strokes[i].points;
-          for (var j = 0; j < pts.length; j++) {
-            if (pts[j].x < minX) minX = pts[j].x;
-            if (pts[j].x > maxX) maxX = pts[j].x;
-            if (pts[j].y < minY) minY = pts[j].y;
-            if (pts[j].y > maxY) maxY = pts[j].y;
-          }
-        }
-        var m = 0.03;
-        minX = Math.max(0, minX - m); maxX = Math.min(1, maxX + m);
-        minY = Math.max(0, minY - m); maxY = Math.min(1, maxY + m);
-        var bwRatio = Math.max(maxX - minX, 0.05);
-        var bhRatio = Math.max(maxY - minY, 0.05);
-        var srcW = bwRatio * padW, srcH = bhRatio * padH;
-        var OUT_H = 220;
-        var OUT_W = Math.round(OUT_H * (srcW / srcH));
-        OUT_W = Math.max(170, Math.min(OUT_W, 900));
-        var tmp = document.createElement('canvas');
-        tmp.width = OUT_W * 2;
-        tmp.height = OUT_H * 2;
-        var c = tmp.getContext('2d');
-        var scale = Math.min(tmp.width / srcW, tmp.height / srcH);
-        var offX = (tmp.width - srcW * scale) / 2;
-        var offY = (tmp.height - srcH * scale) / 2;
-        c.lineCap = 'round';
-        c.lineJoin = 'round';
-        for (var k = 0; k < this.strokes.length; k++) {
-          var st = this.strokes[k];
-          var lw = Math.max(2, (st.width || this.width) * scale * 1.3);
-          c.strokeStyle = st.color || this.color;
-          c.fillStyle = st.color || this.color;
-          c.lineWidth = lw;
-          if (st.points.length === 1) {
-            var pp = st.points[0];
-            c.beginPath();
-            c.arc(offX + ((pp.x - minX) * padW) * scale, offY + ((pp.y - minY) * padH) * scale, lw / 2, 0, Math.PI * 2);
-            c.fill();
-            continue;
-          }
-          c.beginPath();
-          for (var q = 0; q < st.points.length; q++) {
-            var px = offX + ((st.points[q].x - minX) * padW) * scale;
-            var py = offY + ((st.points[q].y - minY) * padH) * scale;
-            if (q === 0) c.moveTo(px, py); else c.lineTo(px, py);
-          }
-          c.stroke();
-        }
-        return tmp.toDataURL('image/png');
-      }
-    }
-    function setPenColor(c, btn, which) {
-      var pad = which === 'fs' ? padFs : padUnit;
-      if (!pad) return;
-      pad.color = c;
-      btn.parentElement.querySelectorAll('.color-dot').forEach(function (b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-    }
-    function setPenWidth(w, btn, which) {
-      var pad = which === 'fs' ? padFs : padUnit;
-      if (!pad) return;
-      pad.width = w;
-      btn.parentElement.querySelectorAll('.pen-btn').forEach(function (b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-    }
-    function openFullscreenSig() {
-      document.getElementById('fsSigModal').classList.add('open');
-      setTimeout(function () { if (padFs) { padFs.resize(); padFs.redraw(); } }, 120);
-    }
-    function confirmFullscreenSig() {
-      if (!padFs || padFs.isEmpty()) { showToast('Faça a assinatura primeiro.'); return; }
-      padUnit.copyFrom(padFs);
+  }
+  resize(){
+    var r=this.canvas.getBoundingClientRect();
+    var w=Math.round(r.width||this.canvas.clientWidth||0);
+    var h=Math.round(r.height||this.canvas.clientHeight||0);
+    if(!w||!h)return;
+    var dpr=Math.min(window.devicePixelRatio||1,3);
+    this.canvas.width=Math.round(w*dpr);
+    this.canvas.height=Math.round(h*dpr);
+    this.w=w;this.h=h;
+    this.ctx.setTransform(dpr,0,0,dpr,0,0);
+    this.redraw();
+  }
+  pt(e){
+    var r=this.canvas.getBoundingClientRect();
+    var bw=r.width||1,bh=r.height||1;
+    var x=(e.clientX-r.left)/bw;
+    var y=(e.clientY-r.top)/bh;
+    return {x:Math.min(Math.max(x,0),1),y:Math.min(Math.max(y,0),1)};
+  }
+  bind(){
+    var self=this;
+    this.canvas.addEventListener('pointerdown',function(e){
+      e.preventDefault();
+      try{self.canvas.setPointerCapture(e.pointerId);}catch(err){}
+      if(!self.w||!self.h)self.resize();
+      self.drawing=true;
+      self.strokes.push({color:self.color,width:self.width,points:[self.pt(e)]});
       limparErroAssinatura();
-      document.getElementById('fsSigModal').classList.remove('open');
-      showToast('Assinatura aplicada na ficha.');
-    }
-
-    /* ============================================================
-       VALIDAÇÃO
-       ============================================================ */
-    function marcarErro(id) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      el.classList.add('campo-erro');
-      var grupo = el.closest('.form-group') || el;
-      try { grupo.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
-      setTimeout(function () { try { el.focus({ preventScroll: true }); } catch (e2) {} }, 260);
-    }
-    function limparErro(id) {
-      var el = document.getElementById(id);
-      if (el) el.classList.remove('campo-erro');
-    }
-    function limparErroAssinatura() {
-      var box = document.getElementById('sigBox');
-      if (box) box.classList.remove('erro');
-    }
-    function limparTodosErros() {
-      ['fServidor', 'fDepartamento', 'fUnidade', 'fResponsavel', 'fData', 'fEntrada', 'fSaida', 'fObjetivo']
-        .forEach(limparErro);
-      limparErroAssinatura();
-    }
-    function validarFicha(modo) {
-      var v = {
-        servidor:     document.getElementById('fServidor').value.trim(),
-        departamento: document.getElementById('fDepartamento').value.trim(),
-        unidade:      document.getElementById('fUnidade').value.trim(),
-        responsavel:  document.getElementById('fResponsavel').value.trim(),
-        data:         document.getElementById('fData').value,
-        entrada:      document.getElementById('fEntrada').value,
-        saida:        document.getElementById('fSaida').value,
-        objetivo:     montarObjetivoFinal()
-      };
-      if (!v.servidor)     return { id: 'fServidor',     msg: 'Preencha o Nome do Servidor.' };
-      if (!v.departamento) return { id: 'fDepartamento', msg: 'Preencha o Departamento.' };
-      if (!v.unidade)      return { id: 'fUnidade',      msg: 'Preencha a Unidade / Escola / Destino.' };
-      if (!v.responsavel)  return { id: 'fResponsavel',  msg: 'Preencha o nome do Responsável pela Escola.' };
-      if (!v.data)         return { id: 'fData',         msg: 'Preencha a Data da Visita.' };
-      if (!v.entrada)      return { id: 'fEntrada',      msg: 'Preencha o Horário de Entrada.' };
-      if (!v.saida)        return { id: 'fSaida',        msg: 'Preencha o Horário de Saída.' };
-      var hoje = todayISO();
-      if (v.data > hoje) return { id: 'fData', msg: 'A data da visita não pode ser futura.' };
-      var minEnt = calcDurationMinutes(v.entrada, v.saida);
-      if (minEnt === null) {
-        return { id: 'fSaida', msg: 'O Horário de Saída deve ser igual ou posterior ao de Entrada.' };
+      self.redraw();
+    });
+    this.canvas.addEventListener('pointermove',function(e){
+      if(!self.drawing)return;
+      e.preventDefault();
+      var evts=(e.getCoalescedEvents&&e.getCoalescedEvents().length)?e.getCoalescedEvents():[e];
+      var s=self.strokes[self.strokes.length-1];
+      for(var i=0;i<evts.length;i++)s.points.push(self.pt(evts[i]));
+      self.redraw();
+    });
+    var stop=function(){self.drawing=false;};
+    this.canvas.addEventListener('pointerup',stop);
+    this.canvas.addEventListener('pointercancel',stop);
+    this.canvas.addEventListener('pointerleave',stop);
+  }
+  redraw(){
+    var w=this.w||this.canvas.clientWidth||0;
+    var h=this.h||this.canvas.clientHeight||0;
+    if(!w||!h)return;
+    this.ctx.clearRect(0,0,w,h);
+    this.ctx.lineCap='round';
+    this.ctx.lineJoin='round';
+    for(var i=0;i<this.strokes.length;i++){
+      var s=this.strokes[i];
+      var lw=s.width||this.width;
+      this.ctx.strokeStyle=s.color||this.color;
+      this.ctx.fillStyle=s.color||this.color;
+      this.ctx.lineWidth=lw;
+      if(s.points.length===1){
+        var p=s.points[0];
+        this.ctx.beginPath();
+        this.ctx.arc(p.x*w,p.y*h,lw/2,0,Math.PI*2);
+        this.ctx.fill();
+        continue;
       }
-      if (!v.objetivo) {
-        return { id: 'fObjetivo', msg: 'Marque pelo menos um objetivo na lista ou escreva no campo de detalhes.' };
+      this.ctx.beginPath();
+      this.ctx.moveTo(s.points[0].x*w,s.points[0].y*h);
+      for(var j=1;j<s.points.length;j++){
+        this.ctx.lineTo(s.points[j].x*w,s.points[j].y*h);
       }
-      if (v.objetivo.replace(/\n/g, ' ').trim().length < OBJETIVO_MIN_CHARS) {
-        return { id: 'fObjetivo', msg: 'Objetivo muito curto. Mínimo de ' + OBJETIVO_MIN_CHARS + ' caracteres.' };
-      }
-      if (modo === 'signed') {
-        if (padUnit.isEmpty()) {
-          return { id: 'sigBox', msg: 'Colha a assinatura na tela antes de enviar.' };
-        }
-        if (padUnit.areaCoberta() < AREA_MINIMA_ASSINATURA) {
-          return { id: 'sigBox', msg: 'Assinatura muito simples. Assine novamente.' };
-        }
-      }
-      return null;
+      this.ctx.stroke();
     }
-
-    /* ============================================================
-       OBJETIVOS
-       ============================================================ */
-    function toggleObjMenu(ev) {
-      if (ev) ev.stopPropagation();
-      fecharTodosCombos();
-      var m = document.getElementById('objMenu');
-      var abrir = !m.classList.contains('open');
-      m.classList.toggle('open', abrir);
-      if (abrir) {
-        document.getElementById('objSearch').value = '';
-        renderObjLista();
-        setTimeout(function () { document.getElementById('objSearch').focus(); }, 60);
-      }
-    }
-    function fecharObjMenu() {
-      var m = document.getElementById('objMenu');
-      if (m) m.classList.remove('open');
-    }
-    function renderObjLista() {
-      var filtro = (document.getElementById('objSearch').value || '').toLowerCase();
-      var lista = (lists.objetivos || []).filter(function (o) {
-        return !filtro || o.toLowerCase().indexOf(filtro) !== -1;
+  }
+  undo(){this.strokes.pop();this.redraw();}
+  clear(){this.strokes=[];this.redraw();}
+  isEmpty(){return this.strokes.length===0;}
+  areaCoberta(){
+    if(!this.strokes.length)return 0;
+    var minX=1,minY=1,maxX=0,maxY=0;
+    this.strokes.forEach(function(s){
+      s.points.forEach(function(p){
+        if(p.x<minX)minX=p.x;
+        if(p.x>maxX)maxX=p.x;
+        if(p.y<minY)minY=p.y;
+        if(p.y>maxY)maxY=p.y;
       });
-      var el = document.getElementById('objLista');
-      if (!lista.length) {
-        el.innerHTML = '<div style="padding:14px;font-size:12px;color:var(--muted);text-align:center;">Nenhum objetivo encontrado.</div>';
-        return;
-      }
-      el.innerHTML = lista.map(function (o) {
-        var sel = selectedObjetivos.indexOf(o) !== -1;
-        return '<label class="obj-opt' + (sel ? ' sel' : '') + '">' +
-          '<input type="checkbox" ' + (sel ? 'checked' : '') + ' data-obj="' + esc(o) + '">' +
-          '<span>' + esc(o) + '</span></label>';
-      }).join('');
-      el.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
-        cb.addEventListener('change', function () {
-          var v = cb.getAttribute('data-obj');
-          if (cb.checked) {
-            if (selectedObjetivos.indexOf(v) === -1) selectedObjetivos.push(v);
-          } else {
-            selectedObjetivos = selectedObjetivos.filter(function (x) { return x !== v; });
-          }
-          renderObjPills();
-          renderObjLista();
-          atualizarContadorObjetivo();
-          limparErro('fObjetivo');
-        });
-      });
+    });
+    return (maxX-minX)*(maxY-minY);
+  }
+  totalPontos(){
+    return this.strokes.reduce(function(a,s){return a+s.points.length;},0);
+  }
+  copyFrom(other){
+    this.clear();
+    for(var i=0;i<other.strokes.length;i++){
+      var s=other.strokes[i];
+      var pts=[];
+      for(var j=0;j<s.points.length;j++)pts.push({x:s.points[j].x,y:s.points[j].y});
+      this.strokes.push({color:s.color,width:s.width,points:pts});
     }
-    function renderObjPills() {
-      var el = document.getElementById('objPills');
-      el.innerHTML = selectedObjetivos.map(function (o, i) {
-        return '<span class="obj-pill">' + esc(o) +
-          '<button type="button" title="Remover" onclick="removerObjetivo(' + i + ')">×</button></span>';
-      }).join('');
-      var count = document.getElementById('objCount');
-      if (selectedObjetivos.length) {
-        count.hidden = false;
-        count.textContent = selectedObjetivos.length;
-      } else {
-        count.hidden = true;
+    this.width=other.width;
+    if(!this.w||!this.h)this.resize();
+    this.redraw();
+  }
+  toDataURL(){
+    if(this.isEmpty())return '';
+    var padW=this.w||this.canvas.clientWidth||600;
+    var padH=this.h||this.canvas.clientHeight||200;
+    var minX=1,minY=1,maxX=0,maxY=0;
+    for(var i=0;i<this.strokes.length;i++){
+      var pts=this.strokes[i].points;
+      for(var j=0;j<pts.length;j++){
+        if(pts[j].x<minX)minX=pts[j].x;
+        if(pts[j].x>maxX)maxX=pts[j].x;
+        if(pts[j].y<minY)minY=pts[j].y;
+        if(pts[j].y>maxY)maxY=pts[j].y;
       }
     }
-    function removerObjetivo(i) {
-      selectedObjetivos.splice(i, 1);
+    var m=0.03;
+    minX=Math.max(0,minX-m);maxX=Math.min(1,maxX+m);
+    minY=Math.max(0,minY-m);maxY=Math.min(1,maxY+m);
+    var bwR=Math.max(maxX-minX,0.05);
+    var bhR=Math.max(maxY-minY,0.05);
+    var srcW=bwR*padW,srcH=bhR*padH;
+    var OUT_H=220;
+    var OUT_W=Math.round(OUT_H*(srcW/srcH));
+    OUT_W=Math.max(170,Math.min(OUT_W,900));
+    var tmp=document.createElement('canvas');
+    tmp.width=OUT_W*2;
+    tmp.height=OUT_H*2;
+    var c=tmp.getContext('2d');
+    var scale=Math.min(tmp.width/srcW,tmp.height/srcH);
+    var offX=(tmp.width-srcW*scale)/2;
+    var offY=(tmp.height-srcH*scale)/2;
+    c.lineCap='round';
+    c.lineJoin='round';
+    for(var k=0;k<this.strokes.length;k++){
+      var st=this.strokes[k];
+      var lw=Math.max(2,(st.width||this.width)*scale*1.3);
+      c.strokeStyle=st.color||this.color;
+      c.fillStyle=st.color||this.color;
+      c.lineWidth=lw;
+      if(st.points.length===1){
+        var pp=st.points[0];
+        c.beginPath();
+        c.arc(offX+((pp.x-minX)*padW)*scale,offY+((pp.y-minY)*padH)*scale,lw/2,0,Math.PI*2);
+        c.fill();
+        continue;
+      }
+      c.beginPath();
+      for(var q=0;q<st.points.length;q++){
+        var px=offX+((st.points[q].x-minX)*padW)*scale;
+        var py=offY+((st.points[q].y-minY)*padH)*scale;
+        if(q===0)c.moveTo(px,py);else c.lineTo(px,py);
+      }
+      c.stroke();
+    }
+    return tmp.toDataURL('image/png');
+  }
+}
+
+function setPenColor(c,btn,which){
+  var pad=which==='fs'?padFs:padUnit;
+  if(!pad)return;
+  pad.color=c;
+  btn.parentElement.querySelectorAll('.cdot').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+}
+function setPenWidth(w,btn,which){
+  var pad=which==='fs'?padFs:padUnit;
+  if(!pad)return;
+  pad.width=w;
+  btn.parentElement.querySelectorAll('.pbtn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+}
+function openFullscreenSig(){
+  document.getElementById('fsSigModal').classList.add('open');
+  setTimeout(function(){if(padFs){padFs.resize();padFs.redraw();}},120);
+}
+function confirmFullscreenSig(){
+  if(!padFs||padFs.isEmpty()){showToast('Faça a assinatura primeiro.');return;}
+  padUnit.copyFrom(padFs);
+  limparErroAssinatura();
+  document.getElementById('fsSigModal').classList.remove('open');
+  showToast('Assinatura aplicada na ficha.');
+}
+
+/* ============ VALIDAÇÃO ============ */
+function marcarErro(id){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.classList.add('err');
+  var grupo=el.closest('.gp')||el;
+  try{grupo.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}
+  setTimeout(function(){try{el.focus({preventScroll:true});}catch(e2){}},260);
+}
+function limparErro(id){
+  var el=document.getElementById(id);
+  if(el)el.classList.remove('err');
+}
+function limparErroAssinatura(){
+  var box=document.getElementById('sigBox');
+  if(box)box.classList.remove('err');
+}
+function limparTodosErros(){
+  ['fServidor','fDepartamento','fUnidade','fResponsavel','fData','fEntrada','fSaida','fObjetivo'].forEach(limparErro);
+  limparErroAssinatura();
+}
+function validarFicha(modo){
+  var v={
+    servidor:document.getElementById('fServidor').value.trim(),
+    departamento:document.getElementById('fDepartamento').value.trim(),
+    unidade:document.getElementById('fUnidade').value.trim(),
+    responsavel:document.getElementById('fResponsavel').value.trim(),
+    data:document.getElementById('fData').value,
+    entrada:document.getElementById('fEntrada').value,
+    saida:document.getElementById('fSaida').value,
+    objetivo:montarObjetivoFinal()
+  };
+  if(!v.servidor)return{id:'fServidor',msg:'Preencha o Nome do Servidor.'};
+  if(!v.departamento)return{id:'fDepartamento',msg:'Preencha o Departamento.'};
+  if(!v.unidade)return{id:'fUnidade',msg:'Preencha a Unidade / Escola / Destino.'};
+  if(!v.responsavel)return{id:'fResponsavel',msg:'Preencha o nome do Responsável pela Escola.'};
+  if(!v.data)return{id:'fData',msg:'Preencha a Data da Visita.'};
+  if(!v.entrada)return{id:'fEntrada',msg:'Preencha o Horário de Entrada.'};
+  if(!v.saida)return{id:'fSaida',msg:'Preencha o Horário de Saída.'};
+  var hoje=todayISO();
+  if(v.data>hoje)return{id:'fData',msg:'A data da visita não pode ser futura.'};
+  var minEnt=calcDurationMinutes(v.entrada,v.saida);
+  if(minEnt===null)return{id:'fSaida',msg:'O Horário de Saída deve ser igual ou posterior ao de Entrada.'};
+  if(!v.objetivo)return{id:'fObjetivo',msg:'Marque pelo menos um objetivo na lista ou escreva no campo de detalhes.'};
+  if(v.objetivo.replace(/\n/g,' ').trim().length<OBJETIVO_MIN_CHARS){
+    return{id:'fObjetivo',msg:'Objetivo muito curto. Mínimo de '+OBJETIVO_MIN_CHARS+' caracteres.'};
+  }
+  if(modo==='signed'){
+    if(padUnit.isEmpty())return{id:'sigBox',msg:'Colha a assinatura na tela antes de enviar.'};
+    if(padUnit.areaCoberta()<AREA_MINIMA_ASSINATURA)return{id:'sigBox',msg:'Assinatura muito simples. Assine novamente.'};
+  }
+  return null;
+}
+
+/* ============ OBJETIVOS ============ */
+function toggleObjMenu(ev){
+  if(ev)ev.stopPropagation();
+  fecharTodosCombos();
+  var m=document.getElementById('objMenu');
+  var abrir=!m.classList.contains('open');
+  m.classList.toggle('open',abrir);
+  if(abrir){
+    document.getElementById('objSearch').value='';
+    renderObjLista();
+    setTimeout(function(){document.getElementById('objSearch').focus();},60);
+  }
+}
+function fecharObjMenu(){
+  var m=document.getElementById('objMenu');
+  if(m)m.classList.remove('open');
+}
+function renderObjLista(){
+  var filtro=(document.getElementById('objSearch').value||'').toLowerCase();
+  var lista=(lists.objetivos||[]).filter(function(o){
+    return !filtro||o.toLowerCase().indexOf(filtro)!==-1;
+  });
+  var el=document.getElementById('objLista');
+  if(!lista.length){
+    el.innerHTML='<div style="padding:14px;font-size:12px;color:var(--mt);text-align:center">Nenhum objetivo encontrado.</div>';
+    return;
+  }
+  el.innerHTML=lista.map(function(o){
+    var sel=selectedObjetivos.indexOf(o)!==-1;
+    return '<label class="opt'+(sel?' sel':'')+'">'+
+      '<input type="checkbox" '+(sel?'checked':'')+' data-obj="'+esc(o)+'">'+
+      '<span>'+esc(o)+'</span></label>';
+  }).join('');
+  el.querySelectorAll('input[type=checkbox]').forEach(function(cb){
+    cb.addEventListener('change',function(){
+      var v=cb.getAttribute('data-obj');
+      if(cb.checked){
+        if(selectedObjetivos.indexOf(v)===-1)selectedObjetivos.push(v);
+      }else{
+        selectedObjetivos=selectedObjetivos.filter(function(x){return x!==v;});
+      }
       renderObjPills();
       renderObjLista();
       atualizarContadorObjetivo();
-    }
-    function limparObjetivos() {
-      selectedObjetivos = [];
-      renderObjPills();
-      renderObjLista();
-      atualizarContadorObjetivo();
-    }
-    function montarObjetivoFinal() {
-      var partes = selectedObjetivos.slice();
-      var livre = cleanObjetivo(document.getElementById('fObjetivo').value);
-      if (livre) partes.push(livre);
-      return partes.join('\n');
-    }
-    function atualizarContadorObjetivo() {
-      var total = montarObjetivoFinal().replace(/\n/g, ' ').trim().length;
-      var el = document.getElementById('objCounter');
-      if (!el) return;
-      el.textContent = total + ' caracteres';
-      el.style.color = total === 0 ? 'var(--muted)' : (total < OBJETIVO_MIN_CHARS ? '#d97706' : '#16a34a');
-    }
-    function cleanObjetivo(texto) {
-      return String(texto || '')
-        .replace(/\r/g, '')
-        .split('\n')
-        .map(function (l) { return l.replace(/\s+/g, ' ').trim(); })
-        .filter(function (l) { return l.length > 0; })
-        .map(function (l) { return l.replace(/^[•\-*]\s*/, ''); })
-        .map(function (l) { return l.charAt(0).toUpperCase() + l.slice(1); })
-        .map(function (l) { return /[.!?]$/.test(l) ? l : l + '.'; })
-        .join('\n');
-    }
+      limparErro('fObjetivo');
+    });
+  });
+}
+function renderObjPills(){
+  var el=document.getElementById('objPills');
+  el.innerHTML=selectedObjetivos.map(function(o,i){
+    return '<span class="pill">'+esc(o)+
+      '<button type="button" title="Remover" onclick="removerObjetivo('+i+')">×</button></span>';
+  }).join('');
+  var count=document.getElementById('objCount');
+  if(selectedObjetivos.length){
+    count.hidden=false;
+    count.textContent=selectedObjetivos.length;
+  }else{
+    count.hidden=true;
+  }
+}
+function removerObjetivo(i){
+  selectedObjetivos.splice(i,1);
+  renderObjPills();
+  renderObjLista();
+  atualizarContadorObjetivo();
+}
+function limparObjetivos(){
+  selectedObjetivos=[];
+  renderObjPills();
+  renderObjLista();
+  atualizarContadorObjetivo();
+}
+function montarObjetivoFinal(){
+  var partes=selectedObjetivos.slice();
+  var livre=cleanObjetivo(document.getElementById('fObjetivo').value);
+  if(livre)partes.push(livre);
+  return partes.join('\n');
+}
+function atualizarContadorObjetivo(){
+  var total=montarObjetivoFinal().replace(/\n/g,' ').trim().length;
+  var el=document.getElementById('objCounter');
+  if(!el)return;
+  el.textContent=total+' caracteres';
+  el.style.color=total===0?'var(--mt)':(total<OBJETIVO_MIN_CHARS?'#d97706':'#16a34a');
+}
+function cleanObjetivo(texto){
+  return String(texto||'')
+    .replace(/\r/g,'')
+    .split('\n')
+    .map(function(l){return l.replace(/\s+/g,' ').trim();})
+    .filter(function(l){return l.length>0;})
+    .map(function(l){return l.replace(/^[•\-*]\s*/,'');})
+    .map(function(l){return l.charAt(0).toUpperCase()+l.slice(1);})
+    .map(function(l){return /[.!?]$/.test(l)?l:l+'.';})
+    .join('\n');
+}
 
-    /* ============================================================
-       PREENCHIMENTO AUTOMÁTICO EM CADEIA
-       ============================================================ */
-    function normaliza(s) {
-      return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-    }
-
-    function esconderHint(id) {
-      var h = document.getElementById(id);
-      if (h) { h.hidden = true; h.innerHTML = ''; }
-    }
-
-    function mostrarHint(id, tipo, html) {
-      var h = document.getElementById(id);
-      if (!h) return;
-      h.hidden = false;
-      h.className = tipo === 'ok' ? 'auto-hint' : 'auto-hint pend';
-      h.innerHTML = html;
-    }
-
-    function preencherAuto(id, valor, chave) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      autoState.prog = true;
-      el.value = valor;
-      el.classList.remove('campo-erro');
-      autoState.prog = false;
-      if (chave) autoState[chave] = true;
-      atualizarTodosCombos();
-    }
-
-    function limparAuto(id, chave) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      autoState.prog = true;
-      el.value = '';
-      autoState.prog = false;
-      if (chave) autoState[chave] = true;
-      atualizarTodosCombos();
-    }
-
-    function ultimaUnidadeDoServidor(servidor) {
-      var alvo = normaliza(servidor);
-      if (!alvo) return '';
-      for (var i = 0; i < visits.length; i++) {
-        var v = visits[i];
-        if (!v || !v.unidade) continue;
-        if (normaliza(v.servidor) === alvo) return String(v.unidade).trim();
-      }
-      return '';
-    }
-
-    function aplicarAutoDepto() {
-      var servidor = document.getElementById('fServidor').value.trim();
-      if (!servidor) { esconderHint('hintDepto'); return; }
-      var alvo = mapaServidorDepto[normaliza(servidor)];
-      if (!alvo) {
-        mostrarHint('hintDepto', 'pend', 'Sem setor cadastrado para este servidor — escolha o departamento.');
-        return;
-      }
-      preencherAuto('fDepartamento', alvo, 'depto');
-      mostrarHint('hintDepto', 'ok', '✅ Departamento preenchido automaticamente.');
-    }
-
-    function aplicarAutoUnidade() {
-      var servidor = document.getElementById('fServidor').value.trim();
-      var uniEl = document.getElementById('fUnidade');
-      if (!servidor) { esconderHint('hintUnidade'); return; }
-
-      var alvo = ultimaUnidadeDoServidor(servidor);
-
-      if (!alvo) {
-        if (uniEl.value.trim()) {
-          limparAuto('fUnidade', 'unidade');
-          esconderHint('hintUnidade');
-          esconderHint('hintResp');
-        }
-        return;
-      }
-
-      if (normaliza(uniEl.value) === normaliza(alvo)) {
-        autoState.unidade = true;
-        esconderHint('hintUnidade');
-        return;
-      }
-
-      preencherAuto('fUnidade', alvo, 'unidade');
-      mostrarHint('hintUnidade', 'ok', '✅ Unidade da última visita deste servidor.');
-    }
-
-    function aplicarAutoResp(forcar) {
-      var unidade = document.getElementById('fUnidade').value.trim();
-      var respEl = document.getElementById('fResponsavel');
-      if (!unidade) { esconderHint('hintResp'); return; }
-
-      var alvo = mapaUnidadeResp[normaliza(unidade)];
-
-      if (!alvo) {
-        mostrarHint('hintResp', 'pend', 'Sem responsável cadastrado para esta escola — digite o nome de quem está assinando.');
-        return;
-      }
-
-      if (!respEl.value.trim() || autoState.resp || forcar === true) {
-        preencherAuto('fResponsavel', alvo, 'resp');
-        mostrarHint('hintResp', 'ok', '✅ Responsável preenchido automaticamente. Pode trocar se outro assinar.');
-        return;
-      }
-
-      if (normaliza(respEl.value) === normaliza(alvo)) {
-        autoState.resp = true;
-        esconderHint('hintResp');
-        return;
-      }
-
-      mostrarHint('hintResp', 'pend',
-        '💡 Cadastro desta escola: "' + esc(alvo) + '". ' +
-        '<a href="#" onclick="aplicarAutoResp(true);return false;">Usar este nome</a>');
-    }
-
-    function aplicarCadeiaCompleta() {
-      aplicarAutoDepto();
-      aplicarAutoUnidade();
-      autoState.resp = true;
-      aplicarAutoResp(false);
-    }
-
-    function montarMapas() {
-      mapaServidorDepto = {};
-      mapaUnidadeResp = {};
-      (lists.paresServidor || []).forEach(function (p) {
-        if (p[0] && p[1]) mapaServidorDepto[normaliza(p[0])] = p[1];
-      });
-      (lists.paresUnidade || []).forEach(function (p) {
-        if (p[0] && p[1]) mapaUnidadeResp[normaliza(p[0])] = p[1];
-      });
-      var s = 'Carregados: ' + Object.keys(mapaServidorDepto).length + ' servidor(es) → setor, ' +
-              Object.keys(mapaUnidadeResp).length + ' escola(s) → responsável.';
-      var lbl = document.getElementById('autoFillLabel');
-      if (lbl) lbl.textContent = s;
-    }
-
-    /* ============================================================
-       ACESSO
-       ============================================================ */
-    function initAccessMode() {
-      var baseUrl = window.location.href.split('?')[0];
-      var profLink = document.getElementById('profLinkDisplay');
-      if (profLink) profLink.value = baseUrl + '?modo=ficha';
-      var modo = getModoSalvo();
-      var autenticado = false;
-      try { autenticado = sessionStorage.getItem('cemtec_coord_auth') === '1'; } catch (e) {}
-      if (isProfessorMode || modo === 'ficha') {
-        document.body.classList.add('mode-professor');
-        switchView('new');
-        return;
-      }
-      if (!autenticado) {
-        document.getElementById('pinGate').classList.add('open');
-        setTimeout(function () { document.getElementById('pinInput').focus(); }, 100);
-      } else {
-        switchView('dashboard');
-      }
-    }
-    function verifyPin() {
-      var val = document.getElementById('pinInput').value.trim();
-      if (val === COORDINATOR_PIN) {
-        try { sessionStorage.setItem('cemtec_coord_auth', '1'); } catch (e) {}
-        setModoSalvo('coordenador');
-        document.getElementById('pinGate').classList.remove('open');
-        document.body.classList.remove('mode-professor');
-        switchView('dashboard');
-        syncTudo(true);
-      } else {
-        document.getElementById('pinError').textContent = 'PIN incorreto. Tente novamente.';
-        document.getElementById('pinInput').value = '';
-      }
-    }
-    function enterProfessorMode() {
-      setModoSalvo('ficha');
-      document.getElementById('pinGate').classList.remove('open');
-      document.body.classList.add('mode-professor');
-      switchView('new');
-    }
-    function requestCoordinatorAccess() {
-      document.getElementById('pinError').textContent = '';
-      document.getElementById('pinInput').value = '';
-      document.getElementById('pinGate').classList.add('open');
-      setTimeout(function () { document.getElementById('pinInput').focus(); }, 100);
-    }
-    function copyProfessorLink() {
-      var link = document.getElementById('profLinkDisplay').value;
-      navigator.clipboard.writeText(link).then(function () {
-        showToast('Link dos Professores copiado!');
-      });
-    }
-
-    /* ============================================================
-       SALVAR
-       ============================================================ */
-    async function saveVisit(mode) {
-      if (enviando) return;
-      fecharTodosCombos();
-      limparTodosErros();
-      var exigeTudo = (mode === 'signed') || EXIGIR_TUDO_NO_PENDENTE;
-      if (exigeTudo) {
-        var problema = validarFicha(mode);
-        if (problema) {
-          if (problema.id === 'sigBox') {
-            document.getElementById('sigBox').classList.add('erro');
-            try { document.getElementById('sigBox').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
-          } else {
-            marcarErro(problema.id);
-          }
-          showToast(problema.msg);
-          return;
-        }
-      } else {
-        if (!document.getElementById('fServidor').value.trim()) {
-          marcarErro('fServidor'); showToast('Preencha o Nome do Servidor.'); return;
-        }
-        if (!document.getElementById('fUnidade').value.trim()) {
-          marcarErro('fUnidade'); showToast('Preencha a Unidade / Escola.'); return;
-        }
-        if (!document.getElementById('fData').value) {
-          marcarErro('fData'); showToast('Preencha a Data da Visita.'); return;
-        }
-      }
-      var servidor     = document.getElementById('fServidor').value.trim();
-      var departamento = document.getElementById('fDepartamento').value.trim();
-      var unidade      = document.getElementById('fUnidade').value.trim();
-      var responsavel  = document.getElementById('fResponsavel').value.trim();
-      var data         = document.getElementById('fData').value;
-      var entrada      = document.getElementById('fEntrada').value;
-      var saida        = document.getElementById('fSaida').value;
-      var objetivo     = montarObjetivoFinal();
-      var sigUnit = padUnit.isEmpty() ? '' : padUnit.toDataURL();
-      if (responsavel) {
-        var existe = lists.responsaveis.some(function (n) {
-          return n.toLowerCase() === responsavel.toLowerCase();
-        });
-        if (!existe) {
-          lists.responsaveis.push(responsavel);
-          lists.responsaveis.sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
-          localStorage.setItem('cemtec_lists_v5', JSON.stringify(lists));
-        }
-      }
-      var agora = new Date().toISOString();
-      var area  = Number(padUnit.areaCoberta().toFixed(4));
-      var visit = {
-        id: 'v_' + Date.now(),
-        protocolo: 'SEMED-' + new Date().getFullYear() + '-' + String(Math.floor(1000 + Math.random() * 9000)),
-        servidor: servidor,
-        departamento: departamento,
-        unidade: unidade,
-        responsavel: responsavel,
-        data: data,
-        dataBR: formatDateBR(data),
-        entrada: entrada,
-        saida: saida,
-        duracao: formatMinutes(calcDurationMinutes(entrada, saida)),
-        objetivo: objetivo,
-        sigUnit: mode === 'signed' ? sigUnit : '',
-        assinaturaEm: mode === 'signed' ? agora : '',
-        assinaturaCodigo: '',
-        assinaturaTracos: mode === 'signed' ? padUnit.strokes.length : '',
-        assinaturaPontos: mode === 'signed' ? padUnit.totalPontos() : '',
-        assinaturaArea: mode === 'signed' ? area : '',
-        registradoEm: agora,
-        status: mode === 'signed' ? 'signed' : 'pending',
-        pdfUrl: ''
-      };
-      var btn      = document.getElementById(mode === 'signed' ? 'btnSaveSigned' : 'btnSavePending');
-      var outroBtn = document.getElementById(mode === 'signed' ? 'btnSavePending' : 'btnSaveSigned');
-      var origText = btn.textContent;
-      enviando = true;
-      btn.disabled = true;
-      outroBtn.disabled = true;
-      btn.textContent = '⏳ Salvando e gerando PDF...';
-      try {
-        if (APPS_SCRIPT_URL) {
-          var res = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            redirect: 'follow',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(visit)
-          });
-          var json = await res.json();
-          if (json.status === 'ok') {
-            if (json.pdfUrl) visit.pdfUrl = json.pdfUrl;
-            if (json.codigo) visit.assinaturaCodigo = json.codigo;
-            if (json.aviso) console.warn('Aviso do Apps Script:', json.aviso);
-            showToast('✅ Ficha salva na Planilha e PDF gerado no Drive!');
-          } else {
-            showToast('⚠️ Erro: ' + (json.message || 'tente novamente'));
-          }
-        }
-      } catch (err) {
-        showToast('⚠️ Falha de conexão: ' + err.message);
-      } finally {
-        enviando = false;
-        btn.disabled = false;
-        outroBtn.disabled = false;
-        btn.textContent = origText;
-      }
-      if (!visit.assinaturaCodigo && visit.status === 'signed') {
-        visit.assinaturaCodigo = sigetCodigo(visit.protocolo + '|' + visit.assinaturaEm);
-      }
-      visits.unshift(visit);
-      localStorage.setItem('cemtec_visits_v5', JSON.stringify(visits));
-      document.getElementById('visitForm').reset();
-      autoState.depto = false;
-      autoState.unidade = false;
-      autoState.resp = false;
-      esconderHint('hintDepto');
+/* ============ AUTOMÁTICO ============ */
+function normaliza(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+function esconderHint(id){
+  var h=document.getElementById(id);
+  if(h){h.hidden=true;h.innerHTML='';}
+}
+function mostrarHint(id,tipo,html){
+  var h=document.getElementById(id);
+  if(!h)return;
+  h.hidden=false;
+  h.className=tipo==='ok'?'hint':'hint pend';
+  h.innerHTML=html;
+}
+function preencherAuto(id,valor,chave){
+  var el=document.getElementById(id);
+  if(!el)return;
+  autoState.prog=true;
+  el.value=valor;
+  el.classList.remove('err');
+  autoState.prog=false;
+  if(chave)autoState[chave]=true;
+  atualizarTodosCombos();
+}
+function limparAuto(id,chave){
+  var el=document.getElementById(id);
+  if(!el)return;
+  autoState.prog=true;
+  el.value='';
+  autoState.prog=false;
+  if(chave)autoState[chave]=true;
+  atualizarTodosCombos();
+}
+function ultimaUnidadeDoServidor(servidor){
+  var alvo=normaliza(servidor);
+  if(!alvo)return '';
+  for(var i=0;i<visits.length;i++){
+    var v=visits[i];
+    if(!v||!v.unidade)continue;
+    if(normaliza(v.servidor)===alvo)return String(v.unidade).trim();
+  }
+  return '';
+}
+function aplicarAutoDepto(){
+  var servidor=document.getElementById('fServidor').value.trim();
+  if(!servidor){esconderHint('hintDepto');return;}
+  var alvo=mapaServidorDepto[normaliza(servidor)];
+  if(!alvo){
+    mostrarHint('hintDepto','pend','Sem setor cadastrado para este servidor — escolha o departamento.');
+    return;
+  }
+  preencherAuto('fDepartamento',alvo,'depto');
+  mostrarHint('hintDepto','ok','✅ Departamento preenchido automaticamente.');
+}
+function aplicarAutoUnidade(){
+  var servidor=document.getElementById('fServidor').value.trim();
+  var uniEl=document.getElementById('fUnidade');
+  if(!servidor){esconderHint('hintUnidade');return;}
+  var alvo=ultimaUnidadeDoServidor(servidor);
+  if(!alvo){
+    if(uniEl.value.trim()){
+      limparAuto('fUnidade','unidade');
       esconderHint('hintUnidade');
       esconderHint('hintResp');
-      selectedObjetivos = [];
-      renderObjPills();
-      document.getElementById('fData').value = todayISO();
-      setNowTime('fEntrada');
-      padUnit.clear();
-      atualizarContadorObjetivo();
-      limparTodosErros();
-      populateDatalists();
-      atualizarTodosCombos();
-      renderDashboard();
-      renderReportsTable();
-      openA4Modal(visit);
     }
+    return;
+  }
+  if(normaliza(uniEl.value)===normaliza(alvo)){
+    autoState.unidade=true;
+    esconderHint('hintUnidade');
+    return;
+  }
+  preencherAuto('fUnidade',alvo,'unidade');
+  mostrarHint('hintUnidade','ok','✅ Unidade da última visita deste servidor.');
+}
+function aplicarAutoResp(forcar){
+  var unidade=document.getElementById('fUnidade').value.trim();
+  var respEl=document.getElementById('fResponsavel');
+  if(!unidade){esconderHint('hintResp');return;}
+  var alvo=mapaUnidadeResp[normaliza(unidade)];
+  if(!alvo){
+    mostrarHint('hintResp','pend','Sem responsável cadastrado para esta escola — digite o nome de quem está assinando.');
+    return;
+  }
+  if(!respEl.value.trim()||autoState.resp||forcar===true){
+    preencherAuto('fResponsavel',alvo,'resp');
+    mostrarHint('hintResp','ok','✅ Responsável preenchido automaticamente. Pode trocar se outro assinar.');
+    return;
+  }
+  if(normaliza(respEl.value)===normaliza(alvo)){
+    autoState.resp=true;
+    esconderHint('hintResp');
+    return;
+  }
+  mostrarHint('hintResp','pend','💡 Cadastro desta escola: "'+esc(alvo)+'". '+
+    '<a href="#" onclick="aplicarAutoResp(true);return false;">Usar este nome</a>');
+}
+function aplicarCadeiaCompleta(){
+  aplicarAutoDepto();
+  aplicarAutoUnidade();
+  autoState.resp=true;
+  aplicarAutoResp(false);
+}
+function montarMapas(){
+  mapaServidorDepto={};
+  mapaUnidadeResp={};
+  (lists.paresServidor||[]).forEach(function(p){
+    if(p[0]&&p[1])mapaServidorDepto[normaliza(p[0])]=p[1];
+  });
+  (lists.paresUnidade||[]).forEach(function(p){
+    if(p[0]&&p[1])mapaUnidadeResp[normaliza(p[0])]=p[1];
+  });
+  var s='Carregados: '+Object.keys(mapaServidorDepto).length+' servidor(es) → setor, '+
+        Object.keys(mapaUnidadeResp).length+' escola(s) → responsável.';
+  var lbl=document.getElementById('autoFillLabel');
+  if(lbl)lbl.textContent=s;
+}
 
-    /* ============================================================
-       SINCRONIZAÇÃO — lê as abas Servidores e Unidades
-       ============================================================ */
-    function csvParaLinhas(texto) {
-      return texto.split(/\r?\n/)
-        .filter(function (l) { return l.trim() !== ''; })
-        .map(function (r) {
-          var out = [], cur = '', dentro = false;
-          for (var i = 0; i < r.length; i++) {
-            var ch = r[i];
-            if (ch === '"') {
-              if (dentro && r[i + 1] === '"') { cur += '"'; i++; }
-              else dentro = !dentro;
-            } else if (ch === ',' && !dentro) { out.push(cur.trim()); cur = ''; }
-            else cur += ch;
-          }
-          out.push(cur.trim());
-          return out;
-        });
+/* ============ ACESSO ============ */
+function initAccessMode(){
+  var baseUrl=window.location.href.split('?')[0];
+  var profLink=document.getElementById('profLinkDisplay');
+  if(profLink)profLink.value=baseUrl+'?modo=ficha';
+  var modo=getModoSalvo();
+  var autenticado=false;
+  try{autenticado=sessionStorage.getItem('cemtec_coord_auth')==='1';}catch(e){}
+  if(isProfessorMode||modo==='ficha'){
+    document.body.classList.add('prof');
+    switchView('new');
+    return;
+  }
+  if(!autenticado){
+    document.getElementById('pinGate').classList.add('open');
+    setTimeout(function(){document.getElementById('pinInput').focus();},100);
+  }else{
+    switchView('dashboard');
+  }
+}
+function verifyPin(){
+  var val=document.getElementById('pinInput').value.trim();
+  if(val===COORDINATOR_PIN){
+    try{sessionStorage.setItem('cemtec_coord_auth','1');}catch(e){}
+    setModoSalvo('coordenador');
+    document.getElementById('pinGate').classList.remove('open');
+    document.body.classList.remove('prof');
+    switchView('dashboard');
+    syncTudo(true);
+  }else{
+    document.getElementById('pinError').textContent='PIN incorreto. Tente novamente.';
+    document.getElementById('pinInput').value='';
+  }
+}
+function enterProfessorMode(){
+  setModoSalvo('ficha');
+  document.getElementById('pinGate').classList.remove('open');
+  document.body.classList.add('prof');
+  switchView('new');
+}
+function requestCoordinatorAccess(){
+  document.getElementById('pinError').textContent='';
+  document.getElementById('pinInput').value='';
+  document.getElementById('pinGate').classList.add('open');
+  setTimeout(function(){document.getElementById('pinInput').focus();},100);
+}
+function copyProfessorLink(){
+  var link=document.getElementById('profLinkDisplay').value;
+  navigator.clipboard.writeText(link).then(function(){
+    showToast('Link dos Professores copiado!');
+  });
+}
+
+/* ============ SALVAR ============ */
+async function saveVisit(mode){
+  if(enviando)return;
+  fecharTodosCombos();
+  limparTodosErros();
+  var exigeTudo=(mode==='signed')||EXIGIR_TUDO_NO_PENDENTE;
+  if(exigeTudo){
+    var problema=validarFicha(mode);
+    if(problema){
+      if(problema.id==='sigBox'){
+        document.getElementById('sigBox').classList.add('err');
+        try{document.getElementById('sigBox').scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}
+      }else{
+        marcarErro(problema.id);
+      }
+      showToast(problema.msg);
+      return;
     }
+  }else{
+    if(!document.getElementById('fServidor').value.trim()){
+      marcarErro('fServidor');showToast('Preencha o Nome do Servidor.');return;
+    }
+    if(!document.getElementById('fUnidade').value.trim()){
+      marcarErro('fUnidade');showToast('Preencha a Unidade / Escola.');return;
+    }
+    if(!document.getElementById('fData').value){
+      marcarErro('fData');showToast('Preencha a Data da Visita.');return;
+    }
+  }
 
-    async function lerAbaCSV(nomeAba) {
-      try {
-        var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
-                  '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(nomeAba);
-        var res = await fetch(url, { redirect: 'follow' });
-        var texto = await res.text();
-        if (!texto || texto.trim().charAt(0) === '<') return null;
-        var rows = csvParaLinhas(texto);
-        return rows.length ? rows : null;
-      } catch (e) {
-        return null;
+  var servidor=document.getElementById('fServidor').value.trim();
+  var departamento=document.getElementById('fDepartamento').value.trim();
+  var unidade=document.getElementById('fUnidade').value.trim();
+  var responsavel=document.getElementById('fResponsavel').value.trim();
+  var data=document.getElementById('fData').value;
+  var entrada=document.getElementById('fEntrada').value;
+  var saida=document.getElementById('fSaida').value;
+  var objetivo=montarObjetivoFinal();
+  var sigUnit=padUnit.isEmpty()?'':padUnit.toDataURL();
+
+  if(responsavel){
+    var existe=lists.responsaveis.some(function(n){
+      return n.toLowerCase()===responsavel.toLowerCase();
+    });
+    if(!existe){
+      lists.responsaveis.push(responsavel);
+      lists.responsaveis.sort(function(a,b){return a.localeCompare(b,'pt-BR');});
+      localStorage.setItem('cemtec_lists_v5',JSON.stringify(lists));
+    }
+  }
+
+  var agora=new Date().toISOString();
+  var area=Number(padUnit.areaCoberta().toFixed(4));
+  var visit={
+    id:'v_'+Date.now(),
+    protocolo:'SEMED-'+new Date().getFullYear()+'-'+String(Math.floor(1000+Math.random()*9000)),
+    servidor:servidor,
+    departamento:departamento,
+    unidade:unidade,
+    responsavel:responsavel,
+    data:data,
+    dataBR:formatDateBR(data),
+    entrada:entrada,
+    saida:saida,
+    duracao:formatMinutes(calcDurationMinutes(entrada,saida)),
+    objetivo:objetivo,
+    sigUnit:mode==='signed'?sigUnit:'',
+    assinaturaEm:mode==='signed'?agora:'',
+    assinaturaCodigo:'',
+    assinaturaTracos:mode==='signed'?padUnit.strokes.length:'',
+    assinaturaPontos:mode==='signed'?padUnit.totalPontos():'',
+    assinaturaArea:mode==='signed'?area:'',
+    registradoEm:agora,
+    status:mode==='signed'?'signed':'pending',
+    pdfUrl:''
+  };
+
+  var btn=document.getElementById(mode==='signed'?'btnSaveSigned':'btnSavePending');
+  var outroBtn=document.getElementById(mode==='signed'?'btnSavePending':'btnSaveSigned');
+  var origText=btn.textContent;
+  enviando=true;
+  btn.disabled=true;
+  outroBtn.disabled=true;
+  btn.textContent='⏳ Salvando e gerando PDF...';
+
+  try{
+    if(APPS_SCRIPT_URL){
+      var res=await fetch(APPS_SCRIPT_URL,{
+        method:'POST',
+        redirect:'follow',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify(visit)
+      });
+      var json=await res.json();
+      if(json.status==='ok'){
+        if(json.pdfUrl)visit.pdfUrl=json.pdfUrl;
+        if(json.codigo)visit.assinaturaCodigo=json.codigo;
+        if(json.aviso)console.warn('Aviso do Apps Script:',json.aviso);
+        showToast('✅ Ficha salva na Planilha e PDF gerado no Drive!');
+      }else{
+        showToast('⚠️ Erro: '+(json.message||'tente novamente'));
       }
     }
+  }catch(err){
+    showToast('⚠️ Falha de conexão: '+err.message);
+  }finally{
+    enviando=false;
+    btn.disabled=false;
+    outroBtn.disabled=false;
+    btn.textContent=origText;
+  }
 
-    function acharCol(head, termos) {
-      for (var i = 0; i < head.length; i++) {
-        for (var t = 0; t < termos.length; t++) {
-          if (head[i].indexOf(termos[t]) !== -1) return i;
+  if(!visit.assinaturaCodigo&&visit.status==='signed'){
+    visit.assinaturaCodigo=sigetCodigo(visit.protocolo+'|'+visit.assinaturaEm);
+  }
+
+  visits.unshift(visit);
+  localStorage.setItem('cemtec_visits_v5',JSON.stringify(visits));
+
+  document.getElementById('visitForm').reset();
+  autoState.depto=false;
+  autoState.unidade=false;
+  autoState.resp=false;
+  esconderHint('hintDepto');
+  esconderHint('hintUnidade');
+  esconderHint('hintResp');
+  selectedObjetivos=[];
+  renderObjPills();
+  document.getElementById('fData').value=todayISO();
+  setNowTime('fEntrada');
+  padUnit.clear();
+  atualizarContadorObjetivo();
+  limparTodosErros();
+  populateDatalists();
+  atualizarTodosCombos();
+
+  renderDashboard();
+  renderReportsTable();
+  openA4Modal(visit);
+}
+
+/* ============ SINCRONIZAÇÃO ============ */
+function csvParaLinhas(texto){
+  return texto.split(/\r?\n/)
+    .filter(function(l){return l.trim()!=='';})
+    .map(function(r){
+      var out=[],cur='',dentro=false;
+      for(var i=0;i<r.length;i++){
+        var ch=r[i];
+        if(ch==='"'){
+          if(dentro&&r[i+1]==='"'){cur+='"';i++;}
+          else dentro=!dentro;
+        }else if(ch===','&&!dentro){out.push(cur.trim());cur='';}
+        else cur+=ch;
+      }
+      out.push(cur.trim());
+      return out;
+    });
+}
+async function lerAbaCSV(nomeAba){
+  try{
+    var url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+
+            '/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(nomeAba);
+    var res=await fetch(url,{redirect:'follow'});
+    var texto=await res.text();
+    if(!texto||texto.trim().charAt(0)==='<')return null;
+    var rows=csvParaLinhas(texto);
+    return rows.length?rows:null;
+  }catch(e){
+    return null;
+  }
+}
+function acharCol(head,termos){
+  for(var i=0;i<head.length;i++){
+    for(var t=0;t<termos.length;t++){
+      if(head[i].indexOf(termos[t])!==-1)return i;
+    }
+  }
+  return -1;
+}
+async function carregarParesDaPlanilha(){
+  var temAlgo=false;
+
+  var rowsS=await lerAbaCSV('Servidores');
+  if(rowsS&&rowsS.length>=2){
+    var headS=rowsS[0].map(normaliza);
+    var cS=acharCol(headS,['servidor']);
+    var cD=acharCol(headS,['departamento','setor']);
+    if(cS>-1&&cD>-1){
+      var pS=[];
+      for(var r=1;r<rowsS.length;r++){
+        if(rowsS[r][cS]&&rowsS[r][cD])pS.push([rowsS[r][cS],rowsS[r][cD]]);
+      }
+      if(pS.length){lists.paresServidor=pS;temAlgo=true;}
+    }
+  }
+
+  var rowsU=await lerAbaCSV('Unidades');
+  if(rowsU&&rowsU.length>=2){
+    var headU=rowsU[0].map(normaliza);
+    var cU=acharCol(headU,['unidade','escola']);
+    var cR=acharCol(headU,['respons']);
+    if(cU>-1&&cR>-1){
+      var pU=[];
+      for(var r2=1;r2<rowsU.length;r2++){
+        if(rowsU[r2][cU]&&rowsU[r2][cR])pU.push([rowsU[r2][cU],rowsU[r2][cR]]);
+      }
+      if(pU.length){lists.paresUnidade=pU;temAlgo=true;}
+    }
+  }
+
+  return temAlgo;
+}
+
+async function syncTudo(silent){
+  var lbl=document.getElementById('cloudStatusLabel');
+  var okPares=await carregarParesDaPlanilha();
+
+  if(APPS_SCRIPT_URL){
+    try{
+      var res=await fetch(APPS_SCRIPT_URL,{redirect:'follow'});
+      var json=await res.json();
+
+      if(json.status==='ok'){
+        if(json.listas){
+          if(json.listas.servidores&&json.listas.servidores.length)lists.servidores=json.listas.servidores;
+          if(json.listas.departamentos&&json.listas.departamentos.length)lists.departamentos=json.listas.departamentos;
+          if(json.listas.unidades&&json.listas.unidades.length)lists.unidades=json.listas.unidades;
+          if(json.listas.objetivos&&json.listas.objetivos.length)lists.objetivos=json.listas.objetivos;
+          if(json.listas.responsaveis&&json.listas.responsaveis.length)lists.responsaveis=json.listas.responsaveis;
         }
-      }
-      return -1;
-    }
 
-    async function carregarParesDaPlanilha() {
-      var temAlgo = false;
-
-      var rowsS = await lerAbaCSV('Servidores');
-      if (rowsS && rowsS.length >= 2) {
-        var headS = rowsS[0].map(normaliza);
-        var cS = acharCol(headS, ['servidor']);
-        var cD = acharCol(headS, ['departamento', 'setor']);
-        if (cS > -1 && cD > -1) {
-          var pS = [];
-          for (var r = 1; r < rowsS.length; r++) {
-            if (rowsS[r][cS] && rowsS[r][cD]) pS.push([rowsS[r][cS], rowsS[r][cD]]);
+        if(json.pares){
+          if(Array.isArray(json.pares.paresServidor)&&json.pares.paresServidor.length){
+            lists.paresServidor=json.pares.paresServidor;
+            okPares=true;
           }
-          if (pS.length) { lists.paresServidor = pS; temAlgo = true; }
-        }
-      }
-
-      var rowsU = await lerAbaCSV('Unidades');
-      if (rowsU && rowsU.length >= 2) {
-        var headU = rowsU[0].map(normaliza);
-        var cU = acharCol(headU, ['unidade', 'escola']);
-        var cR = acharCol(headU, ['respons']);
-        if (cU > -1 && cR > -1) {
-          var pU = [];
-          for (var r2 = 1; r2 < rowsU.length; r2++) {
-            if (rowsU[r2][cU] && rowsU[r2][cR]) pU.push([rowsU[r2][cU], rowsU[r2][cR]]);
+          if(Array.isArray(json.pares.paresUnidade)&&json.pares.paresUnidade.length){
+            lists.paresUnidade=json.pares.paresUnidade;
+            okPares=true;
           }
-          if (pU.length) { lists.paresUnidade = pU; temAlgo = true; }
         }
-      }
 
-      return temAlgo;
-    }
-
-    async function syncTudo(silent) {
-      var lbl = document.getElementById('cloudStatusLabel');
-      var okPares = await carregarParesDaPlanilha();
-
-      if (APPS_SCRIPT_URL) {
-        try {
-          var res = await fetch(APPS_SCRIPT_URL, { redirect: 'follow' });
-          var json = await res.json();
-
-          if (json.status === 'ok') {
-            if (json.listas) {
-              if (json.listas.servidores && json.listas.servidores.length) lists.servidores = json.listas.servidores;
-              if (json.listas.departamentos && json.listas.departamentos.length) lists.departamentos = json.listas.departamentos;
-              if (json.listas.unidades && json.listas.unidades.length) lists.unidades = json.listas.unidades;
-              if (json.listas.objetivos && json.listas.objetivos.length) lists.objetivos = json.listas.objetivos;
-              if (json.listas.responsaveis && json.listas.responsaveis.length) lists.responsaveis = json.listas.responsaveis;
-            }
-
-            /* Pares vindos do Apps Script: mais confiáveis que o CSV */
-            if (json.pares) {
-              if (Array.isArray(json.pares.paresServidor) && json.pares.paresServidor.length) {
-                lists.paresServidor = json.pares.paresServidor;
-                okPares = true;
-              }
-              if (Array.isArray(json.pares.paresUnidade) && json.pares.paresUnidade.length) {
-                lists.paresUnidade = json.pares.paresUnidade;
-                okPares = true;
-              }
-            }
-
-            if (Array.isArray(json.visits)) {
-              visits = json.visits.map(function (v) {
-                return Object.assign({}, v, {
-                  entrada: formatTimeClean(v.entrada),
-                  saida: formatTimeClean(v.saida),
-                  assinaturaCodigo: v.codigo || v.assinaturaCodigo || ''
-                });
+        if(Array.isArray(json.visits)){
+          visits=json.visits.map(function(v){
+            return Object.assign({},v,{
+              entrada:formatTimeClean(v.entrada),
+              saida:formatTimeClean(v.saida),
+              assinaturaCodigo:v.codigo||v.assinaturaCodigo||''
+            });
+          });
+          localStorage.setItem('cemtec_visits_v5',JSON.stringify(visits));
+          json.visits.forEach(function(v){
+            if(v.responsavel){
+              var existe=lists.responsaveis.some(function(n){
+                return n.toLowerCase()===String(v.responsavel).toLowerCase();
               });
-              localStorage.setItem('cemtec_visits_v5', JSON.stringify(visits));
-              json.visits.forEach(function (v) {
-                if (v.responsavel) {
-                  var existe = lists.responsaveis.some(function (n) {
-                    return n.toLowerCase() === String(v.responsavel).toLowerCase();
-                  });
-                  if (!existe) lists.responsaveis.push(String(v.responsavel));
-                }
-              });
+              if(!existe)lists.responsaveis.push(String(v.responsavel));
             }
-
-            if (lbl) {
-              lbl.textContent = 'Conectada — ' + visits.length + ' ficha(s) | ' +
-                                (lists.objetivos || []).length + ' objetivo(s) | ' +
-                                (lists.unidades || []).length + ' unidade(s)';
-            }
-          } else {
-            if (lbl) lbl.textContent = 'Erro: ' + (json.message || 'desconhecido');
-          }
-        } catch (e) {
-          if (lbl && !okPares) lbl.textContent = 'Falha de conexão';
+          });
         }
+
+        if(lbl){
+          lbl.textContent='Conectada — '+visits.length+' ficha(s) | '+
+            (lists.objetivos||[]).length+' objetivo(s) | '+
+            (lists.unidades||[]).length+' unidade(s)';
+        }
+      }else{
+        if(lbl)lbl.textContent='Erro: '+(json.message||'desconhecido');
       }
-
-      if (!okPares && lbl) {
-        lbl.textContent = 'Sem vínculo automático — verifique as abas Servidores e Unidades';
-      }
-
-      lists.paresServidor = lists.paresServidor || [];
-      lists.paresUnidade = lists.paresUnidade || [];
-
-      localStorage.setItem('cemtec_lists_v5', JSON.stringify(lists));
-      montarMapas();
-      populateDatalists();
-      atualizarTodosCombos();
-      renderObjLista();
-      renderDashboard();
-      renderReportsTable();
-
-      if (!silent) {
-        showToast('Sincronizado: ' + (lists.servidores || []).length + ' servidor(es), ' +
-                  (lists.unidades || []).length + ' unidade(s), ' +
-                  (lists.objetivos || []).length + ' objetivo(s).');
-      }
+    }catch(e){
+      if(lbl&&!okPares)lbl.textContent='Falha de conexão';
     }
-    function syncVisitsFromCloud(silent) { return syncTudo(silent); }
+  }
 
-    /* ============================================================
-       NAVEGAÇÃO
-       ============================================================ */
-    function switchView(v) {
-      fecharTodosCombos();
-      fecharObjMenu();
-      document.querySelectorAll('.view-section').forEach(function (s) { s.classList.remove('active'); });
-      var alvo = document.getElementById('view-' + v);
-      if (alvo) alvo.classList.add('active');
-      document.querySelectorAll('.nav-btn').forEach(function (b) {
-        b.classList.toggle('active', b.dataset.view === v);
+  if(!okPares&&lbl){
+    lbl.textContent='Sem vínculo automático — verifique as abas Servidores e Unidades';
+  }
+
+  lists.paresServidor=lists.paresServidor||[];
+  lists.paresUnidade=lists.paresUnidade||[];
+
+  localStorage.setItem('cemtec_lists_v5',JSON.stringify(lists));
+  montarMapas();
+  populateDatalists();
+  atualizarTodosCombos();
+  renderObjLista();
+  renderDashboard();
+  renderReportsTable();
+
+  if(!silent){
+    showToast('Sincronizado: '+(lists.servidores||[]).length+' servidor(es), '+
+      (lists.unidades||[]).length+' unidade(s), '+
+      (lists.objetivos||[]).length+' objetivo(s).');
+  }
+}
+function syncVisitsFromCloud(silent){return syncTudo(silent);}
+
+/* ============ NAVEGAÇÃO ============ */
+function switchView(v){
+  fecharTodosCombos();
+  fecharObjMenu();
+  document.querySelectorAll('.vs').forEach(function(s){s.classList.remove('active');});
+  var alvo=document.getElementById('view-'+v);
+  if(alvo)alvo.classList.add('active');
+  document.querySelectorAll('.nbtn').forEach(function(b){
+    b.classList.toggle('active',b.dataset.view===v);
+  });
+  var sb=document.getElementById('sidebar');
+  if(sb)sb.classList.remove('open');
+  if(v==='new'){
+    setTimeout(function(){if(padUnit){padUnit.resize();padUnit.redraw();}},110);
+  }
+  if(v==='dashboard')renderDashboard();
+  if(v==='reports')renderReportsTable();
+}
+function toggleSidebar(){
+  var sb=document.getElementById('sidebar');
+  if(sb)sb.classList.toggle('open');
+}
+function populateDatalists(){
+  var units=Array.from(new Set((lists.unidades||[]).concat(visits.map(function(v){return v.unidade;})))).filter(Boolean).sort();
+  var depts=Array.from(new Set((lists.departamentos||[]).concat(visits.map(function(v){return v.departamento;})))).filter(Boolean).sort();
+
+  var selU=document.getElementById('filterUnit');
+  if(selU){
+    var atualU=selU.value;
+    selU.innerHTML='<option value="">Todas as Unidades</option>'+units.map(function(u){
+      return '<option value="'+esc(u)+'">'+esc(u)+'</option>';
+    }).join('');
+    selU.value=atualU;
+  }
+
+  var selD=document.getElementById('filterDept');
+  if(selD){
+    var atualD=selD.value;
+    selD.innerHTML='<option value="">Todos os Departamentos</option>'+depts.map(function(d){
+      return '<option value="'+esc(d)+'">'+esc(d)+'</option>';
+    }).join('');
+    selD.value=atualD;
+  }
+
+  atualizarTodosCombos();
+}
+function respCell(nome){
+  var n=String(nome||'').trim();
+  return n?'<span class="rc">'+esc(n)+'</span>':'<span class="rc rv">não informado</span>';
+}
+
+/* ============ DASHBOARD ============ */
+function renderDashboard(){
+  var today=todayISO();
+  var total=visits.length;
+  var signed=visits.filter(function(v){return v.status==='signed';}).length;
+  var pending=total-signed;
+  var durs=visits.map(function(v){return calcDurationMinutes(v.entrada,v.saida);}).filter(function(x){return x!==null;});
+  var avg=durs.length?Math.round(durs.reduce(function(a,b){return a+b;},0)/durs.length):0;
+
+  var set=function(id,txt){
+    var el=document.getElementById(id);
+    if(el)el.textContent=txt;
+  };
+
+  set('kpiTotal',total);
+  set('kpiToday',visits.filter(function(v){return v.data===today;}).length);
+  set('kpiTodayDate',formatDateBR(today));
+  set('kpiUnits',new Set(visits.map(function(v){return v.unidade;})).size);
+  set('kpiSignedRate',(total?Math.round(signed/total*100):0)+'%');
+  set('kpiPendingText',pending+' pendente(s)');
+  set('kpiAvgTime',formatMinutes(avg));
+  var badge=document.getElementById('navPendingBadge');
+  if(badge)badge.textContent=total;
+
+  var countBy=function(k){
+    var m={};
+    visits.forEach(function(v){m[v[k]]=(m[v[k]]||0)+1;});
+    return Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
+  };
+
+  var mk=function(id,cfg){
+    var canvas=document.getElementById(id);
+    if(!canvas||typeof Chart==='undefined')return;
+    if(charts[id])charts[id].destroy();
+    charts[id]=new Chart(canvas,cfg);
+  };
+
+  var uD=countBy('unidade');
+  var dD=countBy('departamento');
+
+  mk('chartUnits',{
+    type:'bar',
+    data:{labels:uD.map(function(x){return String(x[0]).slice(0,22);}),datasets:[{data:uD.map(function(x){return x[1];}),backgroundColor:'#003580',borderRadius:6}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  });
+
+  mk('chartStatus',{
+    type:'doughnut',
+    data:{labels:['Assinadas','Pendentes'],datasets:[{data:[signed,pending],backgroundColor:['#16a34a','#FBC02D'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%'}
+  });
+
+  mk('chartDepts',{
+    type:'bar',
+    data:{labels:dD.map(function(x){return String(x[0]).split('—')[0];}),datasets:[{data:dD.map(function(x){return x[1];}),backgroundColor:'#009FE3',borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  });
+
+  var recentes=visits.slice(0,6);
+  window._dashList=recentes;
+
+  var tb=document.getElementById('recentVisitsBody');
+  if(tb)tb.innerHTML=recentes.map(function(v,i){
+    return '<tr>'+
+      '<td><strong>'+esc(v.protocolo)+'</strong></td>'+
+      '<td>'+formatDateBR(v.data)+'</td>'+
+      '<td>'+esc(v.servidor)+'</td>'+
+      '<td>'+esc(v.unidade)+'</td>'+
+      '<td>'+respCell(v.responsavel)+'</td>'+
+      '<td>'+(v.status==='signed'?'<span class="sp s">✅ Assinada</span>':'<span class="sp p">⏳ Pendente</span>')+'</td>'+
+      '<td>'+(v.pdfUrl
+        ?'<a href="'+v.pdfUrl+'" target="_blank" class="btn bs sm">📁 PDF Drive</a>'
+        :'<button class="btn bo sm" onclick="openA4Modal(window._dashList['+i+'])">📄 A4</button>')+'</td>'+
+    '</tr>';
+  }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--mt);padding:20px">Nenhuma visita registrada ainda.</td></tr>';
+}
+
+/* ============ RELATÓRIOS ============ */
+function dataISO(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function setPeriodo(modo){
+  var de=document.getElementById('filterDe');
+  var ate=document.getElementById('filterAte');
+  if(!de||!ate)return;
+  var hoje=new Date();
+
+  if(modo==='hoje'){
+    de.value=dataISO(hoje);
+    ate.value=dataISO(hoje);
+  }else if(modo==='7'){
+    var d7=new Date(hoje.getTime()-6*86400000);
+    de.value=dataISO(d7);
+    ate.value=dataISO(hoje);
+  }else if(modo==='mes'){
+    de.value=dataISO(new Date(hoje.getFullYear(),hoje.getMonth(),1));
+    ate.value=dataISO(hoje);
+  }else{
+    de.value='';
+    ate.value='';
+  }
+  marcarAtalho(modo==='limpar'?'':modo);
+  renderReportsTable();
+}
+function marcarAtalho(modo){
+  ['btHoje','bt7','btMes'].forEach(function(id){
+    var b=document.getElementById(id);
+    if(b)b.classList.remove('ativo');
+  });
+  var mapa={hoje:'btHoje','7':'bt7',mes:'btMes'};
+  if(mapa[modo]){
+    var el=document.getElementById(mapa[modo]);
+    if(el)el.classList.add('ativo');
+  }
+}
+function listaFiltrada(){
+  var elQ=document.getElementById('filterSearch');
+  var elU=document.getElementById('filterUnit');
+  var elD=document.getElementById('filterDept');
+  var elS=document.getElementById('filterStatus');
+  var elDe=document.getElementById('filterDe');
+  var elAte=document.getElementById('filterAte');
+
+  var q=(elQ?elQ.value:'').toLowerCase();
+  var u=elU?elU.value:'';
+  var d=elD?elD.value:'';
+  var s=elS?elS.value:'';
+  var de=elDe?elDe.value:'';
+  var ate=elAte?elAte.value:'';
+
+  return visits.filter(function(v){
+    var hay=(v.protocolo+' '+v.servidor+' '+v.unidade+' '+(v.responsavel||'')+' '+v.objetivo).toLowerCase();
+    if(u&&v.unidade!==u)return false;
+    if(d&&v.departamento!==d)return false;
+    if(s&&v.status!==s)return false;
+    if(q&&hay.indexOf(q)===-1)return false;
+    if(de&&String(v.data||'')<de)return false;
+    if(ate&&String(v.data||'')>ate)return false;
+    return true;
+  });
+}
+function renderReportsTable(){
+  var list=listaFiltrada();
+  window._reportList=list;
+
+  var tb=document.getElementById('reportsTableBody');
+  if(tb)tb.innerHTML=list.map(function(v,i){
+    return '<tr>'+
+      '<td><strong>'+esc(v.protocolo)+'</strong></td>'+
+      '<td>'+formatDateBR(v.data)+'</td>'+
+      '<td>'+esc(v.servidor)+'</td>'+
+      '<td>'+esc(v.unidade)+'</td>'+
+      '<td>'+respCell(v.responsavel)+'</td>'+
+      '<td>'+esc(formatTimeClean(v.entrada))+(v.saida?' – '+esc(formatTimeClean(v.saida)):'')+'</td>'+
+      '<td>'+(v.status==='signed'?'<span class="sp s">✅ Assinada</span>':'<span class="sp p">⏳ Pendente</span>')+'</td>'+
+      '<td>'+(v.pdfUrl
+        ?'<a href="'+v.pdfUrl+'" target="_blank" class="btn bs sm">📁 PDF Drive</a>'
+        :'<button class="btn bo sm" onclick="openA4Modal(window._reportList['+i+'])">📄 A4</button>')+'</td>'+
+    '</tr>';
+  }).join('')||'<tr><td colspan="8" style="text-align:center;color:var(--mt);padding:20px">Nenhuma ficha encontrada com estes filtros.</td></tr>';
+
+  var assinadas=list.filter(function(v){return v.status==='signed';}).length;
+  var pendentes=list.length-assinadas;
+  var mins=list.map(function(v){return calcDurationMinutes(v.entrada,v.saida);}).filter(function(x){return x!==null;});
+  var totalMin=mins.reduce(function(a,b){return a+b;},0);
+
+  var txt='<strong>'+list.length+'</strong> ficha(s) · <strong>'+assinadas+'</strong> assinada(s) · '+
+          '<strong>'+pendentes+'</strong> pendente(s)';
+  if(mins.length)txt+=' · '+formatMinutes(totalMin)+' de permanência';
+
+  var resumo=document.getElementById('filtrosResumo');
+  if(resumo)resumo.innerHTML=txt;
+}
+
+/* ============ MODAL / PDF ============ */
+function driveEmbedUrl(url){
+  var m=String(url||'').match(/\/d\/([a-zA-Z0-9_-]+)/);
+  return m?'https://drive.google.com/file/d/'+m[1]+'/preview':'';
+}
+function openA4Modal(v){
+  fecharTodosCombos();
+  var btnPdf=document.getElementById('modalDrivePdfBtn');
+  var btnPrint=document.getElementById('btnPrintA4');
+  var titulo=document.getElementById('a4ModalTitle');
+
+  if(v.pdfUrl){
+    btnPdf.href=v.pdfUrl;
+    btnPdf.style.display='inline-flex';
+  }else{
+    btnPdf.style.display='none';
+  }
+
+  var embed=driveEmbedUrl(v.pdfUrl);
+
+  if(embed){
+    titulo.textContent='PDF Oficial — Ficha de Visita';
+    btnPrint.style.display='none';
+    document.getElementById('a4ModalBody').innerHTML=
+      '<div class="pdfv"><iframe src="'+embed+'"></iframe></div>'+
+      '<div class="pdfleg">PDF oficial gerado a partir do modelo do Google Docs.</div>';
+    document.getElementById('a4Modal').classList.add('open');
+    return;
+  }
+
+  titulo.textContent='Comprovante — Ficha de Visita (A4)';
+  btnPrint.style.display='inline-flex';
+
+  var partes=String(v.data||'').split('-');
+  var y=partes[0]||'----',m=partes[1]||'--',d=partes[2]||'--';
+  var ent=formatTimeClean(v.entrada)||'—';
+  var sai=formatTimeClean(v.saida)||'—';
+
+  var sigHtml=v.sigUnit
+    ?'<img src="'+v.sigUnit+'" />'+sigetHTML(v,true)
+    :(v.status==='signed'
+      ?(sigetHTML(v,false)||
+        '<div style="height:40px;display:flex;align-items:center;justify-content:center;color:#16a34a;font-weight:700;font-family:Inter,sans-serif;font-size:12px">✔ Assinada digitalmente (ver PDF oficial no Drive)</div>')
+      :'<div style="height:40px;color:#d97706">[ Pendente ]</div>');
+
+  document.getElementById('a4ModalBody').innerHTML=
+    '<div class="a4">'+
+      '<div class="a4h">'+
+        '<div class="a4l">CEMTEC — CENTRO MUNICIPAL DE TECNOLOGIA E ROBÓTICA EDUCACIONAL</div>'+
+        '<div class="a4ls">SEMED — SECRETARIA MUNICIPAL DE EDUCAÇÃO • PREFEITURA DE SORRISO - MT</div>'+
+      '</div>'+
+      '<div class="a4t">FICHA DE VISITA</div>'+
+      '<div style="text-align:center;font-size:12px;color:#64748b;margin-bottom:16px">Protocolo: <strong>'+esc(v.protocolo)+'</strong></div>'+
+      '<div class="a4f"><span>Nome do Servidor:</span><span class="a4v">'+esc(v.servidor)+'</span></div>'+
+      '<div class="a4f"><span>Departamento / Setor:</span><span class="a4v">'+esc(v.departamento)+'</span></div>'+
+      '<div class="a4f"><span>Unidade / Escola / Destino:</span><span class="a4v">'+esc(v.unidade)+'</span></div>'+
+      '<div class="a4f"><span>Responsável pela Escola:</span><span class="a4v">'+esc(v.responsavel||'Não informado')+'</span></div>'+
+      '<div class="a4f"><span>Data da Visita:</span><span class="a4v">'+d+'/'+m+'/'+y+'</span></div>'+
+      '<div style="font-size:14px;font-weight:600;margin-top:10px">Objetivo da Visita:</div>'+
+      '<div class="a4obj">'+esc(v.objetivo)+'</div>'+
+      '<div style="margin-bottom:20px;font-size:14px">Horário de Entrada: <strong>'+esc(ent)+'</strong> &nbsp;|&nbsp; Horário de Saída: <strong>'+esc(sai)+'</strong> &nbsp;|&nbsp; Duração: <strong>'+esc(v.duracao||'—')+'</strong></div>'+
+      '<div class="a4sig">'+sigHtml+
+        '<div class="a4line">Assinatura do Responsável pela Unidade'+(v.responsavel?'<br/><small>'+esc(v.responsavel)+'</small>':'')+'</div>'+
+      '</div>'+
+      '<div style="font-family:Arial,sans-serif;font-size:9px;color:#475569;text-align:center;border-top:2px solid #003580;padding-top:6px;margin-top:20px">'+
+        'Status: '+(v.status==='signed'?'Assinada digitalmente':'Aguardando assinatura')+' | Registrado em: '+new Date().toLocaleDateString('pt-BR')+'<br/>'+
+        'Avenida Tancredo Neves, nº 124, Centro Sul • Sorriso - MT • (66) 3545-8100 • educacao@sorriso.mt.gov.br'+
+      '</div>'+
+    '</div>';
+
+  document.getElementById('a4Modal').classList.add('open');
+}
+
+/* ============ CSV ============ */
+function exportCSV(){
+  var list=listaFiltrada();
+  if(!list.length){
+    showToast('Nenhuma ficha com os filtros atuais.');
+    return;
+  }
+  var headers=['Protocolo','Data','Servidor','Departamento','Unidade','Responsavel','Objetivo','Entrada','Saida','Duracao','Status','Codigo','Link PDF'];
+  var escCsv=function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';};
+  var lines=[headers.map(escCsv).join(';')];
+
+  list.forEach(function(v){
+    lines.push([
+      v.protocolo,formatDateBR(v.data),v.servidor,v.departamento,v.unidade,
+      v.responsavel||'',String(v.objetivo||'').replace(/\n/g,' | '),
+      formatTimeClean(v.entrada),formatTimeClean(v.saida),v.duracao||'',
+      v.status==='signed'?'Assinada':'Pendente',v.assinaturaCodigo||'',v.pdfUrl
+    ].map(escCsv).join(';'));
+  });
+
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+lines.join('\n')],{type:'text/csv;charset=utf-8;'}));
+  a.download='fichas-cemtec-'+todayISO()+'.csv';
+  a.click();
+  showToast('CSV exportado com '+list.length+' ficha(s).');
+}
+
+/* ============ UTILITÁRIOS ============ */
+function formatTimeClean(val){
+  var s=String(val||'').trim();
+  if(!s)return '';
+  if(/^\d{1,2}:\d{2}$/.test(s))return s.padStart(5,'0');
+  var m=s.match(/(\d{2}):(\d{2})(?::\d{2})?/);
+  return m?m[1]+':'+m[2]:s;
+}
+function todayISO(){
+  var d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function formatDateBR(iso){
+  if(!iso||iso.indexOf('-')===-1)return iso||'—';
+  var p=iso.split('-');
+  return p[2]+'/'+p[1]+'/'+p[0];
+}
+function setNowTime(id){
+  var d=new Date();
+  var el=document.getElementById(id);
+  if(el){
+    el.value=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    el.classList.remove('err');
+  }
+}
+function calcDurationMinutes(a,b){
+  var ta=formatTimeClean(a),tb=formatTimeClean(b);
+  if(!ta||!tb||ta.indexOf(':')===-1||tb.indexOf(':')===-1)return null;
+  var p1=ta.split(':').map(Number),p2=tb.split(':').map(Number);
+  var diff=(p2[0]*60+p2[1])-(p1[0]*60+p1[1]);
+  return (!isNaN(diff)&&diff>=0)?diff:null;
+}
+function formatMinutes(m){
+  if(m===null||m===undefined)return '—';
+  return m<60?m+' min':Math.floor(m/60)+'h '+(m%60)+'min';
+}
+function esc(s){
+  return String(s===undefined||s===null?'':s).replace(/[&<>"']/g,function(m){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+  });
+}
+
+/* ============ ASSINATURA ELETRÔNICA ============ */
+function sigetHash(str){
+  var h=5381;
+  for(var i=0;i<str.length;i++)h=((h<<5)+h+str.charCodeAt(i))>>>0;
+  return h;
+}
+function sigetCodigo(semente){
+  var s=String(semente);
+  var a=sigetHash(s).toString(36).toUpperCase();
+  var b=sigetHash(s+'|v').toString(36).toUpperCase();
+  while(a.length<4)a='0'+a;
+  while(b.length<4)b='0'+b;
+  return a.slice(0,4)+'-'+b.slice(0,4);
+}
+function sigetQuando(v){
+  var iso=v.assinaturaEm;
+  if(!iso)iso=(v.data||'')+'T'+(formatTimeClean(v.entrada)||'00:00')+':00';
+  var dt=new Date(iso);
+  if(isNaN(dt.getTime()))return '';
+  var p=function(n){return String(n).padStart(2,'0');};
+  return p(dt.getDate())+'/'+p(dt.getMonth()+1)+'/'+dt.getFullYear()+
+         ' às '+p(dt.getHours())+':'+p(dt.getMinutes());
+}
+function sigetHTML(v,semTraco){
+  var nome=String(v.responsavel||'').trim();
+  if(!nome)return '';
+  var quando=sigetQuando(v);
+  var codigo=v.assinaturaCodigo||sigetCodigo(
+    [v.protocolo,v.servidor,nome,v.data,v.entrada].join('|')
+  );
+  return '<div class="siget" title="Representação visual do nome. A validade está no registro eletrônico.">'+
+    (semTraco?'':'<span class="siget__traco">'+esc(nome)+'</span>')+
+    '<div class="siget__meta">'+
+      'Assinado eletronicamente por <strong>'+esc(nome)+'</strong>'+
+      (quando?' em '+esc(quando):'')+
+      ' &middot; Protocolo '+esc(v.protocolo)+
+      '<br>Código de verificação: <code class="siget__cod">'+esc(codigo)+'</code>'+
+    '</div>'+
+  '</div>';
+}
+function showToast(msg){
+  var t=document.getElementById('toast');
+  if(!t)return;
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt=setTimeout(function(){t.classList.remove('show');},4200);
+}
+
+/* ============ EVENTOS GLOBAIS ============ */
+document.addEventListener('click',function(e){
+  var menu=document.getElementById('objMenu');
+  var btn=document.getElementById('objMultiBtn');
+  if(!menu||!menu.classList.contains('open'))return;
+  if(menu.contains(e.target)||(btn&&btn.contains(e.target)))return;
+  menu.classList.remove('open');
+});
+window.addEventListener('resize',function(){
+  if(padUnit){padUnit.resize();padUnit.redraw();}
+  if(padFs){padFs.resize();padFs.redraw();}
+});
+window.addEventListener('orientationchange',function(){
+  setTimeout(function(){
+    if(padUnit){padUnit.resize();padUnit.redraw();}
+    if(padFs){padFs.resize();padFs.redraw();}
+  },350);
+});
+
+/* ============ INICIALIZAÇÃO ============ */
+window.addEventListener('DOMContentLoaded',function(){
+  function tentar(nome,fn){
+    try{fn();}catch(e){console.error('Falha em '+nome+':',e);}
+  }
+
+  tentar('logos',function(){
+    document.querySelectorAll('.dlogo').forEach(function(img){img.src=LOGO_URL;});
+  });
+
+  tentar('assinatura',function(){
+    padUnit=new SignaturePad(document.getElementById('sigCanvasUnit'));
+    padFs=new SignaturePad(document.getElementById('fsSigCanvas'));
+  });
+
+  tentar('data/hora',function(){
+    document.getElementById('fData').value=todayISO();
+    setNowTime('fEntrada');
+  });
+
+  tentar('combos',criarCombos);
+
+  tentar('eventos',function(){
+    var elServ=document.getElementById('fServidor');
+    if(elServ){
+      elServ.addEventListener('change',function(){
+        autoState.unidade=false;
+        autoState.resp=false;
+        aplicarCadeiaCompleta();
       });
-      var sb = document.getElementById('sidebar');
-      if (sb) sb.classList.remove('open');
-      if (v === 'new') {
-        setTimeout(function () { if (padUnit) { padUnit.resize(); padUnit.redraw(); } }, 110);
-      }
-      if (v === 'dashboard') renderDashboard();
-      if (v === 'reports') renderReportsTable();
     }
-    function toggleSidebar() {
-      var sb = document.getElementById('sidebar');
-      if (sb) sb.classList.toggle('open');
+    var elUnid=document.getElementById('fUnidade');
+    if(elUnid){
+      elUnid.addEventListener('change',function(){
+        autoState.resp=false;
+        aplicarAutoResp(false);
+      });
     }
-    function populateDatalists() {
-      var units = Array.from(new Set((lists.unidades || []).concat(visits.map(function (v) { return v.unidade; })))).filter(Boolean).sort();
-      var depts = Array.from(new Set((lists.departamentos || []).concat(visits.map(function (v) { return v.departamento; })))).filter(Boolean).sort();
-      var selU = document.getElementById('filterUnit');
-      if (selU) {
-        var atualU = selU.value;
-        selU.innerHTML = '<option value="">Todas as Unidades</option>' + units.map(function (u) {
-          return '<option value="' + esc(u) + '">' + esc(u) + '</option>';
-        }).join('');
-        selU.value = atualU;
-      }
-      var selD = document.getElementById('filterDept');
-      if (selD) {
-        var atualD = selD.value;
-        selD.innerHTML = '<option value="">Todos os Departamentos</option>' + depts.map(function (d) {
-          return '<option value="' + esc(d) + '">' + esc(d) + '</option>';
-        }).join('');
-        selD.value = atualD;
-      }
-      atualizarTodosCombos();
-    }
-    function respCell(nome) {
-      var n = String(nome || '').trim();
-      return n ? '<span class="resp-cell">' + esc(n) + '</span>'
-               : '<span class="resp-cell resp-vazio">não informado</span>';
-    }
+  });
 
-    /* ============================================================
-       DASHBOARD
-       ============================================================ */
-    function renderDashboard() {
-      var today = todayISO();
-      var total = visits.length;
-      var signed = visits.filter(function (v) { return v.status === 'signed'; }).length;
-      var pending = total - signed;
-      var durs = visits.map(function (v) { return calcDurationMinutes(v.entrada, v.saida); }).filter(function (x) { return x !== null; });
-      var avg = durs.length ? Math.round(durs.reduce(function (a, b) { return a + b; }, 0) / durs.length) : 0;
-      var set = function (id, txt) {
-        var el = document.getElementById(id);
-        if (el) el.textContent = txt;
-      };
-      set('kpiTotal', total);
-      set('kpiToday', visits.filter(function (v) { return v.data === today; }).length);
-      set('kpiTodayDate', formatDateBR(today));
-      set('kpiUnits', new Set(visits.map(function (v) { return v.unidade; })).size);
-      set('kpiSignedRate', (total ? Math.round(signed / total * 100) : 0) + '%');
-      set('kpiPendingText', pending + ' pendente(s)');
-      set('kpiAvgTime', formatMinutes(avg));
-      var badge = document.getElementById('navPendingBadge');
-      if (badge) badge.textContent = total;
-      var countBy = function (k) {
-        var m = {};
-        visits.forEach(function (v) { m[v[k]] = (m[v[k]] || 0) + 1; });
-        return Object.entries(m).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 6);
-      };
-      var mk = function (id, cfg) {
-        var canvas = document.getElementById(id);
-        if (!canvas || typeof Chart === 'undefined') return;
-        if (charts[id]) charts[id].destroy();
-        charts[id] = new Chart(canvas, cfg);
-      };
-      var uD = countBy('unidade');
-      var dD = countBy('departamento');
-      mk('chartUnits', {
-        type: 'bar',
-        data: { labels: uD.map(function (x) { return String(x[0]).slice(0, 22); }), datasets: [{ data: uD.map(function (x) { return x[1]; }), backgroundColor: '#003580', borderRadius: 6 }] },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  tentar('manual-tracking',function(){
+    var mapa={fDepartamento:'depto',fUnidade:'unidade',fResponsavel:'resp'};
+    Object.keys(mapa).forEach(function(id){
+      var el=document.getElementById(id);
+      if(!el)return;
+      el.addEventListener('input',function(){
+        if(autoState.prog)return;
+        autoState[mapa[id]]=false;
       });
-      mk('chartStatus', {
-        type: 'doughnut',
-        data: { labels: ['Assinadas', 'Pendentes'], datasets: [{ data: [signed, pending], backgroundColor: ['#16a34a', '#FBC02D'], borderWidth: 0 }] },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '62%' }
-      });
-      mk('chartDepts', {
-        type: 'bar',
-        data: { labels: dD.map(function (x) { return String(x[0]).split('—')[0]; }), datasets: [{ data: dD.map(function (x) { return x[1]; }), backgroundColor: '#009FE3', borderRadius: 6 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-      });
-      var recentes = visits.slice(0, 6);
-      window._dashList = recentes;
-      var tb = document.getElementById('recentVisitsBody');
-      if (tb) tb.innerHTML = recentes.map(function (v, i) {
-        return '<tr>' +
-          '<td><strong>' + esc(v.protocolo) + '</strong></td>' +
-          '<td>' + formatDateBR(v.data) + '</td>' +
-          '<td>' + esc(v.servidor) + '</td>' +
-          '<td>' + esc(v.unidade) + '</td>' +
-          '<td>' + respCell(v.responsavel) + '</td>' +
-          '<td>' + (v.status === 'signed' ? '<span class="status-pill status-signed">✅ Assinada</span>' : '<span class="status-pill status-pending">⏳ Pendente</span>') + '</td>' +
-          '<td>' + (v.pdfUrl
-            ? '<a href="' + v.pdfUrl + '" target="_blank" class="btn btn-success btn-sm">📁 PDF Drive</a>'
-            : '<button class="btn btn-outline btn-sm" onclick="openA4Modal(window._dashList[' + i + '])">📄 A4</button>') + '</td>' +
-        '</tr>';
-      }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma visita registrada ainda.</td></tr>';
-    }
+    });
+  });
 
-    /* ============================================================
-       RELATÓRIOS
-       ============================================================ */
-    function dataISO(d) {
-      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    }
-    function setPeriodo(modo) {
-      var de = document.getElementById('filterDe');
-      var ate = document.getElementById('filterAte');
-      if (!de || !ate) return;
-      var hoje = new Date();
-      if (modo === 'hoje') {
-        de.value = dataISO(hoje);
-        ate.value = dataISO(hoje);
-      } else if (modo === '7') {
-        var d7 = new Date(hoje.getTime() - 6 * 86400000);
-        de.value = dataISO(d7);
-        ate.value = dataISO(hoje);
-      } else if (modo === 'mes') {
-        de.value = dataISO(new Date(hoje.getFullYear(), hoje.getMonth(), 1));
-        ate.value = dataISO(hoje);
-      } else {
-        de.value = '';
-        ate.value = '';
-      }
-      marcarAtalho(modo === 'limpar' ? '' : modo);
-      renderReportsTable();
-    }
-    function marcarAtalho(modo) {
-      ['btHoje', 'bt7', 'btMes'].forEach(function (id) {
-        var b = document.getElementById(id);
-        if (b) b.classList.remove('ativo');
+  tentar('limpar-erros',function(){
+    ['fServidor','fDepartamento','fUnidade','fResponsavel','fData','fEntrada','fSaida','fObjetivo']
+      .forEach(function(id){
+        var el=document.getElementById(id);
+        if(!el)return;
+        el.addEventListener('input',function(){el.classList.remove('err');});
+        el.addEventListener('change',function(){el.classList.remove('err');});
       });
-      var mapa = { hoje: 'btHoje', '7': 'bt7', mes: 'btMes' };
-      if (mapa[modo]) {
-        var el = document.getElementById(mapa[modo]);
-        if (el) el.classList.add('ativo');
-      }
-    }
-    function listaFiltrada() {
-      var elQ = document.getElementById('filterSearch');
-      var elU = document.getElementById('filterUnit');
-      var elD = document.getElementById('filterDept');
-      var elS = document.getElementById('filterStatus');
-      var elDe = document.getElementById('filterDe');
-      var elAte = document.getElementById('filterAte');
-      var q = (elQ ? elQ.value : '').toLowerCase();
-      var u = elU ? elU.value : '';
-      var d = elD ? elD.value : '';
-      var s = elS ? elS.value : '';
-      var de = elDe ? elDe.value : '';
-      var ate = elAte ? elAte.value : '';
-      return visits.filter(function (v) {
-        var hay = (v.protocolo + ' ' + v.servidor + ' ' + v.unidade + ' ' + 
+  });
+
+  tentar('listas',function(){
+    lists.paresServidor=lists.paresServidor||[];
+    lists.paresUnidade=lists.paresUnidade||[];
+  });
+
+  tentar('mapas',montarMapas);
+  tentar('datalists',populateDatalists);
+  tentar('pills',renderObjPills);
+  tentar('objetivos',renderObjLista);
+  tentar('contador',atualizarContadorObjetivo);
+  tentar('relatorios',renderReportsTable);
+  tentar('acesso',initAccessMode);
+  tentar('sync',function(){syncTudo(true);});
+
+  setTimeout(function(){
+    tentar('resize',function(){if(padUnit){padUnit.resize();padUnit.redraw();}});
+  },250);
+});
+</script>
+</body>
+</html>
