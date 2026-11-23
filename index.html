@@ -97,7 +97,7 @@
     .auto-hint a { color: var(--blue-mid); font-weight: 700; cursor: pointer; text-decoration: underline; }
     .auto-hint.pend { color: var(--muted); }
 
-    /* ---------- COMBO (lista suspensa própria, no lugar do datalist) ---------- */
+    /* ---------- COMBO ---------- */
     .combo { position: relative; width: 100%; }
     .combo > input { padding-right: 70px; }
     .combo-seta {
@@ -371,6 +371,7 @@
               <div class="form-group">
                 <label>Unidade / Escola / Destino <span class="obrig">*</span></label>
                 <input type="text" id="fUnidade" placeholder="Selecione ou digite..." autocomplete="off" />
+                <div class="auto-hint pend" id="hintUnidade" hidden></div>
               </div>
               <div class="form-group">
                 <label>Responsável pela Escola <span class="obrig">*</span></label>
@@ -520,6 +521,9 @@
           <div class="card-title" style="margin-bottom:10px;">☁️ Sincronização com Google Sheets &amp; Drive</div>
           <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Status da integração: <strong id="cloudStatusLabel">Verificando...</strong></p>
           <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Preenchimentos automáticos: <strong id="autoFillLabel">Verificando...</strong></p>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.55;">
+            Listas lidas das abas <strong>Servidores</strong>, <strong>Unidades</strong> e <strong>Objetivos</strong>.
+          </p>
           <div style="display:flex;flex-wrap:wrap;gap:10px;">
             <button class="btn btn-primary" onclick="syncTudo()">🔄 Sincronizar Listas &amp; Fichas</button>
             <a href="https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit" target="_blank" class="btn btn-outline">Abrir Planilha ↗</a>
@@ -597,8 +601,10 @@
     const params = new URLSearchParams(window.location.search);
     const isProfessorMode = params.get('modo') === 'ficha';
 
+    const autoState = { depto: false, unidade: false, resp: false, prog: false };
+
     /* ============================================================
-       COMBO — lista suspensa própria (substitui o datalist)
+       COMBO
        ============================================================ */
     const COMBO_FONTES = {
       fServidor:     function () { return lists.servidores || []; },
@@ -1180,7 +1186,8 @@
       }
     }
     function fecharObjMenu() {
-      document.getElementById('objMenu').classList.remove('open');
+      var m = document.getElementById('objMenu');
+      if (m) m.classList.remove('open');
     }
     function renderObjLista() {
       var filtro = (document.getElementById('objSearch').value || '').toLowerCase();
@@ -1265,78 +1272,131 @@
     }
 
     /* ============================================================
-       PREENCHIMENTO AUTOMÁTICO
+       PREENCHIMENTO AUTOMÁTICO EM CADEIA
        ============================================================ */
     function normaliza(s) {
       return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
     }
-    function aplicarAutoDepto(forcar) {
-      var servidor = document.getElementById('fServidor').value.trim();
-      var deptoEl = document.getElementById('fDepartamento');
-      var hint = document.getElementById('hintDepto');
-      hint.hidden = true;
-      if (!servidor) return;
-      var alvo = mapaServidorDepto[normaliza(servidor)];
-      if (!alvo) return;
-      if (!deptoEl.value.trim()) {
-        deptoEl.value = alvo;
-        hint.hidden = false;
-        hint.className = 'auto-hint';
-        hint.innerHTML = '✅ Departamento preenchido automaticamente.';
-        limparErro('fDepartamento');
-        atualizarTodosCombos();
-        return;
-      }
-      if (normaliza(deptoEl.value) === normaliza(alvo)) return;
-      if (forcar) {
-        deptoEl.value = alvo;
-        hint.hidden = false;
-        hint.className = 'auto-hint';
-        hint.innerHTML = '✅ Departamento atualizado.';
-        atualizarTodosCombos();
-        return;
-      }
-      hint.hidden = false;
-      hint.className = 'auto-hint pend';
-      hint.innerHTML = '💡 O setor cadastrado para este servidor é outro. ' +
-        '<a href="#" onclick="aplicarAutoDepto(true);return false;">Usar "' + esc(alvo) + '"</a>';
+
+    function esconderHint(id) {
+      var h = document.getElementById(id);
+      if (h) { h.hidden = true; h.innerHTML = ''; }
     }
+
+    function mostrarHint(id, tipo, html) {
+      var h = document.getElementById(id);
+      if (!h) return;
+      h.hidden = false;
+      h.className = tipo === 'ok' ? 'auto-hint' : 'auto-hint pend';
+      h.innerHTML = html;
+    }
+
+    function preencherAuto(id, valor, chave) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      autoState.prog = true;
+      el.value = valor;
+      el.classList.remove('campo-erro');
+      autoState.prog = false;
+      if (chave) autoState[chave] = true;
+      atualizarTodosCombos();
+    }
+
+    function limparAuto(id, chave) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      autoState.prog = true;
+      el.value = '';
+      autoState.prog = false;
+      if (chave) autoState[chave] = true;
+      atualizarTodosCombos();
+    }
+
+    function ultimaUnidadeDoServidor(servidor) {
+      var alvo = normaliza(servidor);
+      if (!alvo) return '';
+      for (var i = 0; i < visits.length; i++) {
+        var v = visits[i];
+        if (!v || !v.unidade) continue;
+        if (normaliza(v.servidor) === alvo) return String(v.unidade).trim();
+      }
+      return '';
+    }
+
+    function aplicarAutoDepto() {
+      var servidor = document.getElementById('fServidor').value.trim();
+      if (!servidor) { esconderHint('hintDepto'); return; }
+      var alvo = mapaServidorDepto[normaliza(servidor)];
+      if (!alvo) {
+        mostrarHint('hintDepto', 'pend', 'Sem setor cadastrado para este servidor — escolha o departamento.');
+        return;
+      }
+      preencherAuto('fDepartamento', alvo, 'depto');
+      mostrarHint('hintDepto', 'ok', '✅ Departamento preenchido automaticamente.');
+    }
+
+    function aplicarAutoUnidade() {
+      var servidor = document.getElementById('fServidor').value.trim();
+      var uniEl = document.getElementById('fUnidade');
+      if (!servidor) { esconderHint('hintUnidade'); return; }
+
+      var alvo = ultimaUnidadeDoServidor(servidor);
+
+      if (!alvo) {
+        if (uniEl.value.trim()) {
+          limparAuto('fUnidade', 'unidade');
+          esconderHint('hintUnidade');
+          esconderHint('hintResp');
+        }
+        return;
+      }
+
+      if (normaliza(uniEl.value) === normaliza(alvo)) {
+        autoState.unidade = true;
+        esconderHint('hintUnidade');
+        return;
+      }
+
+      preencherAuto('fUnidade', alvo, 'unidade');
+      mostrarHint('hintUnidade', 'ok', '✅ Unidade da última visita deste servidor.');
+    }
+
     function aplicarAutoResp(forcar) {
       var unidade = document.getElementById('fUnidade').value.trim();
       var respEl = document.getElementById('fResponsavel');
-      var hint = document.getElementById('hintResp');
-      hint.hidden = true;
-      if (!unidade) return;
+      if (!unidade) { esconderHint('hintResp'); return; }
+
       var alvo = mapaUnidadeResp[normaliza(unidade)];
+
       if (!alvo) {
-        hint.hidden = false;
-        hint.className = 'auto-hint pend';
-        hint.innerHTML = 'Sem responsável cadastrado para esta escola — digite o nome de quem está assinando.';
+        mostrarHint('hintResp', 'pend', 'Sem responsável cadastrado para esta escola — digite o nome de quem está assinando.');
         return;
       }
-      if (!respEl.value.trim()) {
-        respEl.value = alvo;
-        hint.hidden = false;
-        hint.className = 'auto-hint';
-        hint.innerHTML = '✅ Responsável preenchido automaticamente. Pode trocar se outro assinar.';
-        limparErro('fResponsavel');
-        atualizarTodosCombos();
+
+      if (!respEl.value.trim() || autoState.resp || forcar === true) {
+        preencherAuto('fResponsavel', alvo, 'resp');
+        mostrarHint('hintResp', 'ok', '✅ Responsável preenchido automaticamente. Pode trocar se outro assinar.');
         return;
       }
-      if (normaliza(respEl.value) === normaliza(alvo)) return;
-      if (forcar) {
-        respEl.value = alvo;
-        hint.hidden = false;
-        hint.className = 'auto-hint';
-        hint.innerHTML = '✅ Responsável atualizado. Pode trocar se outro assinar.';
-        atualizarTodosCombos();
+
+      if (normaliza(respEl.value) === normaliza(alvo)) {
+        autoState.resp = true;
+        esconderHint('hintResp');
         return;
       }
-      hint.hidden = false;
-      hint.className = 'auto-hint pend';
-      hint.innerHTML = '💡 Cadastro desta escola: "' + esc(alvo) + '". ' +
-        '<a href="#" onclick="aplicarAutoResp(true);return false;">Usar este nome</a>';
+
+      mostrarHint('hintResp', 'pend',
+        '💡 Cadastro desta escola: "' + esc(alvo) + '". ' +
+        '<a href="#" onclick="aplicarAutoResp(true);return false;">Usar este nome</a>');
     }
+
+    function aplicarCadeiaCompleta() {
+      aplicarAutoDepto();
+      aplicarAutoUnidade();
+      autoState.resp = true;
+      aplicarAutoResp(false);
+    }
+
     function montarMapas() {
       mapaServidorDepto = {};
       mapaUnidadeResp = {};
@@ -1521,8 +1581,12 @@
       visits.unshift(visit);
       localStorage.setItem('cemtec_visits_v5', JSON.stringify(visits));
       document.getElementById('visitForm').reset();
-      document.getElementById('hintDepto').hidden = true;
-      document.getElementById('hintResp').hidden = true;
+      autoState.depto = false;
+      autoState.unidade = false;
+      autoState.resp = false;
+      esconderHint('hintDepto');
+      esconderHint('hintUnidade');
+      esconderHint('hintResp');
       selectedObjetivos = [];
       renderObjPills();
       document.getElementById('fData').value = todayISO();
@@ -1538,15 +1602,12 @@
     }
 
     /* ============================================================
-       SINCRONIZAÇÃO
+       SINCRONIZAÇÃO — lê as abas Servidores e Unidades
        ============================================================ */
-    async function carregarParesDaPlanilha() {
-      try {
-        var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Listas';
-        var res = await fetch(url, { redirect: 'follow' });
-        var texto = await res.text();
-        if (!texto || texto.trim().charAt(0) === '<') return false;
-        var rows = texto.split(/\r?\n/).filter(function (l) { return l.trim() !== ''; }).map(function (r) {
+    function csvParaLinhas(texto) {
+      return texto.split(/\r?\n/)
+        .filter(function (l) { return l.trim() !== ''; })
+        .map(function (r) {
           var out = [], cur = '', dentro = false;
           for (var i = 0; i < r.length; i++) {
             var ch = r[i];
@@ -1559,42 +1620,74 @@
           out.push(cur.trim());
           return out;
         });
-        if (rows.length < 2) return false;
-        var head = rows[0].map(function (h) { return normaliza(h); });
-        function idx(termos) {
-          for (var i = 0; i < head.length; i++) {
-            for (var t = 0; t < termos.length; t++) {
-              if (head[i].indexOf(termos[t]) !== -1) return i;
-            }
-          }
-          return -1;
-        }
-        var cS = idx(['servidor']), cD = idx(['departamento']), cU = idx(['unidade', 'escola']), cR = idx(['respons']);
-        var pS = [], pU = [];
-        for (var r = 1; r < rows.length; r++) {
-          var row = rows[r];
-          if (cS > -1 && cD > -1 && row[cS] && row[cD]) pS.push([row[cS], row[cD]]);
-          if (cU > -1 && cR > -1 && row[cU] && row[cR]) pU.push([row[cU], row[cR]]);
-        }
-        lists.paresServidor = pS;
-        lists.paresUnidade = pU;
-        return true;
+    }
+
+    async function lerAbaCSV(nomeAba) {
+      try {
+        var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
+                  '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(nomeAba);
+        var res = await fetch(url, { redirect: 'follow' });
+        var texto = await res.text();
+        if (!texto || texto.trim().charAt(0) === '<') return null;
+        var rows = csvParaLinhas(texto);
+        return rows.length ? rows : null;
       } catch (e) {
-        return false;
+        return null;
       }
     }
+
+    function acharCol(head, termos) {
+      for (var i = 0; i < head.length; i++) {
+        for (var t = 0; t < termos.length; t++) {
+          if (head[i].indexOf(termos[t]) !== -1) return i;
+        }
+      }
+      return -1;
+    }
+
+    async function carregarParesDaPlanilha() {
+      var temAlgo = false;
+
+      var rowsS = await lerAbaCSV('Servidores');
+      if (rowsS && rowsS.length >= 2) {
+        var headS = rowsS[0].map(normaliza);
+        var cS = acharCol(headS, ['servidor']);
+        var cD = acharCol(headS, ['departamento', 'setor']);
+        if (cS > -1 && cD > -1) {
+          var pS = [];
+          for (var r = 1; r < rowsS.length; r++) {
+            if (rowsS[r][cS] && rowsS[r][cD]) pS.push([rowsS[r][cS], rowsS[r][cD]]);
+          }
+          if (pS.length) { lists.paresServidor = pS; temAlgo = true; }
+        }
+      }
+
+      var rowsU = await lerAbaCSV('Unidades');
+      if (rowsU && rowsU.length >= 2) {
+        var headU = rowsU[0].map(normaliza);
+        var cU = acharCol(headU, ['unidade', 'escola']);
+        var cR = acharCol(headU, ['respons']);
+        if (cU > -1 && cR > -1) {
+          var pU = [];
+          for (var r2 = 1; r2 < rowsU.length; r2++) {
+            if (rowsU[r2][cU] && rowsU[r2][cR]) pU.push([rowsU[r2][cU], rowsU[r2][cR]]);
+          }
+          if (pU.length) { lists.paresUnidade = pU; temAlgo = true; }
+        }
+      }
+
+      return temAlgo;
+    }
+
     async function syncTudo(silent) {
       var lbl = document.getElementById('cloudStatusLabel');
       var okPares = await carregarParesDaPlanilha();
-      if (!okPares) {
-        lists.paresServidor = lists.paresServidor || [];
-        lists.paresUnidade = lists.paresUnidade || [];
-        if (lbl) lbl.textContent = 'Listas vindas do Apps Script (sem vínculo automático)';
-      }
+
       if (APPS_SCRIPT_URL) {
         try {
           var res = await fetch(APPS_SCRIPT_URL, { redirect: 'follow' });
           var json = await res.json();
+
           if (json.status === 'ok') {
             if (json.listas) {
               if (json.listas.servidores && json.listas.servidores.length) lists.servidores = json.listas.servidores;
@@ -1603,18 +1696,19 @@
               if (json.listas.objetivos && json.listas.objetivos.length) lists.objetivos = json.listas.objetivos;
               if (json.listas.responsaveis && json.listas.responsaveis.length) lists.responsaveis = json.listas.responsaveis;
             }
-            if (!okPares) {
-              if (lists.servidores.length === lists.departamentos.length && lists.servidores.length) {
-                lists.paresServidor = lists.servidores.map(function (s, i) {
-                  return [s, lists.departamentos[i]];
-                });
+
+            /* Pares vindos do Apps Script: mais confiáveis que o CSV */
+            if (json.pares) {
+              if (Array.isArray(json.pares.paresServidor) && json.pares.paresServidor.length) {
+                lists.paresServidor = json.pares.paresServidor;
+                okPares = true;
               }
-              if (lists.unidades.length === lists.responsaveis.length && lists.unidades.length) {
-                lists.paresUnidade = lists.unidades.map(function (u, i) {
-                  return [u, lists.responsaveis[i]];
-                });
+              if (Array.isArray(json.pares.paresUnidade) && json.pares.paresUnidade.length) {
+                lists.paresUnidade = json.pares.paresUnidade;
+                okPares = true;
               }
             }
+
             if (Array.isArray(json.visits)) {
               visits = json.visits.map(function (v) {
                 return Object.assign({}, v, {
@@ -1633,7 +1727,12 @@
                 }
               });
             }
-            if (lbl) lbl.textContent = 'Conectada — ' + visits.length + ' ficha(s) | ' + (lists.objetivos || []).length + ' objetivo(s)';
+
+            if (lbl) {
+              lbl.textContent = 'Conectada — ' + visits.length + ' ficha(s) | ' +
+                                (lists.objetivos || []).length + ' objetivo(s) | ' +
+                                (lists.unidades || []).length + ' unidade(s)';
+            }
           } else {
             if (lbl) lbl.textContent = 'Erro: ' + (json.message || 'desconhecido');
           }
@@ -1641,8 +1740,14 @@
           if (lbl && !okPares) lbl.textContent = 'Falha de conexão';
         }
       }
+
+      if (!okPares && lbl) {
+        lbl.textContent = 'Sem vínculo automático — verifique as abas Servidores e Unidades';
+      }
+
       lists.paresServidor = lists.paresServidor || [];
       lists.paresUnidade = lists.paresUnidade || [];
+
       localStorage.setItem('cemtec_lists_v5', JSON.stringify(lists));
       montarMapas();
       populateDatalists();
@@ -1650,7 +1755,12 @@
       renderObjLista();
       renderDashboard();
       renderReportsTable();
-      if (!silent) showToast('Sincronizado! ' + visits.length + ' ficha(s) e ' + (lists.objetivos || []).length + ' objetivo(s).');
+
+      if (!silent) {
+        showToast('Sincronizado: ' + (lists.servidores || []).length + ' servidor(es), ' +
+                  (lists.unidades || []).length + ' unidade(s), ' +
+                  (lists.objetivos || []).length + ' objetivo(s).');
+      }
     }
     function syncVisitsFromCloud(silent) { return syncTudo(silent); }
 
@@ -1827,311 +1937,4 @@
       var de = elDe ? elDe.value : '';
       var ate = elAte ? elAte.value : '';
       return visits.filter(function (v) {
-        var hay = (v.protocolo + ' ' + v.servidor + ' ' + v.unidade + ' ' + (v.responsavel || '') + ' ' + v.objetivo).toLowerCase();
-        if (u && v.unidade !== u) return false;
-        if (d && v.departamento !== d) return false;
-        if (s && v.status !== s) return false;
-        if (q && hay.indexOf(q) === -1) return false;
-        if (de && String(v.data || '') < de) return false;
-        if (ate && String(v.data || '') > ate) return false;
-        return true;
-      });
-    }
-    function renderReportsTable() {
-      var list = listaFiltrada();
-      window._reportList = list;
-      var tb = document.getElementById('reportsTableBody');
-      if (tb) tb.innerHTML = list.map(function (v, i) {
-        return '<tr>' +
-          '<td><strong>' + esc(v.protocolo) + '</strong></td>' +
-          '<td>' + formatDateBR(v.data) + '</td>' +
-          '<td>' + esc(v.servidor) + '</td>' +
-          '<td>' + esc(v.unidade) + '</td>' +
-          '<td>' + respCell(v.responsavel) + '</td>' +
-          '<td>' + esc(formatTimeClean(v.entrada)) + (v.saida ? ' – ' + esc(formatTimeClean(v.saida)) : '') + '</td>' +
-          '<td>' + (v.status === 'signed' ? '<span class="status-pill status-signed">✅ Assinada</span>' : '<span class="status-pill status-pending">⏳ Pendente</span>') + '</td>' +
-          '<td>' + (v.pdfUrl
-            ? '<a href="' + v.pdfUrl + '" target="_blank" class="btn btn-success btn-sm">📁 PDF Drive</a>'
-            : '<button class="btn btn-outline btn-sm" onclick="openA4Modal(window._reportList[' + i + '])">📄 A4</button>') + '</td>' +
-        '</tr>';
-      }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma ficha encontrada com estes filtros.</td></tr>';
-      var assinadas = list.filter(function (v) { return v.status === 'signed'; }).length;
-      var pendentes = list.length - assinadas;
-      var mins = list.map(function (v) { return calcDurationMinutes(v.entrada, v.saida); }).filter(function (x) { return x !== null; });
-      var totalMin = mins.reduce(function (a, b) { return a + b; }, 0);
-      var txt = '<strong>' + list.length + '</strong> ficha(s) · <strong>' + assinadas + '</strong> assinada(s) · ' +
-                '<strong>' + pendentes + '</strong> pendente(s)';
-      if (mins.length) txt += ' · ' + formatMinutes(totalMin) + ' de permanência';
-      var resumo = document.getElementById('filtrosResumo');
-      if (resumo) resumo.innerHTML = txt;
-    }
-
-    /* ============================================================
-       MODAL / PDF
-       ============================================================ */
-    function driveEmbedUrl(url) {
-      var m = String(url || '').match(/\/d\/([a-zA-Z0-9_-]+)/);
-      return m ? 'https://drive.google.com/file/d/' + m[1] + '/preview' : '';
-    }
-    function openA4Modal(v) {
-      fecharTodosCombos();
-      var btnPdf = document.getElementById('modalDrivePdfBtn');
-      var btnPrint = document.getElementById('btnPrintA4');
-      var titulo = document.getElementById('a4ModalTitle');
-      if (v.pdfUrl) {
-        btnPdf.href = v.pdfUrl;
-        btnPdf.style.display = 'inline-flex';
-      } else {
-        btnPdf.style.display = 'none';
-      }
-      var embed = driveEmbedUrl(v.pdfUrl);
-      if (embed) {
-        titulo.textContent = 'PDF Oficial — Ficha de Visita';
-        btnPrint.style.display = 'none';
-        document.getElementById('a4ModalBody').innerHTML =
-          '<div class="pdf-viewer"><iframe src="' + embed + '"></iframe></div>' +
-          '<div class="pdf-legenda">PDF oficial gerado a partir do modelo do Google Docs.</div>';
-        document.getElementById('a4Modal').classList.add('open');
-        return;
-      }
-      titulo.textContent = 'Comprovante — Ficha de Visita (A4)';
-      btnPrint.style.display = 'inline-flex';
-      var partes = String(v.data || '').split('-');
-      var y = partes[0] || '----', m = partes[1] || '--', d = partes[2] || '--';
-      var ent = formatTimeClean(v.entrada) || '—';
-      var sai = formatTimeClean(v.saida) || '—';
-      var sigHtml = v.sigUnit
-        ? '<img src="' + v.sigUnit + '" />' + sigetHTML(v, true)
-        : (v.status === 'signed'
-          ? (sigetHTML(v, false) ||
-             '<div style="height:40px;display:flex;align-items:center;justify-content:center;color:#16a34a;font-weight:700;font-family:Inter,sans-serif;font-size:12px;">✔ Assinada digitalmente (ver PDF oficial no Drive)</div>')
-          : '<div style="height:40px;color:#d97706;">[ Pendente ]</div>');
-      document.getElementById('a4ModalBody').innerHTML =
-        '<div class="a4-sheet">' +
-          '<div class="a4-header">' +
-            '<div class="a4-logos">CEMTEC — CENTRO MUNICIPAL DE TECNOLOGIA E ROBÓTICA EDUCACIONAL</div>' +
-            '<div class="a4-logos-sub">SEMED — SECRETARIA MUNICIPAL DE EDUCAÇÃO • PREFEITURA DE SORRISO - MT</div>' +
-          '</div>' +
-          '<div class="a4-title">FICHA DE VISITA</div>' +
-          '<div style="text-align:center;font-size:12px;color:#64748b;margin-bottom:16px;">Protocolo: <strong>' + esc(v.protocolo) + '</strong></div>' +
-          '<div class="a4-field"><span>Nome do Servidor:</span><span class="a4-field-value">' + esc(v.servidor) + '</span></div>' +
-          '<div class="a4-field"><span>Departamento / Setor:</span><span class="a4-field-value">' + esc(v.departamento) + '</span></div>' +
-          '<div class="a4-field"><span>Unidade / Escola / Destino:</span><span class="a4-field-value">' + esc(v.unidade) + '</span></div>' +
-          '<div class="a4-field"><span>Responsável pela Escola:</span><span class="a4-field-value">' + esc(v.responsavel || 'Não informado') + '</span></div>' +
-          '<div class="a4-field"><span>Data da Visita:</span><span class="a4-field-value">' + d + '/' + m + '/' + y + '</span></div>' +
-          '<div style="font-size:14px;font-weight:600;margin-top:10px;">Objetivo da Visita:</div>' +
-          '<div class="a4-objective-box">' + esc(v.objetivo) + '</div>' +
-          '<div style="margin-bottom:20px;font-size:14px;">Horário de Entrada: <strong>' + esc(ent) + '</strong> &nbsp;|&nbsp; Horário de Saída: <strong>' + esc(sai) + '</strong> &nbsp;|&nbsp; Duração: <strong>' + esc(v.duracao || '—') + '</strong></div>' +
-          '<div class="a4-sig-block">' + sigHtml +
-            '<div class="a4-sig-line">Assinatura do Responsável pela Unidade' + (v.responsavel ? '<br/><small>' + esc(v.responsavel) + '</small>' : '') + '</div>' +
-          '</div>' +
-          '<div style="font-family:Arial,sans-serif;font-size:9px;color:#475569;text-align:center;border-top:2px solid #003580;padding-top:6px;margin-top:20px;">' +
-            'Status: ' + (v.status === 'signed' ? 'Assinada digitalmente' : 'Aguardando assinatura') + ' | Registrado em: ' + new Date().toLocaleDateString('pt-BR') + '<br/>' +
-            'Avenida Tancredo Neves, nº 124, Centro Sul • Sorriso - MT • (66) 3545-8100 • educacao@sorriso.mt.gov.br' +
-          '</div>' +
-        '</div>';
-      document.getElementById('a4Modal').classList.add('open');
-    }
-
-    /* ============================================================
-       CSV
-       ============================================================ */
-    function exportCSV() {
-      var list = listaFiltrada();
-      if (!list.length) {
-        showToast('Nenhuma ficha com os filtros atuais.');
-        return;
-      }
-      var headers = ['Protocolo', 'Data', 'Servidor', 'Departamento', 'Unidade', 'Responsavel', 'Objetivo', 'Entrada', 'Saida', 'Duracao', 'Status', 'Codigo', 'Link PDF'];
-      var escCsv = function (v) { return '"' + String(v || '').replace(/"/g, '""') + '"'; };
-      var lines = [headers.map(escCsv).join(';')];
-      list.forEach(function (v) {
-        lines.push([
-          v.protocolo, formatDateBR(v.data), v.servidor, v.departamento, v.unidade,
-          v.responsavel || '', String(v.objetivo || '').replace(/\n/g, ' | '),
-          formatTimeClean(v.entrada), formatTimeClean(v.saida), v.duracao || '',
-          v.status === 'signed' ? 'Assinada' : 'Pendente', v.assinaturaCodigo || '', v.pdfUrl
-        ].map(escCsv).join(';'));
-      });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' }));
-      a.download = 'fichas-cemtec-' + todayISO() + '.csv';
-      a.click();
-      showToast('CSV exportado com ' + list.length + ' ficha(s).');
-    }
-
-    /* ============================================================
-       UTILITÁRIOS
-       ============================================================ */
-    function formatTimeClean(val) {
-      var s = String(val || '').trim();
-      if (!s) return '';
-      if (/^\d{1,2}:\d{2}$/.test(s)) return s.padStart(5, '0');
-      var m = s.match(/(\d{2}):(\d{2})(?::\d{2})?/);
-      return m ? m[1] + ':' + m[2] : s;
-    }
-    function todayISO() {
-      var d = new Date();
-      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    }
-    function formatDateBR(iso) {
-      if (!iso || iso.indexOf('-') === -1) return iso || '—';
-      var p = iso.split('-');
-      return p[2] + '/' + p[1] + '/' + p[0];
-    }
-    function setNowTime(id) {
-      var d = new Date();
-      var el = document.getElementById(id);
-      if (el) {
-        el.value = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-        el.classList.remove('campo-erro');
-      }
-    }
-    function calcDurationMinutes(a, b) {
-      var ta = formatTimeClean(a), tb = formatTimeClean(b);
-      if (!ta || !tb || ta.indexOf(':') === -1 || tb.indexOf(':') === -1) return null;
-      var p1 = ta.split(':').map(Number), p2 = tb.split(':').map(Number);
-      var diff = (p2[0] * 60 + p2[1]) - (p1[0] * 60 + p1[1]);
-      return (!isNaN(diff) && diff >= 0) ? diff : null;
-    }
-    function formatMinutes(m) {
-      if (m === null || m === undefined) return '—';
-      return m < 60 ? m + ' min' : Math.floor(m / 60) + 'h ' + (m % 60) + 'min';
-    }
-    function esc(s) {
-      return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, function (m) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
-      });
-    }
-
-    /* ============================================================
-       ASSINATURA ELETRÔNICA — traço gerado a partir do nome
-       ============================================================ */
-    function sigetHash(str) {
-      var h = 5381;
-      for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
-      return h;
-    }
-    function sigetCodigo(semente) {
-      var s = String(semente);
-      var a = sigetHash(s).toString(36).toUpperCase();
-      var b = sigetHash(s + '|v').toString(36).toUpperCase();
-      while (a.length < 4) a = '0' + a;
-      while (b.length < 4) b = '0' + b;
-      return a.slice(0, 4) + '-' + b.slice(0, 4);
-    }
-    function sigetQuando(v) {
-      var iso = v.assinaturaEm;
-      if (!iso) iso = (v.data || '') + 'T' + (formatTimeClean(v.entrada) || '00:00') + ':00';
-      var dt = new Date(iso);
-      if (isNaN(dt.getTime())) return '';
-      var p = function (n) { return String(n).padStart(2, '0'); };
-      return p(dt.getDate()) + '/' + p(dt.getMonth() + 1) + '/' + dt.getFullYear() +
-             ' às ' + p(dt.getHours()) + ':' + p(dt.getMinutes());
-    }
-    function sigetHTML(v, semTraco) {
-      var nome = String(v.responsavel || '').trim();
-      if (!nome) return '';
-      var quando = sigetQuando(v);
-      var codigo = v.assinaturaCodigo || sigetCodigo(
-        [v.protocolo, v.servidor, nome, v.data, v.entrada].join('|')
-      );
-      return '<div class="siget" title="Representação visual do nome. A validade está no registro eletrônico.">' +
-        (semTraco ? '' : '<span class="siget__traco">' + esc(nome) + '</span>') +
-        '<div class="siget__meta">' +
-          'Assinado eletronicamente por <strong>' + esc(nome) + '</strong>' +
-          (quando ? ' em ' + esc(quando) : '') +
-          ' &middot; Protocolo ' + esc(v.protocolo) +
-          '<br>Código de verificação: <code class="siget__codigo">' + esc(codigo) + '</code>' +
-        '</div>' +
-      '</div>';
-    }
-    function showToast(msg) {
-      var t = document.getElementById('toast');
-      if (!t) return;
-      t.textContent = msg;
-      t.classList.add('show');
-      clearTimeout(window._tt);
-      window._tt = setTimeout(function () { t.classList.remove('show'); }, 4200);
-    }
-
-    /* ============================================================
-       EVENTOS
-       ============================================================ */
-    document.addEventListener('click', function (e) {
-      var menu = document.getElementById('objMenu');
-      var btn = document.getElementById('objMultiBtn');
-      if (!menu || !menu.classList.contains('open')) return;
-      if (menu.contains(e.target) || (btn && btn.contains(e.target))) return;
-      menu.classList.remove('open');
-    });
-    window.addEventListener('resize', function () {
-      if (padUnit) { padUnit.resize(); padUnit.redraw(); }
-      if (padFs) { padFs.resize(); padFs.redraw(); }
-    });
-    window.addEventListener('orientationchange', function () {
-      setTimeout(function () {
-        if (padUnit) { padUnit.resize(); padUnit.redraw(); }
-        if (padFs) { padFs.resize(); padFs.redraw(); }
-      }, 350);
-    });
-
-    /* ============================================================
-       INICIALIZAÇÃO
-       ============================================================ */
-    window.addEventListener('DOMContentLoaded', function () {
-      function tentar(nome, fn) {
-        try { fn(); } catch (e) { console.error('Falha em ' + nome + ':', e); }
-      }
-      tentar('logos', function () {
-        document.querySelectorAll('.dynamic-logo').forEach(function (img) { img.src = LOGO_URL; });
-      });
-      tentar('assinatura', function () {
-        padUnit = new SignaturePad(document.getElementById('sigCanvasUnit'));
-        padFs = new SignaturePad(document.getElementById('fsSigCanvas'));
-      });
-      tentar('data/hora', function () {
-        document.getElementById('fData').value = todayISO();
-        setNowTime('fEntrada');
-      });
-      tentar('combos', criarCombos);
-      tentar('eventos', function () {
-        var elServ = document.getElementById('fServidor');
-        if (elServ) {
-          elServ.addEventListener('change', function () { aplicarAutoDepto(false); });
-          elServ.addEventListener('blur', function () { aplicarAutoDepto(false); });
-        }
-        var elUnid = document.getElementById('fUnidade');
-        if (elUnid) {
-          elUnid.addEventListener('change', function () { aplicarAutoResp(false); });
-          elUnid.addEventListener('blur', function () { aplicarAutoResp(false); });
-        }
-      });
-      tentar('limpar-erros', function () {
-        ['fServidor', 'fDepartamento', 'fUnidade', 'fResponsavel', 'fData', 'fEntrada', 'fSaida', 'fObjetivo']
-          .forEach(function (id) {
-            var el = document.getElementById(id);
-            if (!el) return;
-            el.addEventListener('input', function () { el.classList.remove('campo-erro'); });
-            el.addEventListener('change', function () { el.classList.remove('campo-erro'); });
-          });
-      });
-      tentar('listas', function () {
-        lists.paresServidor = lists.paresServidor || [];
-        lists.paresUnidade = lists.paresUnidade || [];
-      });
-      tentar('mapas', montarMapas);
-      tentar('datalists', populateDatalists);
-      tentar('pills', renderObjPills);
-      tentar('objetivos', renderObjLista);
-      tentar('contador', atualizarContadorObjetivo);
-      tentar('relatorios', renderReportsTable);
-      tentar('acesso', initAccessMode);
-      tentar('sync', function () { syncTudo(true); });
-      setTimeout(function () {
-        tentar('resize', function () { if (padUnit) { padUnit.resize(); padUnit.redraw(); } });
-      }, 250);
-    });
-  </script>
-</body>
-</html>
+        var hay = (v.protocolo + ' ' + v.servidor + ' ' + v.unidade + ' ' + 
