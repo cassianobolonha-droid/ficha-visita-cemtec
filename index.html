@@ -79,7 +79,6 @@ textarea{min-height:92px;resize:vertical}
 .err{border-color:var(--dg)!important;background:#fef2f2!important}
 .ir{display:flex;gap:8px}.ir input{flex:1}
 .hint{font-size:11px;margin-top:2px;color:var(--ok);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.hint a{color:var(--bm);font-weight:700;cursor:pointer;text-decoration:underline}
 .hint.pend{color:var(--mt)}
 .combo{position:relative;width:100%}
 .combo>input{padding-right:70px}
@@ -106,6 +105,7 @@ textarea{min-height:92px;resize:vertical}
 .objtop{padding:8px;border-bottom:1px solid var(--br)}
 .objtop input{padding:8px 10px;font-size:13px}
 .objlist{max-height:260px;overflow-y:auto;padding:6px}
+.objnota{padding:7px 9px;font-size:11px;color:var(--mt);background:#f8fafc;border-radius:8px;margin-bottom:4px;line-height:1.4}
 .opt{display:flex;align-items:flex-start;justify-content:flex-start;gap:9px;padding:8px 9px;border-radius:8px;cursor:pointer;font-size:12.5px;font-weight:400;line-height:1.45;color:#334155;text-align:left}
 .opt span{flex:1 1 auto;min-width:0;text-align:left}
 .opt:hover{background:#f1f5f9}
@@ -245,7 +245,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
   </div>
   <nav class="nav">
     <button class="nbtn active" data-view="dashboard" onclick="switchView('dashboard')">📊 Dashboard</button>
-    <button class="nbtn" data-view="new" onclick="switchView('new')">✍️ Nova Ficha</button>
+    <button class="nbtn" data-view="new" onclick="abrirNovaFicha()">✍️ Nova Ficha ↗</button>
     <button class="nbtn" data-view="reports" onclick="switchView('reports')">📋 Relatórios &amp; PDFs <span class="bdg" id="navPendingBadge">0</span></button>
     <button class="nbtn" data-view="lists" onclick="switchView('lists')">⚙️ Planilha &amp; Links</button>
   </nav>
@@ -262,7 +262,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <div class="hacts">
       <button class="btn bo" onclick="syncVisitsFromCloud()">🔄 Atualizar da Planilha</button>
       <button class="btn ba" onclick="copyProfessorLink()">🔗 Link dos Professores</button>
-      <button class="btn bp" onclick="switchView('new')">+ Nova Ficha</button>
+      <button class="btn bp" onclick="abrirNovaFicha()">+ Nova Ficha ↗</button>
       <button class="btn bdx" onclick="sairSistema()">🚪 Sair</button>
     </div>
   </div>
@@ -292,7 +292,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
   <div class="ph">
     <div class="pt">
       <h1>Ficha de Visita Digital</h1>
-      <p>Todos os campos com <span style="color:var(--dg);font-weight:800">*</span> são obrigatórios. A ficha só é enviada com tudo preenchido.</p>
+      <p>Escolha o <strong>Departamento</strong> primeiro — as listas de servidores e objetivos se filtram por ele.</p>
     </div>
   </div>
   <form id="visitForm" onsubmit="return false" novalidate>
@@ -300,13 +300,14 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
       <div class="ct" style="margin-bottom:14px">1. Dados da Visita</div>
       <div class="fg">
         <div class="gp">
-          <label>Nome do Servidor <span class="ob">*</span></label>
-          <input type="text" id="fServidor" placeholder="Selecione ou digite..." autocomplete="off" />
+          <label>Departamento <span class="ob">*</span></label>
+          <input type="text" id="fDepartamento" placeholder="Selecione o setor..." autocomplete="off" />
+          <div class="hint pend" id="hintDepto" hidden></div>
         </div>
         <div class="gp">
-          <label>Departamento <span class="ob">*</span></label>
-          <input type="text" id="fDepartamento" placeholder="Selecione ou digite..." autocomplete="off" />
-          <div class="hint pend" id="hintDepto" hidden></div>
+          <label>Nome do Servidor <span class="ob">*</span></label>
+          <input type="text" id="fServidor" placeholder="Selecione o servidor do setor..." autocomplete="off" />
+          <div class="hint pend" id="hintServ" hidden></div>
         </div>
         <div class="gp">
           <label>Unidade / Escola / Destino <span class="ob">*</span></label>
@@ -315,9 +316,8 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
         </div>
         <div class="gp">
           <label>Responsável pela Escola <span class="ob">*</span></label>
-          <input type="text" id="fResponsavel" placeholder="Selecione na lista ou digite o nome de quem vai assinar..." autocomplete="off" />
-          <div class="hint pend" id="hintResp" hidden></div>
-          <div class="dica">O automático só sugere — você pode trocar quando outro responsável assinar.</div>
+          <input type="text" id="fResponsavel" placeholder="Selecione quem vai assinar..." autocomplete="off" />
+          <div class="dica">Preenche com o nome da escola. Se o coordenador assinar, troque ou digite.</div>
         </div>
         <div class="l3">
           <div class="gp">
@@ -343,7 +343,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
           <label>Objetivo da Visita <span class="ob">*</span> <span id="objCounter" style="font-weight:500;color:var(--mt)">0 caracteres</span></label>
           <div class="objm">
             <button type="button" class="objmb" id="objMultiBtn" onclick="toggleObjMenu(event)">
-              <span>☑️ Selecionar objetivos da lista</span>
+              <span>☑️ Selecionar objetivos do setor</span>
               <span class="objc" id="objCount" hidden>0</span>
               <span class="oc">▾</span>
             </button>
@@ -358,7 +358,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
           </div>
           <div class="pills" id="objPills"></div>
           <textarea id="fObjetivo" placeholder="Detalhes adicionais (opcional): escreva o que mais foi feito nesta visita..." oninput="atualizarContadorObjetivo()"></textarea>
-          <div class="dica">💡 Marque os objetivos na lista. Mínimo de 25 caracteres. Se precisar de algo diferente, escreva no campo acima.</div>
+          <div class="dica">💡 A lista mostra os objetivos do departamento escolhido. Mínimo de 25 caracteres.</div>
         </div>
       </div>
     </div>
@@ -449,7 +449,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <div class="ct" style="margin-bottom:10px">☁️ Sincronização com Google Sheets &amp; Drive</div>
     <p style="font-size:13px;color:var(--mt);margin-bottom:12px">Status da integração: <strong id="cloudStatusLabel">Verificando...</strong></p>
     <p style="font-size:13px;color:var(--mt);margin-bottom:12px">Preenchimentos automáticos: <strong id="autoFillLabel">Verificando...</strong></p>
-    <p style="font-size:12px;color:var(--mt);margin-bottom:12px;line-height:1.55">Listas lidas das abas <strong>Servidores</strong>, <strong>Unidades</strong> e <strong>Objetivos</strong>.</p>
+    <p style="font-size:12px;color:var(--mt);margin-bottom:12px;line-height:1.55">Listas lidas das abas <strong>Servidores</strong>, <strong>Unidades</strong> e <strong>Objetivos</strong> (A = Objetivo, B = Departamento).</p>
     <div style="display:flex;flex-wrap:wrap;gap:10px">
       <button class="btn bp" onclick="syncTudo()">🔄 Sincronizar Listas &amp; Fichas</button>
       <a href="https://docs.google.com/spreadsheets/d/1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU/edit" target="_blank" class="btn bo">Abrir Planilha ↗</a>
@@ -509,29 +509,47 @@ const LOGO_URL='https://lh3.googleusercontent.com/d/'+DRIVE_LOGO_ID;
 const OBJETIVO_MIN_CHARS=25;
 const AREA_MINIMA_ASSINATURA=0.02;
 const EXIGIR_TUDO_NO_PENDENTE=true;
-const DEFAULT_LISTS={servidores:[],departamentos:[],unidades:[],objetivos:[],responsaveis:[]};
+const DEFAULT_LISTS={servidores:[],departamentos:[],unidades:[],objetivos:[],responsaveis:[],
+  paresServidor:[],paresUnidade:[],servidoresPorDepartamento:[],responsaveisPorUnidade:[],objetivosPorDepartamento:[]};
+
 let visits=JSON.parse(localStorage.getItem('cemtec_visits_v5')||'[]').map(function(v){
   return Object.assign({},v,{entrada:formatTimeClean(v.entrada),saida:formatTimeClean(v.saida)});
 });
 let lists=JSON.parse(localStorage.getItem('cemtec_lists_v5')||'null')||JSON.parse(JSON.stringify(DEFAULT_LISTS));
-if(!Array.isArray(lists.responsaveis))lists.responsaveis=[];
-if(!Array.isArray(lists.paresServidor))lists.paresServidor=[];
-if(!Array.isArray(lists.paresUnidade))lists.paresUnidade=[];
+['responsaveis','paresServidor','paresUnidade','servidoresPorDepartamento','responsaveisPorUnidade','objetivosPorDepartamento'].forEach(function(k){
+  if(!Array.isArray(lists[k]))lists[k]=[];
+});
+
 let mapaServidorDepto={};
-let mapaUnidadeResp={};
+let mapaServPorDepto={};
+let mapaRespPorUnidade={};
+let mapaObjPorDepto={};
 let selectedObjetivos=[];
 let padUnit,padFs,charts={};
 let enviando=false;
+let ultimaUnidade='';
 const params=new URLSearchParams(window.location.search);
 const isProfessorMode=params.get('modo')==='ficha';
-const autoState={depto:false,unidade:false,resp:false,prog:false};
+const autoState={depto:false,serv:false,unidade:false,resp:false,prog:false};
 
 /* ============ COMBO ============ */
 const COMBO_FONTES={
-  fServidor:function(){return lists.servidores||[];},
   fDepartamento:function(){return lists.departamentos||[];},
+  fServidor:function(){
+    const dep=document.getElementById('fDepartamento');
+    const chave=dep?normaliza(dep.value):'';
+    if(!chave)return lists.servidores||[];
+    const lista=mapaServPorDepto[chave];
+    return (lista&&lista.length)?lista.slice():(lists.servidores||[]);
+  },
   fUnidade:function(){return lists.unidades||[];},
-  fResponsavel:function(){return lists.responsaveis||[];}
+  fResponsavel:function(){
+    const uni=document.getElementById('fUnidade');
+    const chave=uni?normaliza(uni.value):'';
+    if(!chave)return lists.responsaveis||[];
+    const lista=mapaRespPorUnidade[chave];
+    return (lista&&lista.length)?lista.slice():(lists.responsaveis||[]);
+  }
 };
 const combos={};
 
@@ -571,7 +589,7 @@ function criarCombo(id){
 
   function todos(){
     const fn=COMBO_FONTES[id];
-    return fn?fn().slice():[];
+    return fn?fn():[];
   }
   function atualizarLimpar(){
     wrap.classList.toggle('tem',String(input.value||'').trim()!=='');
@@ -780,6 +798,15 @@ function sairSistema(){
   var err=document.getElementById('pinError');
   if(err)err.textContent='';
   if(pin){pin.value='';setTimeout(function(){pin.focus();},100);}
+}
+
+/* ============ NOVA FICHA EM OUTRA ABA ============ */
+function abrirNovaFicha(){
+  var base=window.location.href.split('?')[0];
+  var url=base+'?modo=ficha&t='+Date.now();
+  var win=null;
+  try{win=window.open(url,'_blank');}catch(e){win=null;}
+  if(!win){showToast('O navegador bloqueou a nova aba. Libere pop-ups para este site.');}
 }
 
 /* ============ ASSINATURA ============ */
@@ -1003,13 +1030,13 @@ function limparErroAssinatura(){
   if(box)box.classList.remove('err');
 }
 function limparTodosErros(){
-  ['fServidor','fDepartamento','fUnidade','fResponsavel','fData','fEntrada','fSaida','fObjetivo'].forEach(limparErro);
+  ['fDepartamento','fServidor','fUnidade','fResponsavel','fData','fEntrada','fSaida','fObjetivo'].forEach(limparErro);
   limparErroAssinatura();
 }
 function validarFicha(modo){
   var v={
-    servidor:document.getElementById('fServidor').value.trim(),
     departamento:document.getElementById('fDepartamento').value.trim(),
+    servidor:document.getElementById('fServidor').value.trim(),
     unidade:document.getElementById('fUnidade').value.trim(),
     responsavel:document.getElementById('fResponsavel').value.trim(),
     data:document.getElementById('fData').value,
@@ -1017,8 +1044,8 @@ function validarFicha(modo){
     saida:document.getElementById('fSaida').value,
     objetivo:montarObjetivoFinal()
   };
-  if(!v.servidor)return{id:'fServidor',msg:'Preencha o Nome do Servidor.'};
-  if(!v.departamento)return{id:'fDepartamento',msg:'Preencha o Departamento.'};
+  if(!v.departamento)return{id:'fDepartamento',msg:'Escolha o Departamento.'};
+  if(!v.servidor)return{id:'fServidor',msg:'Escolha o Nome do Servidor.'};
   if(!v.unidade)return{id:'fUnidade',msg:'Preencha a Unidade / Escola / Destino.'};
   if(!v.responsavel)return{id:'fResponsavel',msg:'Preencha o nome do Responsável pela Escola.'};
   if(!v.data)return{id:'fData',msg:'Preencha a Data da Visita.'};
@@ -1039,7 +1066,24 @@ function validarFicha(modo){
   return null;
 }
 
-/* ============ OBJETIVOS ============ */
+/* ============ OBJETIVOS (filtrados por departamento) ============ */
+function objetivosDoDepartamento(){
+  var depEl=document.getElementById('fDepartamento');
+  var chave=depEl?normaliza(depEl.value):'';
+  var gerais=(mapaObjPorDepto['']||[]).slice();
+  if(!chave){
+    var todos=(lists.objetivos||[]).slice();
+    return {lista:todos,gerais:false,departamento:(depEl?depEl.value.trim():'')};
+  }
+  var especificos=(mapaObjPorDepto[chave]||[]).slice();
+  var out=especificos.slice();
+  gerais.forEach(function(o){
+    if(out.indexOf(o)===-1)out.push(o);
+  });
+  if(!out.length)return {lista:(lists.objetivos||[]).slice(),gerais:false,departamento:(depEl?depEl.value.trim():'')};
+  return {lista:out,gerais:true,departamento:(depEl?depEl.value.trim():'')};
+}
+
 function toggleObjMenu(ev){
   if(ev)ev.stopPropagation();
   fecharTodosCombos();
@@ -1057,16 +1101,25 @@ function fecharObjMenu(){
   if(m)m.classList.remove('open');
 }
 function renderObjLista(){
+  var info=objetivosDoDepartamento();
   var filtro=(document.getElementById('objSearch').value||'').toLowerCase();
-  var lista=(lists.objetivos||[]).filter(function(o){
+  var lista=info.lista.filter(function(o){
     return !filtro||o.toLowerCase().indexOf(filtro)!==-1;
   });
   var el=document.getElementById('objLista');
+  var nota='';
+  if(!info.departamento){
+    nota='<div class="objnota">Escolha o Departamento para ver só os objetivos do setor.</div>';
+  }else{
+    nota='<div class="objnota">Objetivos de <strong>'+esc(info.departamento)+'</strong>'+
+      (info.gerais?' + os que valem para todos':'')+
+      ' — '+info.lista.length+' opção(ões).</div>';
+  }
   if(!lista.length){
-    el.innerHTML='<div style="padding:14px;font-size:12px;color:var(--mt);text-align:center">Nenhum objetivo encontrado.</div>';
+    el.innerHTML=nota+'<div style="padding:14px;font-size:12px;color:var(--mt);text-align:center">Nenhum objetivo encontrado.</div>';
     return;
   }
-  el.innerHTML=lista.map(function(o){
+  el.innerHTML=nota+lista.map(function(o){
     var sel=selectedObjetivos.indexOf(o)!==-1;
     return '<label class="opt'+(sel?' sel':'')+'">'+
       '<input type="checkbox" '+(sel?'checked':'')+' data-obj="'+esc(o)+'">'+
@@ -1140,7 +1193,7 @@ function cleanObjetivo(texto){
 
 /* ============ AUTOMÁTICO ============ */
 function normaliza(s){
-  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
 }
 function esconderHint(id){
   var h=document.getElementById(id);
@@ -1172,6 +1225,52 @@ function limparAuto(id,chave){
   if(chave)autoState[chave]=true;
   atualizarTodosCombos();
 }
+
+/* Departamento -> mostra só os servidores do setor */
+function aplicarFiltroServidor(){
+  var depEl=document.getElementById('fDepartamento');
+  var dep=depEl.value.trim();
+  var srv=document.getElementById('fServidor');
+  esconderHint('hintServ');
+  if(!dep){
+    esconderHint('hintDepto');
+    return;
+  }
+  var chave=normaliza(dep);
+  var lista=mapaServPorDepto[chave]||[];
+
+  if(!lista.length){
+    mostrarHint('hintDepto','pend','Nenhum servidor cadastrado neste setor — pode digitar o nome.');
+    return;
+  }
+
+  mostrarHint('hintDepto','ok','✅ '+lista.length+' servidor(es) em '+esc(dep)+'.');
+
+  var atual=srv.value.trim();
+  if(!atual)return;
+  var pertence=lista.some(function(n){return normaliza(n)===normaliza(atual);});
+  if(!pertence){
+    limparAuto('fServidor','serv');
+    mostrarHint('hintServ','pend','Esse servidor não é deste setor. Escolha um dos '+lista.length+'.');
+  }
+}
+
+/* Servidor -> completa o departamento e sugere a última unidade */
+function aplicarAutoDoServidor(){
+  var srv=document.getElementById('fServidor').value.trim();
+  if(!srv)return;
+  var depEl=document.getElementById('fDepartamento');
+  if(!depEl.value.trim()||autoState.depto){
+    var alvo=mapaServidorDepto[normaliza(srv)];
+    if(alvo){
+      preencherAuto('fDepartamento',alvo,'depto');
+      aplicarFiltroServidor();
+    }
+  }
+  autoState.resp=false;
+  aplicarAutoUnidade();
+}
+
 function ultimaUnidadeDoServidor(servidor){
   var alvo=normaliza(servidor);
   if(!alvo)return '';
@@ -1182,77 +1281,84 @@ function ultimaUnidadeDoServidor(servidor){
   }
   return '';
 }
-function aplicarAutoDepto(){
-  var servidor=document.getElementById('fServidor').value.trim();
-  if(!servidor){esconderHint('hintDepto');return;}
-  var alvo=mapaServidorDepto[normaliza(servidor)];
-  if(!alvo){
-    mostrarHint('hintDepto','pend','Sem setor cadastrado para este servidor — escolha o departamento.');
-    return;
-  }
-  preencherAuto('fDepartamento',alvo,'depto');
-  mostrarHint('hintDepto','ok','✅ Departamento preenchido automaticamente.');
-}
+
 function aplicarAutoUnidade(){
   var servidor=document.getElementById('fServidor').value.trim();
   var uniEl=document.getElementById('fUnidade');
   if(!servidor){esconderHint('hintUnidade');return;}
   var alvo=ultimaUnidadeDoServidor(servidor);
   if(!alvo){
-    if(uniEl.value.trim()){
+    if(autoState.unidade&&uniEl.value.trim()){
       limparAuto('fUnidade','unidade');
-      esconderHint('hintUnidade');
-      esconderHint('hintResp');
+      ultimaUnidade='';
     }
+    esconderHint('hintUnidade');
     return;
   }
   if(normaliza(uniEl.value)===normaliza(alvo)){
     autoState.unidade=true;
+    ultimaUnidade=alvo;
     esconderHint('hintUnidade');
     return;
   }
   preencherAuto('fUnidade',alvo,'unidade');
+  ultimaUnidade=alvo;
   mostrarHint('hintUnidade','ok','✅ Unidade da última visita deste servidor.');
 }
-function aplicarAutoResp(forcar){
+
+/* Unidade -> responsável (automático, editável, sem aviso) */
+function aplicarAutoResp(){
   var unidade=document.getElementById('fUnidade').value.trim();
   var respEl=document.getElementById('fResponsavel');
-  if(!unidade){esconderHint('hintResp');return;}
-  var alvo=mapaUnidadeResp[normaliza(unidade)];
-  if(!alvo){
-    mostrarHint('hintResp','pend','Sem responsável cadastrado para esta escola — digite o nome de quem está assinando.');
+  if(!unidade)return;
+  var lista=mapaRespPorUnidade[normaliza(unidade)]||[];
+  if(!lista.length){
+    if(autoState.resp&&respEl.value.trim())limparAuto('fResponsavel','resp');
     return;
   }
-  if(!respEl.value.trim()||autoState.resp||forcar===true){
-    preencherAuto('fResponsavel',alvo,'resp');
-    mostrarHint('hintResp','ok','✅ Responsável preenchido automaticamente. Pode trocar se outro assinar.');
-    return;
-  }
-  if(normaliza(respEl.value)===normaliza(alvo)){
+  if(!respEl.value.trim()||autoState.resp){
+    preencherAuto('fResponsavel',lista[0],'resp');
     autoState.resp=true;
-    esconderHint('hintResp');
-    return;
   }
-  mostrarHint('hintResp','pend','💡 Cadastro desta escola: "'+esc(alvo)+'". '+
-    '<a href="#" onclick="aplicarAutoResp(true);return false;">Usar este nome</a>');
 }
-function aplicarCadeiaCompleta(){
-  aplicarAutoDepto();
-  aplicarAutoUnidade();
-  autoState.resp=true;
-  aplicarAutoResp(false);
-}
+
 function montarMapas(){
   mapaServidorDepto={};
-  mapaUnidadeResp={};
+  mapaServPorDepto={};
+  mapaRespPorUnidade={};
+  mapaObjPorDepto={};
+
   (lists.paresServidor||[]).forEach(function(p){
     if(p[0]&&p[1])mapaServidorDepto[normaliza(p[0])]=p[1];
   });
-  (lists.paresUnidade||[]).forEach(function(p){
-    if(p[0]&&p[1])mapaUnidadeResp[normaliza(p[0])]=p[1];
+  (lists.servidoresPorDepartamento||[]).forEach(function(par){
+    if(!par||!par[0])return;
+    var k=normaliza(par[0]);
+    if(!mapaServPorDepto[k])mapaServPorDepto[k]=[];
+    (par[1]||[]).forEach(function(n){
+      if(mapaServPorDepto[k].indexOf(n)===-1)mapaServPorDepto[k].push(n);
+    });
   });
-  var s='Carregados: '+Object.keys(mapaServidorDepto).length+' servidor(es) → setor, '+
-        Object.keys(mapaUnidadeResp).length+' escola(s) → responsável.';
+  (lists.responsaveisPorUnidade||[]).forEach(function(par){
+    if(!par||!par[0])return;
+    var k=normaliza(par[0]);
+    if(!mapaRespPorUnidade[k])mapaRespPorUnidade[k]=[];
+    (par[1]||[]).forEach(function(n){
+      if(mapaRespPorUnidade[k].indexOf(n)===-1)mapaRespPorUnidade[k].push(n);
+    });
+  });
+  (lists.objetivosPorDepartamento||[]).forEach(function(par){
+    if(!par)return;
+    var k=par[0]?normaliza(par[0]):'';
+    if(!mapaObjPorDepto[k])mapaObjPorDepto[k]=[];
+    (par[1]||[]).forEach(function(o){
+      if(mapaObjPorDepto[k].indexOf(o)===-1)mapaObjPorDepto[k].push(o);
+    });
+  });
+
+  var s='Carregados: '+Object.keys(mapaServPorDepto).length+' setor(es), '+
+        Object.keys(mapaRespPorUnidade).length+' escola(s), '+
+        Object.keys(mapaObjPorDepto).length+' lista(s) de objetivos.';
   var lbl=document.getElementById('autoFillLabel');
   if(lbl)lbl.textContent=s;
 }
@@ -1328,19 +1434,9 @@ async function saveVisit(mode){
       showToast(problema.msg);
       return;
     }
-  }else{
-    if(!document.getElementById('fServidor').value.trim()){
-      marcarErro('fServidor');showToast('Preencha o Nome do Servidor.');return;
-    }
-    if(!document.getElementById('fUnidade').value.trim()){
-      marcarErro('fUnidade');showToast('Preencha a Unidade / Escola.');return;
-    }
-    if(!document.getElementById('fData').value){
-      marcarErro('fData');showToast('Preencha a Data da Visita.');return;
-    }
   }
-  var servidor=document.getElementById('fServidor').value.trim();
   var departamento=document.getElementById('fDepartamento').value.trim();
+  var servidor=document.getElementById('fServidor').value.trim();
   var unidade=document.getElementById('fUnidade').value.trim();
   var responsavel=document.getElementById('fResponsavel').value.trim();
   var data=document.getElementById('fData').value;
@@ -1348,6 +1444,7 @@ async function saveVisit(mode){
   var saida=document.getElementById('fSaida').value;
   var objetivo=montarObjetivoFinal();
   var sigUnit=padUnit.isEmpty()?'':padUnit.toDataURL();
+
   if(responsavel){
     var existe=lists.responsaveis.some(function(n){
       return n.toLowerCase()===responsavel.toLowerCase();
@@ -1358,6 +1455,7 @@ async function saveVisit(mode){
       localStorage.setItem('cemtec_lists_v5',JSON.stringify(lists));
     }
   }
+
   var agora=new Date().toISOString();
   var area=Number(padUnit.areaCoberta().toFixed(4));
   var visit={
@@ -1383,6 +1481,7 @@ async function saveVisit(mode){
     status:mode==='signed'?'signed':'pending',
     pdfUrl:''
   };
+
   var btn=document.getElementById(mode==='signed'?'btnSaveSigned':'btnSavePending');
   var outroBtn=document.getElementById(mode==='signed'?'btnSavePending':'btnSaveSigned');
   var origText=btn.textContent;
@@ -1390,6 +1489,7 @@ async function saveVisit(mode){
   btn.disabled=true;
   outroBtn.disabled=true;
   btn.textContent='⏳ Salvando e gerando PDF...';
+
   try{
     if(APPS_SCRIPT_URL){
       var res=await fetch(APPS_SCRIPT_URL,{
@@ -1416,20 +1516,26 @@ async function saveVisit(mode){
     outroBtn.disabled=false;
     btn.textContent=origText;
   }
+
   if(!visit.assinaturaCodigo&&visit.status==='signed'){
     visit.assinaturaCodigo=sigetCodigo(visit.protocolo+'|'+visit.assinaturaEm);
   }
+
   visits.unshift(visit);
   localStorage.setItem('cemtec_visits_v5',JSON.stringify(visits));
+
   document.getElementById('visitForm').reset();
   autoState.depto=false;
+  autoState.serv=false;
   autoState.unidade=false;
   autoState.resp=false;
+  ultimaUnidade='';
   esconderHint('hintDepto');
+  esconderHint('hintServ');
   esconderHint('hintUnidade');
-  esconderHint('hintResp');
   selectedObjetivos=[];
   renderObjPills();
+  renderObjLista();
   document.getElementById('fData').value=todayISO();
   setNowTime('fEntrada');
   padUnit.clear();
@@ -1437,6 +1543,7 @@ async function saveVisit(mode){
   limparTodosErros();
   populateDatalists();
   atualizarTodosCombos();
+
   renderDashboard();
   renderReportsTable();
   openA4Modal(visit);
@@ -1483,32 +1590,77 @@ function acharCol(head,termos){
 }
 async function carregarParesDaPlanilha(){
   var temAlgo=false;
+
   var rowsS=await lerAbaCSV('Servidores');
   if(rowsS&&rowsS.length>=2){
     var headS=rowsS[0].map(normaliza);
     var cS=acharCol(headS,['servidor']);
     var cD=acharCol(headS,['departamento','setor']);
     if(cS>-1&&cD>-1){
-      var pS=[];
+      var pS=[],agS={};
       for(var r=1;r<rowsS.length;r++){
-        if(rowsS[r][cS]&&rowsS[r][cD])pS.push([rowsS[r][cS],rowsS[r][cD]]);
+        var s=String(rowsS[r][cS]||'').trim();
+        var d=String(rowsS[r][cD]||'').trim();
+        if(!s||!d)continue;
+        pS.push([s,d]);
+        var kd=normaliza(d);
+        if(!agS[kd])agS[kd]=[];
+        if(agS[kd].indexOf(s)===-1)agS[kd].push(s);
       }
-      if(pS.length){lists.paresServidor=pS;temAlgo=true;}
+      if(pS.length){
+        lists.paresServidor=pS;
+        lists.servidoresPorDepartamento=Object.keys(agS).map(function(k){return [k,agS[k]];});
+        temAlgo=true;
+      }
     }
   }
+
   var rowsU=await lerAbaCSV('Unidades');
   if(rowsU&&rowsU.length>=2){
     var headU=rowsU[0].map(normaliza);
     var cU=acharCol(headU,['unidade','escola']);
     var cR=acharCol(headU,['respons']);
     if(cU>-1&&cR>-1){
-      var pU=[];
+      var pU=[],agU={};
       for(var r2=1;r2<rowsU.length;r2++){
-        if(rowsU[r2][cU]&&rowsU[r2][cR])pU.push([rowsU[r2][cU],rowsU[r2][cR]]);
+        var u=String(rowsU[r2][cU]||'').trim();
+        var rr=String(rowsU[r2][cR]||'').trim();
+        if(!u||!rr)continue;
+        pU.push([u,rr]);
+        var ku=normaliza(u);
+        if(!agU[ku])agU[ku]=[];
+        if(agU[ku].indexOf(rr)===-1)agU[ku].push(rr);
       }
-      if(pU.length){lists.paresUnidade=pU;temAlgo=true;}
+      if(pU.length){
+        lists.paresUnidade=pU;
+        lists.responsaveisPorUnidade=Object.keys(agU).map(function(k){return [k,agU[k]];});
+        temAlgo=true;
+      }
     }
   }
+
+  var rowsO=await lerAbaCSV('Objetivos');
+  if(rowsO&&rowsO.length>=2){
+    var headO=rowsO[0].map(normaliza);
+    var cO=acharCol(headO,['objetivo']);
+    var cOD=acharCol(headO,['departamento','setor']);
+    if(cO>-1){
+      var agO={};
+      for(var r3=1;r3<rowsO.length;r3++){
+        var obj=String(rowsO[r3][cO]||'').trim();
+        if(!obj)continue;
+        var dep= (cOD>-1) ? String(rowsO[r3][cOD]||'').trim() : '';
+        var ko=dep?normaliza(dep):'';
+        if(!agO[ko])agO[ko]=[];
+        if(agO[ko].indexOf(obj)===-1)agO[ko].push(obj);
+      }
+      if(Object.keys(agO).length){
+        lists.objetivosPorDepartamento=Object.keys(agO).map(function(k){return [k,agO[k]];});
+        temAlgo=true;
+      }
+    }
+  }
+
   return temAlgo;
 }
 
@@ -1539,6 +1691,15 @@ async function syncTudo(silent){
           if(Array.isArray(json.pares.paresUnidade)&&json.pares.paresUnidade.length){
             lists.paresUnidade=json.pares.paresUnidade;okPares=true;
           }
+          if(Array.isArray(json.pares.servidoresPorDepartamento)&&json.pares.servidoresPorDepartamento.length){
+            lists.servidoresPorDepartamento=json.pares.servidoresPorDepartamento;okPares=true;
+          }
+          if(Array.isArray(json.pares.responsaveisPorUnidade)&&json.pares.responsaveisPorUnidade.length){
+            lists.responsaveisPorUnidade=json.pares.responsaveisPorUnidade;okPares=true;
+          }
+          if(Array.isArray(json.pares.objetivosPorDepartamento)&&json.pares.objetivosPorDepartamento.length){
+            lists.objetivosPorDepartamento=json.pares.objetivosPorDepartamento;okPares=true;
+          }
         }
         if(Array.isArray(json.visits)){
           visits=json.visits.map(function(v){
@@ -1562,11 +1723,12 @@ async function syncTudo(silent){
   }
 
   if(!okPares){
-    try{ await carregarParesDaPlanilha(); }catch(e){}
+    try{await carregarParesDaPlanilha();}catch(e){}
   }
 
-  lists.paresServidor=lists.paresServidor||[];
-  lists.paresUnidade=lists.paresUnidade||[];
+  ['paresServidor','paresUnidade','servidoresPorDepartamento','responsaveisPorUnidade','objetivosPorDepartamento'].forEach(function(k){
+    if(!Array.isArray(lists[k]))lists[k]=[];
+  });
 
   localStorage.setItem('cemtec_lists_v5',JSON.stringify(lists));
   montarMapas();
@@ -2006,25 +2168,39 @@ window.addEventListener('DOMContentLoaded',function(){
     setNowTime('fEntrada');
   });
   tentar('combos',criarCombos);
+
   tentar('eventos',function(){
+    var elDep=document.getElementById('fDepartamento');
+    if(elDep){
+      elDep.addEventListener('change',function(){
+        autoState.serv=false;
+        aplicarFiltroServidor();
+        renderObjLista();
+      });
+    }
     var elServ=document.getElementById('fServidor');
     if(elServ){
       elServ.addEventListener('change',function(){
+        autoState.depto=false;
         autoState.unidade=false;
         autoState.resp=false;
-        aplicarCadeiaCompleta();
+        ultimaUnidade='';
+        aplicarAutoDoServidor();
       });
     }
     var elUnid=document.getElementById('fUnidade');
     if(elUnid){
       elUnid.addEventListener('change',function(){
+        var atual=elUnid.value.trim();
+        ultimaUnidade=atual;
         autoState.resp=false;
-        aplicarAutoResp(false);
+        aplicarAutoResp();
       });
     }
   });
+
   tentar('manual-tracking',function(){
-    var mapa={fDepartamento:'depto',fUnidade:'unidade',fResponsavel:'resp'};
+    var mapa={fDepartamento:'depto',fServidor:'serv',fUnidade:'unidade',fResponsavel:'resp'};
     Object.keys(mapa).forEach(function(id){
       var el=document.getElementById(id);
       if(!el)return;
@@ -2034,8 +2210,9 @@ window.addEventListener('DOMContentLoaded',function(){
       });
     });
   });
+
   tentar('limpar-erros',function(){
-    ['fServidor','fDepartamento','fUnidade','fResponsavel','fData','fEntrada','fSaida','fObjetivo']
+    ['fDepartamento','fServidor','fUnidade','fResponsavel','fData','fEntrada','fSaida','fObjetivo']
       .forEach(function(id){
         var el=document.getElementById(id);
         if(!el)return;
@@ -2043,10 +2220,7 @@ window.addEventListener('DOMContentLoaded',function(){
         el.addEventListener('change',function(){el.classList.remove('err');});
       });
   });
-  tentar('listas',function(){
-    lists.paresServidor=lists.paresServidor||[];
-    lists.paresUnidade=lists.paresUnidade||[];
-  });
+
   tentar('mapas',montarMapas);
   tentar('datalists',populateDatalists);
   tentar('pills',renderObjPills);
@@ -2055,6 +2229,7 @@ window.addEventListener('DOMContentLoaded',function(){
   tentar('relatorios',renderReportsTable);
   tentar('acesso',initAccessMode);
   tentar('sync',function(){syncTudo(true);});
+
   setTimeout(function(){
     tentar('resize',function(){if(padUnit){padUnit.resize();padUnit.redraw();}});
   },250);
