@@ -207,6 +207,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 </head>
 <body>
 <div class="tri"><div class="c1"></div><div class="c2"></div><div class="c3"></div></div>
+
 <div class="pin" id="pinGate">
   <div class="pin-card">
     <img class="dlogo" alt="CEMTEC" />
@@ -218,6 +219,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <button class="btn bo" style="width:100%" onclick="enterProfessorMode()">✍️ Sou Professor (Abrir só a Ficha)</button>
   </div>
 </div>
+
 <div class="ptop">
   <div style="display:flex;align-items:center;gap:10px">
     <img class="dlogo" style="height:34px;background:#fff;padding:3px 6px;border-radius:6px" alt="CEMTEC" />
@@ -231,6 +233,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <button class="btn bo sm" onclick="sairSistema()">🚪 Sair</button>
   </div>
 </div>
+
 <header class="mhead">
   <div class="mbrand">
     <img class="dlogo" alt="CEMTEC" />
@@ -238,6 +241,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
   </div>
   <button class="mmenu" onclick="toggleSidebar()">☰</button>
 </header>
+
 <div class="shell">
 <aside class="side" id="sidebar">
   <div class="brand">
@@ -256,6 +260,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <strong>Prefeitura de Sorriso - MT</strong><br/>CEMTEC • Robótica e Tecnologia
   </div>
 </aside>
+
 <main class="main">
 <section class="vs active" id="view-dashboard">
   <div class="ph">
@@ -289,6 +294,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     </div>
   </div>
 </section>
+
 <section class="vs" id="view-new">
   <div class="ph">
     <div class="pt">
@@ -359,8 +365,8 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
             </div>
           </div>
           <div class="pills" id="objPills"></div>
-          <textarea id="fObjetivo" placeholder="Detalhes adicionais (opcional): escreva o que mais foi feito nesta visita..." oninput="atualizarContadorObjetivo()"></textarea>
-          <div class="dica">💡 A lista mostra os objetivos do departamento escolhido. Mínimo de 25 caracteres.</div>
+          <textarea id="fObjetivo" placeholder="Opcional — acrescente algum detalhe se precisar." oninput="atualizarContadorObjetivo()"></textarea>
+          <div class="dica">💡 Marque um objetivo na lista. Os detalhes abaixo são opcionais — use só se quiser acrescentar algo.</div>
         </div>
       </div>
     </div>
@@ -398,6 +404,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     </div>
   </form>
 </section>
+
 <section class="vs" id="view-reports">
   <div class="ph">
     <div class="pt"><h1>Relatórios &amp; PDFs no Drive</h1><p>Todas as fichas sincronizadas com link direto para o PDF oficial.</p></div>
@@ -435,6 +442,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     </div>
   </div>
 </section>
+
 <section class="vs" id="view-lists">
   <div class="ph">
     <div class="pt"><h1>Planilha, Drive &amp; Links de Acesso</h1><p>Gerencie a integração com o Google Drive e compartilhe o link exclusivo dos professores.</p></div>
@@ -463,6 +471,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 </section>
 </main>
 </div>
+
 <div class="mbk" id="a4Modal">
   <div class="mcard">
     <div class="mhead2 no-print">
@@ -476,6 +485,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <div class="mbody" id="a4ModalBody"></div>
   </div>
 </div>
+
 <div class="fsig" id="fsSigModal">
   <div class="fstop">
     <strong>Assinatura Digital (Tela Cheia)</strong>
@@ -503,7 +513,9 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <button class="btn bs" onclick="confirmFullscreenSig()">✅ Confirmar Assinatura</button>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
+
 <script>
 const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec';
 const SHEET_ID='1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU';
@@ -1092,6 +1104,7 @@ function limparTodosErros(){
   ['fDepartamento','fServidor','fUnidade','fResponsavel','fData','fEntrada','fSaida','fObjetivo'].forEach(limparErro);
   limparErroAssinatura();
 }
+
 function validarFicha(modo){
   var v={
     departamento:document.getElementById('fDepartamento').value.trim(),
@@ -1100,8 +1113,7 @@ function validarFicha(modo){
     responsavel:document.getElementById('fResponsavel').value.trim(),
     data:document.getElementById('fData').value,
     entrada:document.getElementById('fEntrada').value,
-    saida:document.getElementById('fSaida').value,
-    objetivo:montarObjetivoFinal()
+    saida:document.getElementById('fSaida').value
   };
   if(!v.departamento)return{id:'fDepartamento',msg:'Escolha ou digite o Departamento.'};
   if(!v.servidor)return{id:'fServidor',msg:'Escolha ou digite o Nome do Servidor.'};
@@ -1114,10 +1126,17 @@ function validarFicha(modo){
   if(v.data>hoje)return{id:'fData',msg:'A data da visita não pode ser futura.'};
   var minEnt=calcDurationMinutes(v.entrada,v.saida);
   if(minEnt===null)return{id:'fSaida',msg:'O Horário de Saída deve ser igual ou posterior ao de Entrada.'};
-  if(!v.objetivo)return{id:'fObjetivo',msg:'Marque pelo menos um objetivo na lista ou escreva no campo de detalhes.'};
-  if(v.objetivo.replace(/\n/g,' ').trim().length<OBJETIVO_MIN_CHARS){
-    return{id:'fObjetivo',msg:'Objetivo muito curto. Mínimo de '+OBJETIVO_MIN_CHARS+' caracteres.'};
+
+  var temNaLista=selectedObjetivos.length>0;
+  var livre=cleanObjetivo(document.getElementById('fObjetivo').value);
+
+  if(!temNaLista&&!livre){
+    return{id:'fObjetivo',msg:'Marque pelo menos um objetivo na lista. Os detalhes são opcionais.'};
   }
+  if(!temNaLista&&livre.replace(/\n/g,' ').trim().length<OBJETIVO_MIN_CHARS){
+    return{id:'fObjetivo',msg:'Marque um objetivo na lista, ou escreva pelo menos '+OBJETIVO_MIN_CHARS+' caracteres nos detalhes.'};
+  }
+
   if(modo==='signed'){
     if(padUnit.isEmpty())return{id:'sigBox',msg:'Colha a assinatura na tela antes de enviar.'};
     if(padUnit.areaCoberta()<AREA_MINIMA_ASSINATURA)return{id:'sigBox',msg:'Assinatura muito simples. Assine novamente.'};
@@ -1125,7 +1144,7 @@ function validarFicha(modo){
   return null;
 }
 
-/* ============ OBJETIVOS — só do setor, sem misturar ============ */
+/* ============ OBJETIVOS ============ */
 function objetivosDoDepartamento(){
   var depEl=document.getElementById('fDepartamento');
   var nome=depEl?depEl.value.trim():'';
@@ -1135,7 +1154,6 @@ function objetivosDoDepartamento(){
   if(!k){
     return {lista:(lists.objetivos||[]).slice(),aviso:'Escolha o Departamento para ver os objetivos do setor.'};
   }
-
   var especificos=(mapaObjPorDepto[k]||[]).slice();
   var out=especificos.slice();
   gerais.forEach(function(o){ if(out.indexOf(o)===-1)out.push(o); });
@@ -1228,13 +1246,23 @@ function montarObjetivoFinal(){
   if(livre)partes.push(livre);
   return partes.join('\n');
 }
+
 function atualizarContadorObjetivo(){
+  var marcados=selectedObjetivos.length;
+  var livre=cleanObjetivo(document.getElementById('fObjetivo').value).replace(/\n/g,' ').trim();
   var total=montarObjetivoFinal().replace(/\n/g,' ').trim().length;
   var el=document.getElementById('objCounter');
   if(!el)return;
-  el.textContent=total+' caracteres';
-  el.style.color=total===0?'var(--mt)':(total<OBJETIVO_MIN_CHARS?'#d97706':'#16a34a');
+  el.textContent=(marcados>0?marcados+' selecionado(s) · ':'')+total+' caracteres';
+  if(marcados>0){
+    el.style.color='#16a34a';
+  }else if(!livre){
+    el.style.color='var(--mt)';
+  }else{
+    el.style.color=livre.length<OBJETIVO_MIN_CHARS?'#d97706':'#16a34a';
+  }
 }
+
 function cleanObjetivo(texto){
   return String(texto||'')
     .replace(/\r/g,'')
@@ -1353,7 +1381,6 @@ function aplicarAutoUnidade(){
   mostrarHint('hintUnidade','ok','✅ Unidade da última visita deste servidor.');
 }
 
-/* Unidade -> Responsável: forcar=true sempre troca para o 1º da escola */
 function aplicarAutoResp(forcar){
   var unidade=document.getElementById('fUnidade').value.trim();
   var respEl=document.getElementById('fResponsavel');
