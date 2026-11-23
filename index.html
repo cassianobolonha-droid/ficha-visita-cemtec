@@ -63,6 +63,7 @@
     .btn-danger { background: #fee2e2; color: var(--danger); border-color: #fecaca; }
     .btn-outline { background: #fff; color: var(--text); border-color: var(--border); }
     .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
     .view-section { display: none; }
     .view-section.active { display: block; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 18px; }
@@ -86,8 +87,10 @@
     .linha-tripla .input-row input { min-width: 0; }
     .linha-tripla .input-row .btn { white-space: nowrap; padding: 6px 8px; }
     label { font-size: 13px; font-weight: 600; color: #334155; display: flex; justify-content: space-between; }
-    input[type="text"], input[type="date"], input[type="time"], input[type="url"], input[type="password"], select, textarea { width: 100%; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-family: inherit; background: #fff; }
+    label .obrig { color: var(--danger); font-weight: 800; margin-left: 2px; }
+    input[type="text"], input[type="date"], input[type="time"], input[type="url"], input[type="password"], select, textarea { width: 100%; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-family: inherit; background: #fff; transition: border-color .15s, background .15s; }
     textarea { min-height: 92px; resize: vertical; }
+    .campo-erro { border-color: var(--danger) !important; background: #fef2f2 !important; }
     .input-row { display: flex; gap: 8px; }
     .input-row input { flex: 1; }
     .auto-hint { font-size: 11px; margin-top: 2px; color: var(--success); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
@@ -113,6 +116,7 @@
     .obj-pill button { border: none; background: transparent; color: #64748b; cursor: pointer; font-size: 15px; line-height: 1; padding: 0 3px; }
     .dica-objetivo { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .sig-box { border: 2px dashed #94a3b8; border-radius: 12px; background: #fff; overflow: hidden; position: relative; }
+    .sig-box.erro { border-color: var(--danger); background: #fef2f2; }
     .sig-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; background: #f8fafc; border-bottom: 1px solid var(--border); }
     .sig-group { display: flex; align-items: center; gap: 6px; }
     .sig-label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; }
@@ -168,13 +172,8 @@
     .a4-sig-block { text-align: center; max-width: 340px; margin: 20px auto; }
     .a4-sig-block img { max-height: 75px; margin-bottom: -6px; }
     .a4-sig-line { border-top: 1px solid #1f2937; padding-top: 6px; font-size: 13px; }
-    .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all .25s; z-index: 600; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all .25s; z-index: 600; max-width: 340px; line-height: 1.45; }
     .toast.show { transform: translateY(0); opacity: 1; }
-
-    /* ============================================================
-       ASSINATURA ELETRÔNICA — traço gerado + carimbo
-       Prefixo siget evita colisão com .sig-* existentes
-       ============================================================ */
     .siget { display: block; text-align: center; margin: 0 auto; max-width: 420px; }
     .siget__traco {
       display: block;
@@ -194,7 +193,6 @@
       border: 1px solid #d8dde2; border-radius: 3px;
       padding: 0 4px; color: #334155;
     }
-
     @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } .charts-grid { grid-template-columns: 1fr; } }
     @media (max-width: 860px) {
       .mobile-header { display: flex; }
@@ -220,6 +218,7 @@
 </head>
 <body>
   <div class="tricolor-bar"><div class="c1"></div><div class="c2"></div><div class="c3"></div></div>
+
   <div class="pin-gate" id="pinGate">
     <div class="pin-card">
       <img class="dynamic-logo" alt="CEMTEC" />
@@ -231,6 +230,7 @@
       <button class="btn btn-outline" style="width:100%;" onclick="enterProfessorMode()">✍️ Sou Professor (Abrir só a Ficha)</button>
     </div>
   </div>
+
   <div class="prof-topbar">
     <div style="display:flex;align-items:center;gap:10px;">
       <img class="dynamic-logo" style="height:34px;background:#fff;padding:3px 6px;border-radius:6px;" alt="CEMTEC" />
@@ -244,6 +244,7 @@
       <button class="btn btn-outline btn-sm" onclick="sairSistema()">🚪 Sair</button>
     </div>
   </div>
+
   <header class="mobile-header">
     <div class="mobile-brand">
       <img class="dynamic-logo" alt="CEMTEC" />
@@ -251,6 +252,7 @@
     </div>
     <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
   </header>
+
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <div class="brand-box">
@@ -269,6 +271,7 @@
         <strong>Prefeitura de Sorriso - MT</strong><br/>CEMTEC • Robótica e Tecnologia
       </div>
     </aside>
+
     <main class="main-content">
       <section class="view-section active" id="view-dashboard">
         <div class="page-header">
@@ -305,62 +308,70 @@
           </div>
         </div>
       </section>
+
       <section class="view-section" id="view-new">
         <div class="page-header">
           <div class="page-title">
             <h1>Ficha de Visita Digital</h1>
-            <p>Preencha os dados, colete a assinatura na tela e envie diretamente para a pasta da coordenação.</p>
+            <p>Todos os campos com <span style="color:var(--danger);font-weight:800;">*</span> são obrigatórios. A ficha só é enviada com tudo preenchido.</p>
           </div>
         </div>
-        <form id="visitForm" onsubmit="return false;">
+
+        <form id="visitForm" onsubmit="return false;" novalidate>
           <div class="card">
             <div class="card-title" style="margin-bottom:14px;">1. Dados da Visita</div>
             <div class="form-grid">
+
               <div class="form-group">
-                <label>Nome do Servidor *</label>
-                <input type="text" id="fServidor" list="dlServidores" placeholder="Selecione ou digite..." autocomplete="off" required />
+                <label>Nome do Servidor <span class="obrig">*</span></label>
+                <input type="text" id="fServidor" list="dlServidores" placeholder="Selecione ou digite..." autocomplete="off" />
                 <datalist id="dlServidores"></datalist>
               </div>
+
               <div class="form-group">
-                <label>Departamento *</label>
-                <input type="text" id="fDepartamento" list="dlDepartamentos" placeholder="Selecione ou digite..." autocomplete="off" required />
+                <label>Departamento <span class="obrig">*</span></label>
+                <input type="text" id="fDepartamento" list="dlDepartamentos" placeholder="Selecione ou digite..." autocomplete="off" />
                 <datalist id="dlDepartamentos"></datalist>
                 <div class="auto-hint pend" id="hintDepto" hidden></div>
               </div>
+
               <div class="form-group">
-                <label>Unidade / Escola / Destino *</label>
-                <input type="text" id="fUnidade" list="dlUnidades" placeholder="Selecione ou digite..." autocomplete="off" required />
+                <label>Unidade / Escola / Destino <span class="obrig">*</span></label>
+                <input type="text" id="fUnidade" list="dlUnidades" placeholder="Selecione ou digite..." autocomplete="off" />
                 <datalist id="dlUnidades"></datalist>
               </div>
+
               <div class="form-group">
-                <label>Responsável pela Escola</label>
-                <input type="text" id="fResponsavel" list="dlResponsaveis" placeholder="Selecione na lista ou digite o nome..." autocomplete="off" />
+                <label>Responsável pela Escola <span class="obrig">*</span></label>
+                <input type="text" id="fResponsavel" list="dlResponsaveis" placeholder="Selecione na lista ou digite o nome de quem vai assinar..." autocomplete="off" />
                 <datalist id="dlResponsaveis"></datalist>
                 <div class="auto-hint pend" id="hintResp" hidden></div>
                 <div class="dica-objetivo">O automático só sugere — você pode trocar quando outro responsável assinar.</div>
               </div>
+
               <div class="linha-tripla">
                 <div class="form-group">
-                  <label>Data da Visita *</label>
-                  <input type="date" id="fData" required />
+                  <label>Data da Visita <span class="obrig">*</span></label>
+                  <input type="date" id="fData" />
                 </div>
                 <div class="form-group">
-                  <label>Horário de Entrada *</label>
+                  <label>Horário de Entrada <span class="obrig">*</span></label>
                   <div class="input-row">
-                    <input type="time" id="fEntrada" required />
+                    <input type="time" id="fEntrada" />
                     <button type="button" class="btn btn-outline btn-sm" onclick="setNowTime('fEntrada')">Agora</button>
                   </div>
                 </div>
                 <div class="form-group">
-                  <label>Horário de Saída</label>
+                  <label>Horário de Saída <span class="obrig">*</span></label>
                   <div class="input-row">
                     <input type="time" id="fSaida" />
                     <button type="button" class="btn btn-outline btn-sm" onclick="setNowTime('fSaida')">Agora</button>
                   </div>
                 </div>
               </div>
+
               <div class="form-group full">
-                <label>Objetivo da Visita * <span id="objCounter" style="font-weight:500;color:var(--muted);">0 caracteres</span></label>
+                <label>Objetivo da Visita <span class="obrig">*</span> <span id="objCounter" style="font-weight:500;color:var(--muted);">0 caracteres</span></label>
                 <div class="obj-multi">
                   <button type="button" class="obj-multi-btn" id="objMultiBtn" onclick="toggleObjMenu(event)">
                     <span>☑️ Selecionar objetivos da lista</span>
@@ -380,19 +391,21 @@
                 </div>
                 <div class="obj-pills" id="objPills"></div>
                 <textarea id="fObjetivo" placeholder="Detalhes adicionais (opcional): escreva o que mais foi feito nesta visita..." oninput="atualizarContadorObjetivo()"></textarea>
-                <div class="dica-objetivo">💡 Marque os objetivos na lista. Se precisar de algo diferente, escreva no campo acima.</div>
+                <div class="dica-objetivo">💡 Marque os objetivos na lista. Mínimo de 25 caracteres. Se precisar de algo diferente, escreva no campo acima.</div>
               </div>
+
             </div>
           </div>
+
           <div class="card">
             <div class="card-header">
-              <div class="card-title">2. Assinatura do Responsável pela Unidade</div>
+              <div class="card-title">2. Assinatura do Responsável pela Unidade <span class="obrig">*</span></div>
               <button type="button" class="btn btn-accent btn-sm" onclick="openFullscreenSig()">📱 Assinar em Tela Cheia</button>
             </div>
             <div class="sig-aviso">
               Ao assinar, você concorda com o registro eletrônico desta ficha, incluindo data, hora e código de verificação.
             </div>
-            <div class="sig-box">
+            <div class="sig-box" id="sigBox">
               <div class="sig-toolbar">
                 <div class="sig-group">
                   <span class="sig-label">Cor</span>
@@ -420,6 +433,7 @@
           </div>
         </form>
       </section>
+
       <section class="view-section" id="view-reports">
         <div class="page-header">
           <div class="page-title"><h1>Relatórios &amp; PDFs no Drive</h1><p>Todas as fichas sincronizadas com link direto para o PDF oficial.</p></div>
@@ -463,6 +477,7 @@
           </div>
         </div>
       </section>
+
       <section class="view-section" id="view-lists">
         <div class="page-header">
           <div class="page-title"><h1>Planilha, Drive &amp; Links de Acesso</h1><p>Gerencie a integração com o Google Drive e compartilhe o link exclusivo dos professores.</p></div>
@@ -490,6 +505,7 @@
       </section>
     </main>
   </div>
+
   <div class="modal-backdrop" id="a4Modal">
     <div class="modal-card">
       <div class="modal-header no-print">
@@ -503,6 +519,7 @@
       <div class="modal-body" id="a4ModalBody"></div>
     </div>
   </div>
+
   <div class="fs-sig-modal" id="fsSigModal">
     <div class="fs-sig-top">
       <strong>Assinatura Digital (Tela Cheia)</strong>
@@ -530,7 +547,9 @@
       <button class="btn btn-success" onclick="confirmFullscreenSig()">✅ Confirmar Assinatura</button>
     </div>
   </div>
+
   <div class="toast" id="toast"></div>
+
   <script>
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec';
     const SHEET_ID = '1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU';
@@ -539,9 +558,13 @@
     const LOGO_URL = 'https://lh3.googleusercontent.com/d/' + DRIVE_LOGO_ID;
     const OBJETIVO_MIN_CHARS = 25;
     const AREA_MINIMA_ASSINATURA = 0.02;
+    /* true = "Salvar Pendente" também exige tudo preenchido */
+    const EXIGIR_TUDO_NO_PENDENTE = true;
+
     const DEFAULT_LISTS = {
       servidores: [], departamentos: [], unidades: [], objetivos: [], responsaveis: []
     };
+
     let visits = JSON.parse(localStorage.getItem('cemtec_visits_v5') || '[]').map(function (v) {
       return Object.assign({}, v, { entrada: formatTimeClean(v.entrada), saida: formatTimeClean(v.saida) });
     });
@@ -553,6 +576,7 @@
     let mapaUnidadeResp = {};
     let selectedObjetivos = [];
     let padUnit, padFs, charts = {};
+    let enviando = false;
     const params = new URLSearchParams(window.location.search);
     const isProfessorMode = params.get('modo') === 'ficha';
 
@@ -632,6 +656,7 @@
           if (!self.w || !self.h) self.resize();
           self.drawing = true;
           self.strokes.push({ color: self.color, width: self.width, points: [self.pt(e)] });
+          limparErroAssinatura();
           self.redraw();
         });
         this.canvas.addEventListener('pointermove', function (e) {
@@ -678,8 +703,6 @@
       undo() { this.strokes.pop(); this.redraw(); }
       clear() { this.strokes = []; this.redraw(); }
       isEmpty() { return this.strokes.length === 0; }
-
-      /* Área coberta pelo gesto (0 a 1) — detecta toque acidental */
       areaCoberta() {
         if (!this.strokes.length) return 0;
         var minX = 1, minY = 1, maxX = 0, maxY = 0;
@@ -693,12 +716,9 @@
         });
         return (maxX - minX) * (maxY - minY);
       }
-
-      /* Quantidade total de pontos capturados no gesto */
       totalPontos() {
         return this.strokes.reduce(function (acc, s) { return acc + s.points.length; }, 0);
       }
-
       copyFrom(other) {
         this.clear();
         for (var i = 0; i < other.strokes.length; i++) {
@@ -767,6 +787,7 @@
         return tmp.toDataURL('image/png');
       }
     }
+
     function setPenColor(c, btn, which) {
       var pad = which === 'fs' ? padFs : padUnit;
       if (!pad) return;
@@ -788,8 +809,88 @@
     function confirmFullscreenSig() {
       if (!padFs || padFs.isEmpty()) { showToast('Faça a assinatura primeiro.'); return; }
       padUnit.copyFrom(padFs);
+      limparErroAssinatura();
       document.getElementById('fsSigModal').classList.remove('open');
       showToast('Assinatura aplicada na ficha.');
+    }
+
+    /* ============================================================
+       VALIDAÇÃO
+       ============================================================ */
+    function marcarErro(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('campo-erro');
+
+      var grupo = el.closest('.form-group') || el;
+      try { grupo.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+      setTimeout(function () { try { el.focus({ preventScroll: true }); } catch (e2) {} }, 260);
+    }
+
+    function limparErro(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.remove('campo-erro');
+    }
+
+    function limparErroAssinatura() {
+      var box = document.getElementById('sigBox');
+      if (box) box.classList.remove('erro');
+    }
+
+    function limparTodosErros() {
+      ['fServidor', 'fDepartamento', 'fUnidade', 'fResponsavel', 'fData', 'fEntrada', 'fSaida', 'fObjetivo']
+        .forEach(limparErro);
+      limparErroAssinatura();
+    }
+
+    /* Retorna null se estiver tudo certo, ou { id, msg } do primeiro problema */
+    function validarFicha(modo) {
+      var v = {
+        servidor:     document.getElementById('fServidor').value.trim(),
+        departamento: document.getElementById('fDepartamento').value.trim(),
+        unidade:      document.getElementById('fUnidade').value.trim(),
+        responsavel:  document.getElementById('fResponsavel').value.trim(),
+        data:         document.getElementById('fData').value,
+        entrada:      document.getElementById('fEntrada').value,
+        saida:        document.getElementById('fSaida').value,
+        objetivo:     montarObjetivoFinal()
+      };
+
+      if (!v.servidor)     return { id: 'fServidor',     msg: 'Preencha o Nome do Servidor.' };
+      if (!v.departamento) return { id: 'fDepartamento', msg: 'Preencha o Departamento.' };
+      if (!v.unidade)      return { id: 'fUnidade',      msg: 'Preencha a Unidade / Escola / Destino.' };
+      if (!v.responsavel)  return { id: 'fResponsavel',  msg: 'Preencha o nome do Responsável pela Escola.' };
+      if (!v.data)         return { id: 'fData',         msg: 'Preencha a Data da Visita.' };
+      if (!v.entrada)      return { id: 'fEntrada',      msg: 'Preencha o Horário de Entrada.' };
+      if (!v.saida)        return { id: 'fSaida',        msg: 'Preencha o Horário de Saída.' };
+
+      /* data não pode ser futura */
+      var hoje = todayISO();
+      if (v.data > hoje) return { id: 'fData', msg: 'A data da visita não pode ser futura.' };
+
+      /* saída não pode ser menor que a entrada */
+      var minEnt = calcDurationMinutes(v.entrada, v.saida);
+      if (minEnt === null) {
+        return { id: 'fSaida', msg: 'O Horário de Saída deve ser igual ou posterior ao de Entrada.' };
+      }
+
+      if (!v.objetivo) {
+        return { id: 'fObjetivo', msg: 'Marque pelo menos um objetivo na lista ou escreva no campo de detalhes.' };
+      }
+      if (v.objetivo.replace(/\n/g, ' ').trim().length < OBJETIVO_MIN_CHARS) {
+        return { id: 'fObjetivo', msg: 'Objetivo muito curto. Mínimo de ' + OBJETIVO_MIN_CHARS + ' caracteres.' };
+      }
+
+      if (modo === 'signed') {
+        if (padUnit.isEmpty()) {
+          return { id: 'sigBox', msg: 'Colha a assinatura na tela antes de enviar.' };
+        }
+        if (padUnit.areaCoberta() < AREA_MINIMA_ASSINATURA) {
+          return { id: 'sigBox', msg: 'Assinatura muito simples. Assine novamente.' };
+        }
+      }
+
+      return null;
     }
 
     /* ============================================================
@@ -836,6 +937,7 @@
           renderObjPills();
           renderObjLista();
           atualizarContadorObjetivo();
+          limparErro('fObjetivo');
         });
       });
     }
@@ -909,6 +1011,7 @@
         hint.hidden = false;
         hint.className = 'auto-hint';
         hint.innerHTML = '✅ Departamento preenchido automaticamente.';
+        limparErro('fDepartamento');
         return;
       }
       if (normaliza(deptoEl.value) === normaliza(alvo)) return;
@@ -942,6 +1045,7 @@
         hint.hidden = false;
         hint.className = 'auto-hint';
         hint.innerHTML = '✅ Responsável preenchido automaticamente. Pode trocar se outro assinar.';
+        limparErro('fResponsavel');
         return;
       }
       if (normaliza(respEl.value) === normaliza(alvo)) return;
@@ -1031,39 +1135,48 @@
        SALVAR
        ============================================================ */
     async function saveVisit(mode) {
-      var servidor = document.getElementById('fServidor').value.trim();
-      var departamento = document.getElementById('fDepartamento').value.trim();
-      var unidade = document.getElementById('fUnidade').value.trim();
-      var data = document.getElementById('fData').value;
-      var entrada = document.getElementById('fEntrada').value;
-      var saida = document.getElementById('fSaida').value;
-      var objetivo = montarObjetivoFinal();
-      var responsavel = document.getElementById('fResponsavel').value.trim();
+      if (enviando) return;
 
-      if (!servidor || !departamento || !unidade || !data || !entrada) {
-        showToast('Preencha todos os campos obrigatórios (*).');
-        return;
+      limparTodosErros();
+
+      var exigeTudo = (mode === 'signed') || EXIGIR_TUDO_NO_PENDENTE;
+
+      if (exigeTudo) {
+        var problema = validarFicha(mode);
+
+        if (problema) {
+          if (problema.id === 'sigBox') {
+            document.getElementById('sigBox').classList.add('erro');
+            try { document.getElementById('sigBox').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+          } else {
+            marcarErro(problema.id);
+          }
+          showToast(problema.msg);
+          return;
+        }
+      } else {
+        /* pendente mínimo: servidor, unidade e data */
+        if (!document.getElementById('fServidor').value.trim()) {
+          marcarErro('fServidor'); showToast('Preencha o Nome do Servidor.'); return;
+        }
+        if (!document.getElementById('fUnidade').value.trim()) {
+          marcarErro('fUnidade'); showToast('Preencha a Unidade / Escola.'); return;
+        }
+        if (!document.getElementById('fData').value) {
+          marcarErro('fData'); showToast('Preencha a Data da Visita.'); return;
+        }
       }
-      if (!objetivo) {
-        showToast('Marque pelo menos um objetivo na lista ou escreva no campo de detalhes.');
-        return;
-      }
-      if (objetivo.replace(/\n/g, ' ').trim().length < OBJETIVO_MIN_CHARS) {
-        showToast('Objetivo muito curto. Detalhe melhor o que foi feito.');
-        return;
-      }
+
+      var servidor     = document.getElementById('fServidor').value.trim();
+      var departamento = document.getElementById('fDepartamento').value.trim();
+      var unidade      = document.getElementById('fUnidade').value.trim();
+      var responsavel  = document.getElementById('fResponsavel').value.trim();
+      var data         = document.getElementById('fData').value;
+      var entrada      = document.getElementById('fEntrada').value;
+      var saida        = document.getElementById('fSaida').value;
+      var objetivo     = montarObjetivoFinal();
 
       var sigUnit = padUnit.isEmpty() ? '' : padUnit.toDataURL();
-
-      if (mode === 'signed' && !sigUnit) {
-        showToast('Colha a assinatura na tela antes de enviar.');
-        return;
-      }
-      /* Bloqueia assinatura de um pingo só / toque acidental */
-      if (mode === 'signed' && padUnit.areaCoberta() < AREA_MINIMA_ASSINATURA) {
-        showToast('Assinatura muito simples. Assine novamente.');
-        return;
-      }
 
       if (responsavel) {
         var existe = lists.responsaveis.some(function (n) {
@@ -1077,7 +1190,7 @@
       }
 
       var agora = new Date().toISOString();
-      var area = Number(padUnit.areaCoberta().toFixed(4));
+      var area  = Number(padUnit.areaCoberta().toFixed(4));
 
       var visit = {
         id: 'v_' + Date.now(),
@@ -1103,13 +1216,17 @@
         pdfUrl: ''
       };
 
-      var btn = document.getElementById(mode === 'signed' ? 'btnSaveSigned' : 'btnSavePending');
+      var btn      = document.getElementById(mode === 'signed' ? 'btnSaveSigned' : 'btnSavePending');
+      var outroBtn = document.getElementById(mode === 'signed' ? 'btnSavePending' : 'btnSaveSigned');
       var origText = btn.textContent;
+
+      enviando = true;
       btn.disabled = true;
+      outroBtn.disabled = true;
       btn.textContent = '⏳ Salvando e gerando PDF...';
 
-      if (APPS_SCRIPT_URL) {
-        try {
+      try {
+        if (APPS_SCRIPT_URL) {
           var res = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             redirect: 'follow',
@@ -1120,25 +1237,25 @@
 
           if (json.status === 'ok') {
             if (json.pdfUrl) visit.pdfUrl = json.pdfUrl;
-            /* Usa o código gerado pelo servidor — garante que A4 e PDF têm o mesmo */
             if (json.codigo) visit.assinaturaCodigo = json.codigo;
             if (json.aviso) console.warn('Aviso do Apps Script:', json.aviso);
             showToast('✅ Ficha salva na Planilha e PDF gerado no Drive!');
           } else {
             showToast('⚠️ Erro: ' + (json.message || 'tente novamente'));
           }
-        } catch (err) {
-          showToast('⚠️ Falha de conexão: ' + err.message);
         }
+      } catch (err) {
+        showToast('⚠️ Falha de conexão: ' + err.message);
+      } finally {
+        enviando = false;
+        btn.disabled = false;
+        outroBtn.disabled = false;
+        btn.textContent = origText;
       }
 
-      /* Fallback: se o servidor não devolveu código, gera local */
       if (!visit.assinaturaCodigo && visit.status === 'signed') {
         visit.assinaturaCodigo = sigetCodigo(visit.protocolo + '|' + visit.assinaturaEm);
       }
-
-      btn.disabled = false;
-      btn.textContent = origText;
 
       visits.unshift(visit);
       localStorage.setItem('cemtec_visits_v5', JSON.stringify(visits));
@@ -1152,6 +1269,7 @@
       setNowTime('fEntrada');
       padUnit.clear();
       atualizarContadorObjetivo();
+      limparTodosErros();
       populateDatalists();
       renderDashboard();
       renderReportsTable();
@@ -1204,6 +1322,7 @@
         return false;
       }
     }
+
     async function syncTudo(silent) {
       var lbl = document.getElementById('cloudStatusLabel');
       var okPares = await carregarParesDaPlanilha();
@@ -1345,6 +1464,7 @@
       set('kpiAvgTime', formatMinutes(avg));
       var badge = document.getElementById('navPendingBadge');
       if (badge) badge.textContent = total;
+
       var countBy = function (k) {
         var m = {};
         visits.forEach(function (v) { m[v[k]] = (m[v[k]] || 0) + 1; });
@@ -1373,6 +1493,7 @@
         data: { labels: dD.map(function (x) { return String(x[0]).split('—')[0]; }), datasets: [{ data: dD.map(function (x) { return x[1]; }), backgroundColor: '#009FE3', borderRadius: 6 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
+
       var recentes = visits.slice(0, 6);
       window._dashList = recentes;
       var tb = document.getElementById('recentVisitsBody');
@@ -1604,7 +1725,10 @@
     function setNowTime(id) {
       var d = new Date();
       var el = document.getElementById(id);
-      if (el) el.value = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+      if (el) {
+        el.value = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        el.classList.remove('campo-erro');
+      }
     }
     function calcDurationMinutes(a, b) {
       var ta = formatTimeClean(a), tb = formatTimeClean(b);
@@ -1672,7 +1796,7 @@
       t.textContent = msg;
       t.classList.add('show');
       clearTimeout(window._tt);
-      window._tt = setTimeout(function () { t.classList.remove('show'); }, 3500);
+      window._tt = setTimeout(function () { t.classList.remove('show'); }, 4200);
     }
 
     /* ============================================================
@@ -1685,6 +1809,7 @@
       if (menu.contains(e.target) || (btn && btn.contains(e.target))) return;
       menu.classList.remove('open');
     });
+
     window.addEventListener('resize', function () {
       if (padUnit) { padUnit.resize(); padUnit.redraw(); }
       if (padFs) { padFs.resize(); padFs.redraw(); }
@@ -1703,17 +1828,21 @@
       function tentar(nome, fn) {
         try { fn(); } catch (e) { console.error('Falha em ' + nome + ':', e); }
       }
+
       tentar('logos', function () {
         document.querySelectorAll('.dynamic-logo').forEach(function (img) { img.src = LOGO_URL; });
       });
+
       tentar('assinatura', function () {
         padUnit = new SignaturePad(document.getElementById('sigCanvasUnit'));
         padFs = new SignaturePad(document.getElementById('fsSigCanvas'));
       });
+
       tentar('data/hora', function () {
         document.getElementById('fData').value = todayISO();
         setNowTime('fEntrada');
       });
+
       tentar('eventos', function () {
         var elServ = document.getElementById('fServidor');
         if (elServ) {
@@ -1726,10 +1855,23 @@
           elUnid.addEventListener('blur', function () { aplicarAutoResp(false); });
         }
       });
+
+      /* limpa o vermelho assim que o campo é corrigido */
+      tentar('limpar-erros', function () {
+        ['fServidor', 'fDepartamento', 'fUnidade', 'fResponsavel', 'fData', 'fEntrada', 'fSaida', 'fObjetivo']
+          .forEach(function (id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('input', function () { el.classList.remove('campo-erro'); });
+            el.addEventListener('change', function () { el.classList.remove('campo-erro'); });
+          });
+      });
+
       tentar('listas', function () {
         lists.paresServidor = lists.paresServidor || [];
         lists.paresUnidade = lists.paresUnidade || [];
       });
+
       tentar('mapas', montarMapas);
       tentar('datalists', populateDatalists);
       tentar('pills', renderObjPills);
@@ -1738,6 +1880,7 @@
       tentar('relatorios', renderReportsTable);
       tentar('acesso', initAccessMode);
       tentar('sync', function () { syncTudo(true); });
+
       setTimeout(function () {
         tentar('resize', function () { if (padUnit) { padUnit.resize(); padUnit.redraw(); } });
       }, 250);
