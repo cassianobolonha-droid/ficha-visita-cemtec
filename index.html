@@ -96,6 +96,34 @@
     .auto-hint { font-size: 11px; margin-top: 2px; color: var(--success); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .auto-hint a { color: var(--blue-mid); font-weight: 700; cursor: pointer; text-decoration: underline; }
     .auto-hint.pend { color: var(--muted); }
+
+    /* ---------- COMBO (lista suspensa própria, no lugar do datalist) ---------- */
+    .combo { position: relative; width: 100%; }
+    .combo .combo-input { padding-right: 38px; }
+    .combo-seta {
+      position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+      width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+      border: none; background: transparent; color: #94a3b8; font-size: 13px;
+      cursor: pointer; border-radius: 8px; line-height: 1;
+    }
+    .combo-seta:active { background: #f1f5f9; }
+    .combo-panel {
+      position: fixed; display: none; z-index: 300;
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 14px 36px rgba(15,23,42,.22);
+      overflow-y: auto; overflow-x: hidden; padding: 6px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .combo-panel.open { display: block; }
+    .combo-item {
+      padding: 10px 11px; font-size: 13px; line-height: 1.4;
+      border-radius: 8px; cursor: pointer; color: #334155;
+      word-break: break-word;
+    }
+    .combo-item:hover, .combo-item.ativo { background: #eff6ff; color: var(--blue-dark); font-weight: 600; }
+    .combo-item.atual { background: #e8f1fb; color: var(--blue-dark); }
+    .combo-vazio { padding: 14px; font-size: 12px; color: var(--muted); text-align: center; }
+
     .obj-multi { position: relative; }
     .obj-multi-btn { width: 100%; display: flex; align-items: center; gap: 8px; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; font-size: 14px; font-family: inherit; cursor: pointer; text-align: left; color: #475569; }
     .obj-multi-btn .obj-caret { margin-left: auto; color: #94a3b8; }
@@ -206,9 +234,10 @@
       .filters-periodo { grid-template-columns: 1fr 1fr; }
       .periodo-atalhos { grid-column: 1 / -1; }
       .periodo-atalhos .btn { flex: 1 1 auto; }
+      .combo-item { padding: 12px 12px; font-size: 14px; }
     }
     @media print {
-      .tricolor-bar, .sidebar, .mobile-header, .prof-topbar, .main-content, .modal-header, .no-print, .toast { display: none !important; }
+      .tricolor-bar, .sidebar, .mobile-header, .prof-topbar, .main-content, .modal-header, .no-print, .toast, .combo-panel { display: none !important; }
       .modal-backdrop { position: static !important; background: none !important; padding: 0 !important; display: block !important; }
       .modal-card { max-height: none !important; max-width: none !important; box-shadow: none !important; }
       .a4-sheet { border: none !important; padding: 10mm !important; }
@@ -218,7 +247,6 @@
 </head>
 <body>
   <div class="tricolor-bar"><div class="c1"></div><div class="c2"></div><div class="c3"></div></div>
-
   <div class="pin-gate" id="pinGate">
     <div class="pin-card">
       <img class="dynamic-logo" alt="CEMTEC" />
@@ -230,7 +258,6 @@
       <button class="btn btn-outline" style="width:100%;" onclick="enterProfessorMode()">✍️ Sou Professor (Abrir só a Ficha)</button>
     </div>
   </div>
-
   <div class="prof-topbar">
     <div style="display:flex;align-items:center;gap:10px;">
       <img class="dynamic-logo" style="height:34px;background:#fff;padding:3px 6px;border-radius:6px;" alt="CEMTEC" />
@@ -244,7 +271,6 @@
       <button class="btn btn-outline btn-sm" onclick="sairSistema()">🚪 Sair</button>
     </div>
   </div>
-
   <header class="mobile-header">
     <div class="mobile-brand">
       <img class="dynamic-logo" alt="CEMTEC" />
@@ -252,7 +278,6 @@
     </div>
     <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
   </header>
-
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <div class="brand-box">
@@ -271,7 +296,6 @@
         <strong>Prefeitura de Sorriso - MT</strong><br/>CEMTEC • Robótica e Tecnologia
       </div>
     </aside>
-
     <main class="main-content">
       <section class="view-section active" id="view-dashboard">
         <div class="page-header">
@@ -308,7 +332,6 @@
           </div>
         </div>
       </section>
-
       <section class="view-section" id="view-new">
         <div class="page-header">
           <div class="page-title">
@@ -316,39 +339,29 @@
             <p>Todos os campos com <span style="color:var(--danger);font-weight:800;">*</span> são obrigatórios. A ficha só é enviada com tudo preenchido.</p>
           </div>
         </div>
-
         <form id="visitForm" onsubmit="return false;" novalidate>
           <div class="card">
             <div class="card-title" style="margin-bottom:14px;">1. Dados da Visita</div>
             <div class="form-grid">
-
               <div class="form-group">
                 <label>Nome do Servidor <span class="obrig">*</span></label>
-                <input type="text" id="fServidor" list="dlServidores" placeholder="Selecione ou digite..." autocomplete="off" />
-                <datalist id="dlServidores"></datalist>
+                <input type="text" id="fServidor" placeholder="Selecione ou digite..." autocomplete="off" />
               </div>
-
               <div class="form-group">
                 <label>Departamento <span class="obrig">*</span></label>
-                <input type="text" id="fDepartamento" list="dlDepartamentos" placeholder="Selecione ou digite..." autocomplete="off" />
-                <datalist id="dlDepartamentos"></datalist>
+                <input type="text" id="fDepartamento" placeholder="Selecione ou digite..." autocomplete="off" />
                 <div class="auto-hint pend" id="hintDepto" hidden></div>
               </div>
-
               <div class="form-group">
                 <label>Unidade / Escola / Destino <span class="obrig">*</span></label>
-                <input type="text" id="fUnidade" list="dlUnidades" placeholder="Selecione ou digite..." autocomplete="off" />
-                <datalist id="dlUnidades"></datalist>
+                <input type="text" id="fUnidade" placeholder="Selecione ou digite..." autocomplete="off" />
               </div>
-
               <div class="form-group">
                 <label>Responsável pela Escola <span class="obrig">*</span></label>
-                <input type="text" id="fResponsavel" list="dlResponsaveis" placeholder="Selecione na lista ou digite o nome de quem vai assinar..." autocomplete="off" />
-                <datalist id="dlResponsaveis"></datalist>
+                <input type="text" id="fResponsavel" placeholder="Selecione na lista ou digite o nome de quem vai assinar..." autocomplete="off" />
                 <div class="auto-hint pend" id="hintResp" hidden></div>
                 <div class="dica-objetivo">O automático só sugere — você pode trocar quando outro responsável assinar.</div>
               </div>
-
               <div class="linha-tripla">
                 <div class="form-group">
                   <label>Data da Visita <span class="obrig">*</span></label>
@@ -369,7 +382,6 @@
                   </div>
                 </div>
               </div>
-
               <div class="form-group full">
                 <label>Objetivo da Visita <span class="obrig">*</span> <span id="objCounter" style="font-weight:500;color:var(--muted);">0 caracteres</span></label>
                 <div class="obj-multi">
@@ -393,10 +405,8 @@
                 <textarea id="fObjetivo" placeholder="Detalhes adicionais (opcional): escreva o que mais foi feito nesta visita..." oninput="atualizarContadorObjetivo()"></textarea>
                 <div class="dica-objetivo">💡 Marque os objetivos na lista. Mínimo de 25 caracteres. Se precisar de algo diferente, escreva no campo acima.</div>
               </div>
-
             </div>
           </div>
-
           <div class="card">
             <div class="card-header">
               <div class="card-title">2. Assinatura do Responsável pela Unidade <span class="obrig">*</span></div>
@@ -433,7 +443,6 @@
           </div>
         </form>
       </section>
-
       <section class="view-section" id="view-reports">
         <div class="page-header">
           <div class="page-title"><h1>Relatórios &amp; PDFs no Drive</h1><p>Todas as fichas sincronizadas com link direto para o PDF oficial.</p></div>
@@ -477,7 +486,6 @@
           </div>
         </div>
       </section>
-
       <section class="view-section" id="view-lists">
         <div class="page-header">
           <div class="page-title"><h1>Planilha, Drive &amp; Links de Acesso</h1><p>Gerencie a integração com o Google Drive e compartilhe o link exclusivo dos professores.</p></div>
@@ -505,7 +513,6 @@
       </section>
     </main>
   </div>
-
   <div class="modal-backdrop" id="a4Modal">
     <div class="modal-card">
       <div class="modal-header no-print">
@@ -519,7 +526,6 @@
       <div class="modal-body" id="a4ModalBody"></div>
     </div>
   </div>
-
   <div class="fs-sig-modal" id="fsSigModal">
     <div class="fs-sig-top">
       <strong>Assinatura Digital (Tela Cheia)</strong>
@@ -547,9 +553,7 @@
       <button class="btn btn-success" onclick="confirmFullscreenSig()">✅ Confirmar Assinatura</button>
     </div>
   </div>
-
   <div class="toast" id="toast"></div>
-
   <script>
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec';
     const SHEET_ID = '1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU';
@@ -558,13 +562,10 @@
     const LOGO_URL = 'https://lh3.googleusercontent.com/d/' + DRIVE_LOGO_ID;
     const OBJETIVO_MIN_CHARS = 25;
     const AREA_MINIMA_ASSINATURA = 0.02;
-    /* true = "Salvar Pendente" também exige tudo preenchido */
     const EXIGIR_TUDO_NO_PENDENTE = true;
-
     const DEFAULT_LISTS = {
       servidores: [], departamentos: [], unidades: [], objetivos: [], responsaveis: []
     };
-
     let visits = JSON.parse(localStorage.getItem('cemtec_visits_v5') || '[]').map(function (v) {
       return Object.assign({}, v, { entrada: formatTimeClean(v.entrada), saida: formatTimeClean(v.saida) });
     });
@@ -581,6 +582,196 @@
     const isProfessorMode = params.get('modo') === 'ficha';
 
     /* ============================================================
+       COMBO — lista suspensa própria (substitui o datalist)
+       ============================================================ */
+    const COMBO_FONTES = {
+      fServidor:     function () { return lists.servidores || []; },
+      fDepartamento: function () { return lists.departamentos || []; },
+      fUnidade:      function () { return lists.unidades || []; },
+      fResponsavel:  function () { return lists.responsaveis || []; }
+    };
+    const combos = {};
+
+    function criarCombo(id) {
+      const input = document.getElementById(id);
+      if (!input || input._combo) return;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'combo';
+      input.parentNode.insertBefore(wrap, input);
+      wrap.appendChild(input);
+      input.setAttribute('autocomplete', 'off');
+      input.removeAttribute('list');
+
+      const seta = document.createElement('button');
+      seta.type = 'button';
+      seta.className = 'combo-seta';
+      seta.tabIndex = -1;
+      seta.setAttribute('aria-label', 'Abrir lista');
+      seta.textContent = '▾';
+      wrap.appendChild(seta);
+
+      const panel = document.createElement('div');
+      panel.className = 'combo-panel';
+      document.body.appendChild(panel);
+
+      const st = { aberto: false, idx: -1, itens: [] };
+
+      function todos() {
+        const fn = COMBO_FONTES[id];
+        const arr = fn ? fn() : [];
+        return arr.slice();
+      }
+
+      function filtrar() {
+        const q = normaliza(input.value);
+        const lista = todos();
+        if (!q) return lista;
+        const comeca = [], contem = [];
+        lista.forEach(function (o) {
+          const n = normaliza(o);
+          if (n.indexOf(q) === 0) comeca.push(o);
+          else if (n.indexOf(q) !== -1) contem.push(o);
+        });
+        return comeca.concat(contem);
+      }
+
+      function posicionar() {
+        if (!st.aberto) return;
+        const v = window.visualViewport;
+        const vh = v ? v.height : window.innerHeight;
+        const vtop = v ? v.offsetTop : 0;
+        const r = input.getBoundingClientRect();
+        const largura = Math.min(Math.max(r.width, 200), window.innerWidth - 16);
+
+        panel.style.width = largura + 'px';
+        panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - largura - 8)) + 'px';
+
+        const abaixo = (vtop + vh) - r.bottom - 8;
+        const acima  = r.top - vtop - 8;
+        const altura = Math.min(280, Math.max(150, st.itens.length * 44 + 12));
+
+        if (abaixo < 160 && acima > abaixo) {
+          panel.style.top = 'auto';
+          panel.style.bottom = (window.innerHeight - r.top + 6) + 'px';
+          panel.style.maxHeight = Math.max(110, Math.min(altura, acima)) + 'px';
+        } else {
+          panel.style.bottom = 'auto';
+          panel.style.top = (r.bottom + 6) + 'px';
+          panel.style.maxHeight = Math.max(110, Math.min(altura, Math.max(130, abaixo))) + 'px';
+        }
+      }
+
+      function render() {
+        st.itens = filtrar();
+        st.idx = -1;
+        if (!st.itens.length) {
+          panel.innerHTML = '<div class="combo-vazio">Nenhuma opção encontrada.</div>';
+          return;
+        }
+        const atual = normaliza(input.value);
+        panel.innerHTML = st.itens.map(function (o, i) {
+          const eh = normaliza(o) === atual ? ' atual' : '';
+          return '<div class="combo-item' + eh + '" data-i="' + i + '">' + esc(o) + '</div>';
+        }).join('');
+        panel.querySelectorAll('.combo-item').forEach(function (el) {
+          el.addEventListener('pointerdown', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            escolher(Number(el.getAttribute('data-i')));
+          });
+        });
+      }
+
+      function escolher(i) {
+        const v = st.itens[i];
+        if (v === undefined) return;
+        input.value = v;
+        input.classList.remove('campo-erro');
+        fechar();
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      function abrir() {
+        if (st.aberto) { render(); posicionar(); return; }
+        st.aberto = true;
+        render();
+        panel.classList.add('open');
+        posicionar();
+      }
+
+      function fechar() {
+        st.aberto = false;
+        st.idx = -1;
+        panel.classList.remove('open');
+      }
+
+      function mover(d) {
+        if (!st.itens.length) return;
+        st.idx = (st.idx + d + st.itens.length) % st.itens.length;
+        panel.querySelectorAll('.combo-item').forEach(function (el, i) {
+          el.classList.toggle('ativo', i === st.idx);
+          if (i === st.idx) { try { el.scrollIntoView({ block: 'nearest' }); } catch (e) {} }
+        });
+      }
+
+      input.addEventListener('focus', function () { setTimeout(abrir, 30); });
+      input.addEventListener('click', function () { abrir(); });
+      input.addEventListener('input', function () {
+        if (!st.aberto) abrir();
+        else { render(); posicionar(); }
+      });
+
+      seta.addEventListener('pointerdown', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (st.aberto) { fechar(); }
+        else { input.focus(); setTimeout(abrir, 60); }
+      });
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown') { e.preventDefault(); if (!st.aberto) abrir(); setTimeout(function () { mover(1); }, 10); return; }
+        if (e.key === 'ArrowUp')   { e.preventDefault(); if (!st.aberto) abrir(); setTimeout(function () { mover(-1); }, 10); return; }
+        if (e.key === 'Enter') {
+          if (st.aberto && st.idx >= 0) { e.preventDefault(); escolher(st.idx); }
+          else if (st.aberto) { e.preventDefault(); fechar(); }
+          return;
+        }
+        if (e.key === 'Escape') { fechar(); }
+      });
+
+      document.addEventListener('pointerdown', function (e) {
+        if (!st.aberto) return;
+        if (wrap.contains(e.target) || panel.contains(e.target)) return;
+        fechar();
+      });
+
+      window.addEventListener('scroll', function () { if (st.aberto) posicionar(); }, true);
+      window.addEventListener('resize', function () { if (st.aberto) posicionar(); });
+      window.addEventListener('orientationchange', function () {
+        setTimeout(function () { if (st.aberto) posicionar(); }, 300);
+      });
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', function () { if (st.aberto) posicionar(); });
+        window.visualViewport.addEventListener('scroll', function () { if (st.aberto) posicionar(); });
+      }
+
+      input._combo = { abrir: abrir, fechar: fechar };
+      combos[id] = input._combo;
+    }
+
+    function criarCombos() {
+      Object.keys(COMBO_FONTES).forEach(criarCombo);
+    }
+
+    function fecharTodosCombos() {
+      Object.keys(combos).forEach(function (k) {
+        try { combos[k].fechar(); } catch (e) {}
+      });
+    }
+
+    /* ============================================================
        SESSÃO / MODO
        ============================================================ */
     function getModoSalvo() {
@@ -594,6 +785,7 @@
         sessionStorage.removeItem('cemtec_coord_auth');
         sessionStorage.removeItem('cemtec_modo');
       } catch (e) {}
+      fecharTodosCombos();
       document.body.classList.remove('mode-professor');
       var base = window.location.href.split('?')[0];
       if (window.location.search) {
@@ -787,7 +979,6 @@
         return tmp.toDataURL('image/png');
       }
     }
-
     function setPenColor(c, btn, which) {
       var pad = which === 'fs' ? padFs : padUnit;
       if (!pad) return;
@@ -821,29 +1012,23 @@
       var el = document.getElementById(id);
       if (!el) return;
       el.classList.add('campo-erro');
-
       var grupo = el.closest('.form-group') || el;
       try { grupo.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
       setTimeout(function () { try { el.focus({ preventScroll: true }); } catch (e2) {} }, 260);
     }
-
     function limparErro(id) {
       var el = document.getElementById(id);
       if (el) el.classList.remove('campo-erro');
     }
-
     function limparErroAssinatura() {
       var box = document.getElementById('sigBox');
       if (box) box.classList.remove('erro');
     }
-
     function limparTodosErros() {
       ['fServidor', 'fDepartamento', 'fUnidade', 'fResponsavel', 'fData', 'fEntrada', 'fSaida', 'fObjetivo']
         .forEach(limparErro);
       limparErroAssinatura();
     }
-
-    /* Retorna null se estiver tudo certo, ou { id, msg } do primeiro problema */
     function validarFicha(modo) {
       var v = {
         servidor:     document.getElementById('fServidor').value.trim(),
@@ -855,7 +1040,6 @@
         saida:        document.getElementById('fSaida').value,
         objetivo:     montarObjetivoFinal()
       };
-
       if (!v.servidor)     return { id: 'fServidor',     msg: 'Preencha o Nome do Servidor.' };
       if (!v.departamento) return { id: 'fDepartamento', msg: 'Preencha o Departamento.' };
       if (!v.unidade)      return { id: 'fUnidade',      msg: 'Preencha a Unidade / Escola / Destino.' };
@@ -863,24 +1047,18 @@
       if (!v.data)         return { id: 'fData',         msg: 'Preencha a Data da Visita.' };
       if (!v.entrada)      return { id: 'fEntrada',      msg: 'Preencha o Horário de Entrada.' };
       if (!v.saida)        return { id: 'fSaida',        msg: 'Preencha o Horário de Saída.' };
-
-      /* data não pode ser futura */
       var hoje = todayISO();
       if (v.data > hoje) return { id: 'fData', msg: 'A data da visita não pode ser futura.' };
-
-      /* saída não pode ser menor que a entrada */
       var minEnt = calcDurationMinutes(v.entrada, v.saida);
       if (minEnt === null) {
         return { id: 'fSaida', msg: 'O Horário de Saída deve ser igual ou posterior ao de Entrada.' };
       }
-
       if (!v.objetivo) {
         return { id: 'fObjetivo', msg: 'Marque pelo menos um objetivo na lista ou escreva no campo de detalhes.' };
       }
       if (v.objetivo.replace(/\n/g, ' ').trim().length < OBJETIVO_MIN_CHARS) {
         return { id: 'fObjetivo', msg: 'Objetivo muito curto. Mínimo de ' + OBJETIVO_MIN_CHARS + ' caracteres.' };
       }
-
       if (modo === 'signed') {
         if (padUnit.isEmpty()) {
           return { id: 'sigBox', msg: 'Colha a assinatura na tela antes de enviar.' };
@@ -889,7 +1067,6 @@
           return { id: 'sigBox', msg: 'Assinatura muito simples. Assine novamente.' };
         }
       }
-
       return null;
     }
 
@@ -898,6 +1075,7 @@
        ============================================================ */
     function toggleObjMenu(ev) {
       if (ev) ev.stopPropagation();
+      fecharTodosCombos();
       var m = document.getElementById('objMenu');
       var abrir = !m.classList.contains('open');
       m.classList.toggle('open', abrir);
@@ -1136,14 +1314,11 @@
        ============================================================ */
     async function saveVisit(mode) {
       if (enviando) return;
-
+      fecharTodosCombos();
       limparTodosErros();
-
       var exigeTudo = (mode === 'signed') || EXIGIR_TUDO_NO_PENDENTE;
-
       if (exigeTudo) {
         var problema = validarFicha(mode);
-
         if (problema) {
           if (problema.id === 'sigBox') {
             document.getElementById('sigBox').classList.add('erro');
@@ -1155,7 +1330,6 @@
           return;
         }
       } else {
-        /* pendente mínimo: servidor, unidade e data */
         if (!document.getElementById('fServidor').value.trim()) {
           marcarErro('fServidor'); showToast('Preencha o Nome do Servidor.'); return;
         }
@@ -1166,7 +1340,6 @@
           marcarErro('fData'); showToast('Preencha a Data da Visita.'); return;
         }
       }
-
       var servidor     = document.getElementById('fServidor').value.trim();
       var departamento = document.getElementById('fDepartamento').value.trim();
       var unidade      = document.getElementById('fUnidade').value.trim();
@@ -1175,9 +1348,7 @@
       var entrada      = document.getElementById('fEntrada').value;
       var saida        = document.getElementById('fSaida').value;
       var objetivo     = montarObjetivoFinal();
-
       var sigUnit = padUnit.isEmpty() ? '' : padUnit.toDataURL();
-
       if (responsavel) {
         var existe = lists.responsaveis.some(function (n) {
           return n.toLowerCase() === responsavel.toLowerCase();
@@ -1188,10 +1359,8 @@
           localStorage.setItem('cemtec_lists_v5', JSON.stringify(lists));
         }
       }
-
       var agora = new Date().toISOString();
       var area  = Number(padUnit.areaCoberta().toFixed(4));
-
       var visit = {
         id: 'v_' + Date.now(),
         protocolo: 'SEMED-' + new Date().getFullYear() + '-' + String(Math.floor(1000 + Math.random() * 9000)),
@@ -1215,16 +1384,13 @@
         status: mode === 'signed' ? 'signed' : 'pending',
         pdfUrl: ''
       };
-
       var btn      = document.getElementById(mode === 'signed' ? 'btnSaveSigned' : 'btnSavePending');
       var outroBtn = document.getElementById(mode === 'signed' ? 'btnSavePending' : 'btnSaveSigned');
       var origText = btn.textContent;
-
       enviando = true;
       btn.disabled = true;
       outroBtn.disabled = true;
       btn.textContent = '⏳ Salvando e gerando PDF...';
-
       try {
         if (APPS_SCRIPT_URL) {
           var res = await fetch(APPS_SCRIPT_URL, {
@@ -1234,7 +1400,6 @@
             body: JSON.stringify(visit)
           });
           var json = await res.json();
-
           if (json.status === 'ok') {
             if (json.pdfUrl) visit.pdfUrl = json.pdfUrl;
             if (json.codigo) visit.assinaturaCodigo = json.codigo;
@@ -1252,14 +1417,11 @@
         outroBtn.disabled = false;
         btn.textContent = origText;
       }
-
       if (!visit.assinaturaCodigo && visit.status === 'signed') {
         visit.assinaturaCodigo = sigetCodigo(visit.protocolo + '|' + visit.assinaturaEm);
       }
-
       visits.unshift(visit);
       localStorage.setItem('cemtec_visits_v5', JSON.stringify(visits));
-
       document.getElementById('visitForm').reset();
       document.getElementById('hintDepto').hidden = true;
       document.getElementById('hintResp').hidden = true;
@@ -1322,7 +1484,6 @@
         return false;
       }
     }
-
     async function syncTudo(silent) {
       var lbl = document.getElementById('cloudStatusLabel');
       var okPares = await carregarParesDaPlanilha();
@@ -1343,9 +1504,25 @@
               if (json.listas.objetivos && json.listas.objetivos.length) lists.objetivos = json.listas.objetivos;
               if (json.listas.responsaveis && json.listas.responsaveis.length) lists.responsaveis = json.listas.responsaveis;
             }
+            if (!okPares) {
+              if (lists.servidores.length === lists.departamentos.length && lists.servidores.length) {
+                lists.paresServidor = lists.servidores.map(function (s, i) {
+                  return [s, lists.departamentos[i]];
+                });
+              }
+              if (lists.unidades.length === lists.responsaveis.length && lists.unidades.length) {
+                lists.paresUnidade = lists.unidades.map(function (u, i) {
+                  return [u, lists.responsaveis[i]];
+                });
+              }
+            }
             if (Array.isArray(json.visits)) {
               visits = json.visits.map(function (v) {
-                return Object.assign({}, v, { entrada: formatTimeClean(v.entrada), saida: formatTimeClean(v.saida) });
+                return Object.assign({}, v, {
+                  entrada: formatTimeClean(v.entrada),
+                  saida: formatTimeClean(v.saida),
+                  assinaturaCodigo: v.codigo || v.assinaturaCodigo || ''
+                });
               });
               localStorage.setItem('cemtec_visits_v5', JSON.stringify(visits));
               json.visits.forEach(function (v) {
@@ -1381,6 +1558,8 @@
        NAVEGAÇÃO
        ============================================================ */
     function switchView(v) {
+      fecharTodosCombos();
+      fecharObjMenu();
       document.querySelectorAll('.view-section').forEach(function (s) { s.classList.remove('active'); });
       var alvo = document.getElementById('view-' + v);
       if (alvo) alvo.classList.add('active');
@@ -1400,22 +1579,6 @@
       if (sb) sb.classList.toggle('open');
     }
     function populateDatalists() {
-      var el = document.getElementById('dlServidores');
-      if (el) el.innerHTML = (lists.servidores || []).map(function (v) {
-        return '<option value="' + esc(v) + '">';
-      }).join('');
-      el = document.getElementById('dlDepartamentos');
-      if (el) el.innerHTML = (lists.departamentos || []).map(function (v) {
-        return '<option value="' + esc(v) + '">';
-      }).join('');
-      el = document.getElementById('dlUnidades');
-      if (el) el.innerHTML = (lists.unidades || []).map(function (v) {
-        return '<option value="' + esc(v) + '">';
-      }).join('');
-      el = document.getElementById('dlResponsaveis');
-      if (el) el.innerHTML = (lists.responsaveis || []).map(function (v) {
-        return '<option value="' + esc(v) + '">';
-      }).join('');
       var units = Array.from(new Set((lists.unidades || []).concat(visits.map(function (v) { return v.unidade; })))).filter(Boolean).sort();
       var depts = Array.from(new Set((lists.departamentos || []).concat(visits.map(function (v) { return v.departamento; })))).filter(Boolean).sort();
       var selU = document.getElementById('filterUnit');
@@ -1464,7 +1627,6 @@
       set('kpiAvgTime', formatMinutes(avg));
       var badge = document.getElementById('navPendingBadge');
       if (badge) badge.textContent = total;
-
       var countBy = function (k) {
         var m = {};
         visits.forEach(function (v) { m[v[k]] = (m[v[k]] || 0) + 1; });
@@ -1493,7 +1655,6 @@
         data: { labels: dD.map(function (x) { return String(x[0]).split('—')[0]; }), datasets: [{ data: dD.map(function (x) { return x[1]; }), backgroundColor: '#009FE3', borderRadius: 6 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
-
       var recentes = visits.slice(0, 6);
       window._dashList = recentes;
       var tb = document.getElementById('recentVisitsBody');
@@ -1612,17 +1773,16 @@
       return m ? 'https://drive.google.com/file/d/' + m[1] + '/preview' : '';
     }
     function openA4Modal(v) {
+      fecharTodosCombos();
       var btnPdf = document.getElementById('modalDrivePdfBtn');
       var btnPrint = document.getElementById('btnPrintA4');
       var titulo = document.getElementById('a4ModalTitle');
-
       if (v.pdfUrl) {
         btnPdf.href = v.pdfUrl;
         btnPdf.style.display = 'inline-flex';
       } else {
         btnPdf.style.display = 'none';
       }
-
       var embed = driveEmbedUrl(v.pdfUrl);
       if (embed) {
         titulo.textContent = 'PDF Oficial — Ficha de Visita';
@@ -1633,22 +1793,18 @@
         document.getElementById('a4Modal').classList.add('open');
         return;
       }
-
       titulo.textContent = 'Comprovante — Ficha de Visita (A4)';
       btnPrint.style.display = 'inline-flex';
-
       var partes = String(v.data || '').split('-');
       var y = partes[0] || '----', m = partes[1] || '--', d = partes[2] || '--';
       var ent = formatTimeClean(v.entrada) || '—';
       var sai = formatTimeClean(v.saida) || '—';
-
       var sigHtml = v.sigUnit
         ? '<img src="' + v.sigUnit + '" />' + sigetHTML(v, true)
         : (v.status === 'signed'
           ? (sigetHTML(v, false) ||
              '<div style="height:40px;display:flex;align-items:center;justify-content:center;color:#16a34a;font-weight:700;font-family:Inter,sans-serif;font-size:12px;">✔ Assinada digitalmente (ver PDF oficial no Drive)</div>')
           : '<div style="height:40px;color:#d97706;">[ Pendente ]</div>');
-
       document.getElementById('a4ModalBody').innerHTML =
         '<div class="a4-sheet">' +
           '<div class="a4-header">' +
@@ -1789,7 +1945,6 @@
         '</div>' +
       '</div>';
     }
-
     function showToast(msg) {
       var t = document.getElementById('toast');
       if (!t) return;
@@ -1809,7 +1964,6 @@
       if (menu.contains(e.target) || (btn && btn.contains(e.target))) return;
       menu.classList.remove('open');
     });
-
     window.addEventListener('resize', function () {
       if (padUnit) { padUnit.resize(); padUnit.redraw(); }
       if (padFs) { padFs.resize(); padFs.redraw(); }
@@ -1828,21 +1982,18 @@
       function tentar(nome, fn) {
         try { fn(); } catch (e) { console.error('Falha em ' + nome + ':', e); }
       }
-
       tentar('logos', function () {
         document.querySelectorAll('.dynamic-logo').forEach(function (img) { img.src = LOGO_URL; });
       });
-
       tentar('assinatura', function () {
         padUnit = new SignaturePad(document.getElementById('sigCanvasUnit'));
         padFs = new SignaturePad(document.getElementById('fsSigCanvas'));
       });
-
       tentar('data/hora', function () {
         document.getElementById('fData').value = todayISO();
         setNowTime('fEntrada');
       });
-
+      tentar('combos', criarCombos);
       tentar('eventos', function () {
         var elServ = document.getElementById('fServidor');
         if (elServ) {
@@ -1855,8 +2006,6 @@
           elUnid.addEventListener('blur', function () { aplicarAutoResp(false); });
         }
       });
-
-      /* limpa o vermelho assim que o campo é corrigido */
       tentar('limpar-erros', function () {
         ['fServidor', 'fDepartamento', 'fUnidade', 'fResponsavel', 'fData', 'fEntrada', 'fSaida', 'fObjetivo']
           .forEach(function (id) {
@@ -1866,12 +2015,10 @@
             el.addEventListener('change', function () { el.classList.remove('campo-erro'); });
           });
       });
-
       tentar('listas', function () {
         lists.paresServidor = lists.paresServidor || [];
         lists.paresUnidade = lists.paresUnidade || [];
       });
-
       tentar('mapas', montarMapas);
       tentar('datalists', populateDatalists);
       tentar('pills', renderObjPills);
@@ -1880,7 +2027,6 @@
       tentar('relatorios', renderReportsTable);
       tentar('acesso', initAccessMode);
       tentar('sync', function () { syncTudo(true); });
-
       setTimeout(function () {
         tentar('resize', function () { if (padUnit) { padUnit.resize(); padUnit.redraw(); } });
       }, 250);
