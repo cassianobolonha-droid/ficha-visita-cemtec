@@ -206,7 +206,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 </head>
 <body>
 <div class="tri"><div class="c1"></div><div class="c2"></div><div class="c3"></div></div>
-
 <div class="pin" id="pinGate">
   <div class="pin-card">
     <img class="dlogo" alt="CEMTEC" />
@@ -218,7 +217,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <button class="btn bo" style="width:100%" onclick="enterProfessorMode()">✍️ Sou Professor (Abrir só a Ficha)</button>
   </div>
 </div>
-
 <div class="ptop">
   <div style="display:flex;align-items:center;gap:10px">
     <img class="dlogo" style="height:34px;background:#fff;padding:3px 6px;border-radius:6px" alt="CEMTEC" />
@@ -232,7 +230,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <button class="btn bo sm" onclick="sairSistema()">🚪 Sair</button>
   </div>
 </div>
-
 <header class="mhead">
   <div class="mbrand">
     <img class="dlogo" alt="CEMTEC" />
@@ -240,7 +237,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
   </div>
   <button class="mmenu" onclick="toggleSidebar()">☰</button>
 </header>
-
 <div class="shell">
 <aside class="side" id="sidebar">
   <div class="brand">
@@ -259,7 +255,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <strong>Prefeitura de Sorriso - MT</strong><br/>CEMTEC • Robótica e Tecnologia
   </div>
 </aside>
-
 <main class="main">
 <section class="vs active" id="view-dashboard">
   <div class="ph">
@@ -293,7 +288,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     </div>
   </div>
 </section>
-
 <section class="vs" id="view-new">
   <div class="ph">
     <div class="pt">
@@ -368,7 +362,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
         </div>
       </div>
     </div>
-
     <div class="card">
       <div class="ch">
         <div class="ct">2. Assinatura do Responsável pela Unidade <span class="ob">*</span></div>
@@ -403,7 +396,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     </div>
   </form>
 </section>
-
 <section class="vs" id="view-reports">
   <div class="ph">
     <div class="pt"><h1>Relatórios &amp; PDFs no Drive</h1><p>Todas as fichas sincronizadas com link direto para o PDF oficial.</p></div>
@@ -441,7 +433,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     </div>
   </div>
 </section>
-
 <section class="vs" id="view-lists">
   <div class="ph">
     <div class="pt"><h1>Planilha, Drive &amp; Links de Acesso</h1><p>Gerencie a integração com o Google Drive e compartilhe o link exclusivo dos professores.</p></div>
@@ -468,7 +459,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 </section>
 </main>
 </div>
-
 <div class="mbk" id="a4Modal">
   <div class="mcard">
     <div class="mhead2 no-print">
@@ -482,7 +472,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <div class="mbody" id="a4ModalBody"></div>
   </div>
 </div>
-
 <div class="fsig" id="fsSigModal">
   <div class="fstop">
     <strong>Assinatura Digital (Tela Cheia)</strong>
@@ -510,9 +499,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <button class="btn bs" onclick="confirmFullscreenSig()">✅ Confirmar Assinatura</button>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <script>
 const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec';
 const SHEET_ID='1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU';
@@ -523,7 +510,6 @@ const OBJETIVO_MIN_CHARS=25;
 const AREA_MINIMA_ASSINATURA=0.02;
 const EXIGIR_TUDO_NO_PENDENTE=true;
 const DEFAULT_LISTS={servidores:[],departamentos:[],unidades:[],objetivos:[],responsaveis:[]};
-
 let visits=JSON.parse(localStorage.getItem('cemtec_visits_v5')||'[]').map(function(v){
   return Object.assign({},v,{entrada:formatTimeClean(v.entrada),saida:formatTimeClean(v.saida)});
 });
@@ -1353,7 +1339,6 @@ async function saveVisit(mode){
       marcarErro('fData');showToast('Preencha a Data da Visita.');return;
     }
   }
-
   var servidor=document.getElementById('fServidor').value.trim();
   var departamento=document.getElementById('fDepartamento').value.trim();
   var unidade=document.getElementById('fUnidade').value.trim();
@@ -1363,7 +1348,6 @@ async function saveVisit(mode){
   var saida=document.getElementById('fSaida').value;
   var objetivo=montarObjetivoFinal();
   var sigUnit=padUnit.isEmpty()?'':padUnit.toDataURL();
-
   if(responsavel){
     var existe=lists.responsaveis.some(function(n){
       return n.toLowerCase()===responsavel.toLowerCase();
@@ -1374,7 +1358,6 @@ async function saveVisit(mode){
       localStorage.setItem('cemtec_lists_v5',JSON.stringify(lists));
     }
   }
-
   var agora=new Date().toISOString();
   var area=Number(padUnit.areaCoberta().toFixed(4));
   var visit={
@@ -1400,7 +1383,6 @@ async function saveVisit(mode){
     status:mode==='signed'?'signed':'pending',
     pdfUrl:''
   };
-
   var btn=document.getElementById(mode==='signed'?'btnSaveSigned':'btnSavePending');
   var outroBtn=document.getElementById(mode==='signed'?'btnSavePending':'btnSaveSigned');
   var origText=btn.textContent;
@@ -1408,7 +1390,6 @@ async function saveVisit(mode){
   btn.disabled=true;
   outroBtn.disabled=true;
   btn.textContent='⏳ Salvando e gerando PDF...';
-
   try{
     if(APPS_SCRIPT_URL){
       var res=await fetch(APPS_SCRIPT_URL,{
@@ -1435,14 +1416,11 @@ async function saveVisit(mode){
     outroBtn.disabled=false;
     btn.textContent=origText;
   }
-
   if(!visit.assinaturaCodigo&&visit.status==='signed'){
     visit.assinaturaCodigo=sigetCodigo(visit.protocolo+'|'+visit.assinaturaEm);
   }
-
   visits.unshift(visit);
   localStorage.setItem('cemtec_visits_v5',JSON.stringify(visits));
-
   document.getElementById('visitForm').reset();
   autoState.depto=false;
   autoState.unidade=false;
@@ -1459,7 +1437,6 @@ async function saveVisit(mode){
   limparTodosErros();
   populateDatalists();
   atualizarTodosCombos();
-
   renderDashboard();
   renderReportsTable();
   openA4Modal(visit);
@@ -1506,7 +1483,6 @@ function acharCol(head,termos){
 }
 async function carregarParesDaPlanilha(){
   var temAlgo=false;
-
   var rowsS=await lerAbaCSV('Servidores');
   if(rowsS&&rowsS.length>=2){
     var headS=rowsS[0].map(normaliza);
@@ -1520,7 +1496,6 @@ async function carregarParesDaPlanilha(){
       if(pS.length){lists.paresServidor=pS;temAlgo=true;}
     }
   }
-
   var rowsU=await lerAbaCSV('Unidades');
   if(rowsU&&rowsU.length>=2){
     var headU=rowsU[0].map(normaliza);
@@ -1534,17 +1509,19 @@ async function carregarParesDaPlanilha(){
       if(pU.length){lists.paresUnidade=pU;temAlgo=true;}
     }
   }
-
   return temAlgo;
 }
 
 async function syncTudo(silent){
   var lbl=document.getElementById('cloudStatusLabel');
-  var okPares=await carregarParesDaPlanilha();
+  var okPares=false;
 
   if(APPS_SCRIPT_URL){
     try{
-      var res=await fetch(APPS_SCRIPT_URL,{redirect:'follow'});
+      var ctrl=(typeof AbortController!=='undefined')?new AbortController():null;
+      var tmr=ctrl?setTimeout(function(){ctrl.abort();},12000):null;
+      var res=await fetch(APPS_SCRIPT_URL,{redirect:'follow',signal:ctrl?ctrl.signal:undefined});
+      if(tmr)clearTimeout(tmr);
       var json=await res.json();
 
       if(json.status==='ok'){
@@ -1555,18 +1532,14 @@ async function syncTudo(silent){
           if(json.listas.objetivos&&json.listas.objetivos.length)lists.objetivos=json.listas.objetivos;
           if(json.listas.responsaveis&&json.listas.responsaveis.length)lists.responsaveis=json.listas.responsaveis;
         }
-
         if(json.pares){
           if(Array.isArray(json.pares.paresServidor)&&json.pares.paresServidor.length){
-            lists.paresServidor=json.pares.paresServidor;
-            okPares=true;
+            lists.paresServidor=json.pares.paresServidor;okPares=true;
           }
           if(Array.isArray(json.pares.paresUnidade)&&json.pares.paresUnidade.length){
-            lists.paresUnidade=json.pares.paresUnidade;
-            okPares=true;
+            lists.paresUnidade=json.pares.paresUnidade;okPares=true;
           }
         }
-
         if(Array.isArray(json.visits)){
           visits=json.visits.map(function(v){
             return Object.assign({},v,{
@@ -1576,31 +1549,20 @@ async function syncTudo(silent){
             });
           });
           localStorage.setItem('cemtec_visits_v5',JSON.stringify(visits));
-          json.visits.forEach(function(v){
-            if(v.responsavel){
-              var existe=lists.responsaveis.some(function(n){
-                return n.toLowerCase()===String(v.responsavel).toLowerCase();
-              });
-              if(!existe)lists.responsaveis.push(String(v.responsavel));
-            }
-          });
         }
-
-        if(lbl){
-          lbl.textContent='Conectada — '+visits.length+' ficha(s) | '+
-            (lists.objetivos||[]).length+' objetivo(s) | '+
-            (lists.unidades||[]).length+' unidade(s)';
-        }
+        if(lbl)lbl.textContent='Conectada — '+visits.length+' ficha(s) | '+
+          (lists.objetivos||[]).length+' objetivo(s) | '+
+          (lists.unidades||[]).length+' unidade(s)';
       }else{
         if(lbl)lbl.textContent='Erro: '+(json.message||'desconhecido');
       }
     }catch(e){
-      if(lbl&&!okPares)lbl.textContent='Falha de conexão';
+      if(lbl)lbl.textContent='Falha ao conectar no Apps Script';
     }
   }
 
-  if(!okPares&&lbl){
-    lbl.textContent='Sem vínculo automático — verifique as abas Servidores e Unidades';
+  if(!okPares){
+    try{ await carregarParesDaPlanilha(); }catch(e){}
   }
 
   lists.paresServidor=lists.paresServidor||[];
@@ -1647,7 +1609,6 @@ function toggleSidebar(){
 function populateDatalists(){
   var units=Array.from(new Set((lists.unidades||[]).concat(visits.map(function(v){return v.unidade;})))).filter(Boolean).sort();
   var depts=Array.from(new Set((lists.departamentos||[]).concat(visits.map(function(v){return v.departamento;})))).filter(Boolean).sort();
-
   var selU=document.getElementById('filterUnit');
   if(selU){
     var atualU=selU.value;
@@ -1656,7 +1617,6 @@ function populateDatalists(){
     }).join('');
     selU.value=atualU;
   }
-
   var selD=document.getElementById('filterDept');
   if(selD){
     var atualD=selD.value;
@@ -1665,7 +1625,6 @@ function populateDatalists(){
     }).join('');
     selD.value=atualD;
   }
-
   atualizarTodosCombos();
 }
 function respCell(nome){
@@ -1681,12 +1640,10 @@ function renderDashboard(){
   var pending=total-signed;
   var durs=visits.map(function(v){return calcDurationMinutes(v.entrada,v.saida);}).filter(function(x){return x!==null;});
   var avg=durs.length?Math.round(durs.reduce(function(a,b){return a+b;},0)/durs.length):0;
-
   var set=function(id,txt){
     var el=document.getElementById(id);
     if(el)el.textContent=txt;
   };
-
   set('kpiTotal',total);
   set('kpiToday',visits.filter(function(v){return v.data===today;}).length);
   set('kpiTodayDate',formatDateBR(today));
@@ -1696,44 +1653,36 @@ function renderDashboard(){
   set('kpiAvgTime',formatMinutes(avg));
   var badge=document.getElementById('navPendingBadge');
   if(badge)badge.textContent=total;
-
   var countBy=function(k){
     var m={};
     visits.forEach(function(v){m[v[k]]=(m[v[k]]||0)+1;});
     return Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
   };
-
   var mk=function(id,cfg){
     var canvas=document.getElementById(id);
     if(!canvas||typeof Chart==='undefined')return;
     if(charts[id])charts[id].destroy();
     charts[id]=new Chart(canvas,cfg);
   };
-
   var uD=countBy('unidade');
   var dD=countBy('departamento');
-
   mk('chartUnits',{
     type:'bar',
     data:{labels:uD.map(function(x){return String(x[0]).slice(0,22);}),datasets:[{data:uD.map(function(x){return x[1];}),backgroundColor:'#003580',borderRadius:6}]},
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
   });
-
   mk('chartStatus',{
     type:'doughnut',
     data:{labels:['Assinadas','Pendentes'],datasets:[{data:[signed,pending],backgroundColor:['#16a34a','#FBC02D'],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'62%'}
   });
-
   mk('chartDepts',{
     type:'bar',
     data:{labels:dD.map(function(x){return String(x[0]).split('—')[0];}),datasets:[{data:dD.map(function(x){return x[1];}),backgroundColor:'#009FE3',borderRadius:6}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
   });
-
   var recentes=visits.slice(0,6);
   window._dashList=recentes;
-
   var tb=document.getElementById('recentVisitsBody');
   if(tb)tb.innerHTML=recentes.map(function(v,i){
     return '<tr>'+
@@ -1759,7 +1708,6 @@ function setPeriodo(modo){
   var ate=document.getElementById('filterAte');
   if(!de||!ate)return;
   var hoje=new Date();
-
   if(modo==='hoje'){
     de.value=dataISO(hoje);
     ate.value=dataISO(hoje);
@@ -1795,14 +1743,12 @@ function listaFiltrada(){
   var elS=document.getElementById('filterStatus');
   var elDe=document.getElementById('filterDe');
   var elAte=document.getElementById('filterAte');
-
   var q=(elQ?elQ.value:'').toLowerCase();
   var u=elU?elU.value:'';
   var d=elD?elD.value:'';
   var s=elS?elS.value:'';
   var de=elDe?elDe.value:'';
   var ate=elAte?elAte.value:'';
-
   return visits.filter(function(v){
     var hay=(v.protocolo+' '+v.servidor+' '+v.unidade+' '+(v.responsavel||'')+' '+v.objetivo).toLowerCase();
     if(u&&v.unidade!==u)return false;
@@ -1817,7 +1763,6 @@ function listaFiltrada(){
 function renderReportsTable(){
   var list=listaFiltrada();
   window._reportList=list;
-
   var tb=document.getElementById('reportsTableBody');
   if(tb)tb.innerHTML=list.map(function(v,i){
     return '<tr>'+
@@ -1833,16 +1778,13 @@ function renderReportsTable(){
         :'<button class="btn bo sm" onclick="openA4Modal(window._reportList['+i+'])">📄 A4</button>')+'</td>'+
     '</tr>';
   }).join('')||'<tr><td colspan="8" style="text-align:center;color:var(--mt);padding:20px">Nenhuma ficha encontrada com estes filtros.</td></tr>';
-
   var assinadas=list.filter(function(v){return v.status==='signed';}).length;
   var pendentes=list.length-assinadas;
   var mins=list.map(function(v){return calcDurationMinutes(v.entrada,v.saida);}).filter(function(x){return x!==null;});
   var totalMin=mins.reduce(function(a,b){return a+b;},0);
-
   var txt='<strong>'+list.length+'</strong> ficha(s) · <strong>'+assinadas+'</strong> assinada(s) · '+
           '<strong>'+pendentes+'</strong> pendente(s)';
   if(mins.length)txt+=' · '+formatMinutes(totalMin)+' de permanência';
-
   var resumo=document.getElementById('filtrosResumo');
   if(resumo)resumo.innerHTML=txt;
 }
@@ -1857,16 +1799,13 @@ function openA4Modal(v){
   var btnPdf=document.getElementById('modalDrivePdfBtn');
   var btnPrint=document.getElementById('btnPrintA4');
   var titulo=document.getElementById('a4ModalTitle');
-
   if(v.pdfUrl){
     btnPdf.href=v.pdfUrl;
     btnPdf.style.display='inline-flex';
   }else{
     btnPdf.style.display='none';
   }
-
   var embed=driveEmbedUrl(v.pdfUrl);
-
   if(embed){
     titulo.textContent='PDF Oficial — Ficha de Visita';
     btnPrint.style.display='none';
@@ -1876,22 +1815,18 @@ function openA4Modal(v){
     document.getElementById('a4Modal').classList.add('open');
     return;
   }
-
   titulo.textContent='Comprovante — Ficha de Visita (A4)';
   btnPrint.style.display='inline-flex';
-
   var partes=String(v.data||'').split('-');
   var y=partes[0]||'----',m=partes[1]||'--',d=partes[2]||'--';
   var ent=formatTimeClean(v.entrada)||'—';
   var sai=formatTimeClean(v.saida)||'—';
-
   var sigHtml=v.sigUnit
     ?'<img src="'+v.sigUnit+'" />'+sigetHTML(v,true)
     :(v.status==='signed'
       ?(sigetHTML(v,false)||
         '<div style="height:40px;display:flex;align-items:center;justify-content:center;color:#16a34a;font-weight:700;font-family:Inter,sans-serif;font-size:12px">✔ Assinada digitalmente (ver PDF oficial no Drive)</div>')
       :'<div style="height:40px;color:#d97706">[ Pendente ]</div>');
-
   document.getElementById('a4ModalBody').innerHTML=
     '<div class="a4">'+
       '<div class="a4h">'+
@@ -1916,7 +1851,6 @@ function openA4Modal(v){
         'Avenida Tancredo Neves, nº 124, Centro Sul • Sorriso - MT • (66) 3545-8100 • educacao@sorriso.mt.gov.br'+
       '</div>'+
     '</div>';
-
   document.getElementById('a4Modal').classList.add('open');
 }
 
@@ -1930,7 +1864,6 @@ function exportCSV(){
   var headers=['Protocolo','Data','Servidor','Departamento','Unidade','Responsavel','Objetivo','Entrada','Saida','Duracao','Status','Codigo','Link PDF'];
   var escCsv=function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';};
   var lines=[headers.map(escCsv).join(';')];
-
   list.forEach(function(v){
     lines.push([
       v.protocolo,formatDateBR(v.data),v.servidor,v.departamento,v.unidade,
@@ -1939,7 +1872,6 @@ function exportCSV(){
       v.status==='signed'?'Assinada':'Pendente',v.assinaturaCodigo||'',v.pdfUrl
     ].map(escCsv).join(';'));
   });
-
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob(['\uFEFF'+lines.join('\n')],{type:'text/csv;charset=utf-8;'}));
   a.download='fichas-cemtec-'+todayISO()+'.csv';
@@ -2062,23 +1994,18 @@ window.addEventListener('DOMContentLoaded',function(){
   function tentar(nome,fn){
     try{fn();}catch(e){console.error('Falha em '+nome+':',e);}
   }
-
   tentar('logos',function(){
     document.querySelectorAll('.dlogo').forEach(function(img){img.src=LOGO_URL;});
   });
-
   tentar('assinatura',function(){
     padUnit=new SignaturePad(document.getElementById('sigCanvasUnit'));
     padFs=new SignaturePad(document.getElementById('fsSigCanvas'));
   });
-
   tentar('data/hora',function(){
     document.getElementById('fData').value=todayISO();
     setNowTime('fEntrada');
   });
-
   tentar('combos',criarCombos);
-
   tentar('eventos',function(){
     var elServ=document.getElementById('fServidor');
     if(elServ){
@@ -2096,7 +2023,6 @@ window.addEventListener('DOMContentLoaded',function(){
       });
     }
   });
-
   tentar('manual-tracking',function(){
     var mapa={fDepartamento:'depto',fUnidade:'unidade',fResponsavel:'resp'};
     Object.keys(mapa).forEach(function(id){
@@ -2108,7 +2034,6 @@ window.addEventListener('DOMContentLoaded',function(){
       });
     });
   });
-
   tentar('limpar-erros',function(){
     ['fServidor','fDepartamento','fUnidade','fResponsavel','fData','fEntrada','fSaida','fObjetivo']
       .forEach(function(id){
@@ -2118,12 +2043,10 @@ window.addEventListener('DOMContentLoaded',function(){
         el.addEventListener('change',function(){el.classList.remove('err');});
       });
   });
-
   tentar('listas',function(){
     lists.paresServidor=lists.paresServidor||[];
     lists.paresUnidade=lists.paresUnidade||[];
   });
-
   tentar('mapas',montarMapas);
   tentar('datalists',populateDatalists);
   tentar('pills',renderObjPills);
@@ -2132,7 +2055,6 @@ window.addEventListener('DOMContentLoaded',function(){
   tentar('relatorios',renderReportsTable);
   tentar('acesso',initAccessMode);
   tentar('sync',function(){syncTudo(true);});
-
   setTimeout(function(){
     tentar('resize',function(){if(padUnit){padUnit.resize();padUnit.redraw();}});
   },250);
