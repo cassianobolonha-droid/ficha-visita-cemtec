@@ -541,7 +541,7 @@ function normaliza(s){
   return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
 }
 
-/* ============ COMBO (permite digitar sempre) ============ */
+/* ============ COMBO — seleciona, fixa e NÃO reabre ============ */
 const COMBO_FONTES={
   fDepartamento:function(){return lists.departamentos||[];},
   fServidor:function(){
@@ -594,7 +594,7 @@ function criarCombo(id){
   panel.className='cpan';
   document.body.appendChild(panel);
 
-  const st={aberto:false,idx:-1,itens:[],digitou:false,programatico:false};
+  const st={aberto:false,idx:-1,itens:[],digitou:false,programatico:false,travado:false};
 
   function todos(){
     const fn=COMBO_FONTES[id];
@@ -602,6 +602,10 @@ function criarCombo(id){
   }
   function atualizarLimpar(){
     wrap.classList.toggle('tem',String(input.value||'').trim()!=='');
+  }
+  function travar(ms){
+    st.travado=true;
+    setTimeout(function(){st.travado=false;},ms||600);
   }
   function filtrar(){
     const lista=todos();
@@ -645,6 +649,7 @@ function criarCombo(id){
     elNovo.addEventListener('pointerdown',function(e){
       e.preventDefault();e.stopPropagation();
       fechar();
+      travar(800);
       atualizarLimpar();
       input.dispatchEvent(new Event('input',{bubbles:true}));
       input.dispatchEvent(new Event('change',{bubbles:true}));
@@ -706,27 +711,30 @@ function criarCombo(id){
     st.programatico=true;
     input.value=v;
     input.classList.remove('err');
-    st.programatico=false;
     st.digitou=false;
     fechar();
+    travar(800);
+    st.programatico=false;
     atualizarLimpar();
+    input.blur();
     input.dispatchEvent(new Event('input',{bubbles:true}));
     input.dispatchEvent(new Event('change',{bubbles:true}));
   }
   function limparCampo(){
     st.programatico=true;
     input.value='';
-    st.programatico=false;
     input.classList.remove('err');
     st.digitou=false;
     atualizarLimpar();
     render();
     posicionar();
+    st.programatico=false;
     input.dispatchEvent(new Event('input',{bubbles:true}));
     input.dispatchEvent(new Event('change',{bubbles:true}));
     setTimeout(function(){try{input.focus();}catch(e){}},10);
   }
   function abrir(mostrarTudo){
+    if(st.travado)return;
     if(mostrarTudo!==false)st.digitou=false;
     st.aberto=true;
     render();
@@ -748,12 +756,19 @@ function criarCombo(id){
   }
 
   input.addEventListener('focus',function(){
+    if(st.travado)return;
     st.digitou=false;
-    setTimeout(function(){if(document.activeElement===input)abrir(true);},30);
+    setTimeout(function(){
+      if(st.travado)return;
+      if(document.activeElement===input)abrir(true);
+    },30);
   });
-  input.addEventListener('click',function(){abrir(true);});
+  input.addEventListener('click',function(){
+    if(st.travado)return;
+    abrir(true);
+  });
   input.addEventListener('input',function(){
-    if(st.programatico){atualizarLimpar();return;}
+    if(st.programatico||st.travado){atualizarLimpar();return;}
     st.digitou=true;
     if(!st.aberto)abrir(false);
     else{render();posicionar();}
@@ -761,11 +776,14 @@ function criarCombo(id){
   input.addEventListener('change',atualizarLimpar);
   seta.addEventListener('pointerdown',function(e){
     e.preventDefault();e.stopPropagation();
-    if(st.aberto){fechar();}
-    else{input.focus();setTimeout(function(){abrir(true);},60);}
+    if(st.aberto){fechar();return;}
+    st.travado=false;
+    input.focus();
+    setTimeout(function(){abrir(true);},60);
   });
   limpar.addEventListener('pointerdown',function(e){
     e.preventDefault();e.stopPropagation();
+    st.travado=false;
     limparCampo();
   });
   input.addEventListener('keydown',function(e){
@@ -773,10 +791,11 @@ function criarCombo(id){
     if(e.key==='ArrowUp'){e.preventDefault();if(!st.aberto)abrir(true);setTimeout(function(){mover(-1);},10);return;}
     if(e.key==='Enter'){
       if(st.aberto&&st.idx>=0){e.preventDefault();escolher(st.idx);}
-      else if(st.aberto){e.preventDefault();fechar();}
+      else if(st.aberto){e.preventDefault();fechar();travar(500);}
       return;
     }
-    if(e.key==='Escape'){fechar();}
+    if(e.key==='Escape'){fechar();travar(400);}
+    if(e.key==='Tab'){fechar();}
   });
   document.addEventListener('pointerdown',function(e){
     if(!st.aberto)return;
@@ -840,7 +859,6 @@ function sairSistema(){
   if(pin){pin.value='';setTimeout(function(){pin.focus();},100);}
 }
 
-/* ============ NOVA FICHA EM OUTRA ABA ============ */
 function abrirNovaFicha(){
   var base=window.location.href.split('?')[0];
   var url=base+'?modo=ficha&t='+Date.now();
@@ -1334,10 +1352,12 @@ function aplicarAutoUnidade(){
   mostrarHint('hintUnidade','ok','✅ Unidade da última visita deste servidor.');
 }
 
+/* Unidade -> Responsável: sempre ajusta para o nome da escola */
 function aplicarAutoResp(){
   var unidade=document.getElementById('fUnidade').value.trim();
   var respEl=document.getElementById('fResponsavel');
   if(!unidade){esconderHint('hintResp');return;}
+
   var lista=mapaRespPorUnidade[normaliza(unidade)]||[];
 
   if(!lista.length){
@@ -1350,28 +1370,35 @@ function aplicarAutoResp(){
     return;
   }
 
-  if(!respEl.value.trim()||autoState.resp){
+  var atual=respEl.value.trim();
+  var pertence=atual&&lista.some(function(n){return normaliza(n)===normaliza(atual);});
+
+  if(!atual||autoState.resp||!pertence){
     preencherAuto('fResponsavel',lista[0],'resp');
     autoState.resp=true;
     mostrarHint('hintResp','ok',lista.length>1
       ?'✅ '+lista.length+' nomes nesta escola — abra a lista se for outro.'
-      :'✅ Preenchido pelo cadastro. Pode editar.');
+      :'✅ '+esc(lista[0])+' — pode editar se precisar.');
     return;
   }
 
-  var pertence=lista.some(function(n){return normaliza(n)===normaliza(respEl.value);});
-  if(pertence){
-    mostrarHint('hintResp','ok','✅ Nome desta escola.');
-  }else{
-    mostrarHint('hintResp','ok','➕ Nome novo — será salvo na lista desta escola.');
-  }
+  mostrarHint('hintResp','ok',lista.length>1
+    ?'✅ '+lista.length+' nomes nesta escola.'
+    :'✅ Nome desta escola.');
 }
 
+/* ============ MAPAS (com cálculo próprio de reserva) ============ */
 function montarMapas(){
   mapaServidorDepto={};
   mapaServPorDepto={};
   mapaRespPorUnidade={};
   mapaObjPorDepto={};
+
+  function addGrupo(mapa,chave,valor){
+    if(!chave||!valor)return;
+    if(!mapa[chave])mapa[chave]=[];
+    if(mapa[chave].indexOf(valor)===-1)mapa[chave].push(valor);
+  }
 
   (lists.paresServidor||[]).forEach(function(p){
     if(p[0]&&p[1])mapaServidorDepto[normaliza(p[0])]=p[1];
@@ -1379,27 +1406,30 @@ function montarMapas(){
   (lists.servidoresPorDepartamento||[]).forEach(function(par){
     if(!par||!par[0])return;
     var k=normaliza(par[0]);
-    if(!mapaServPorDepto[k])mapaServPorDepto[k]=[];
-    (par[1]||[]).forEach(function(n){
-      if(mapaServPorDepto[k].indexOf(n)===-1)mapaServPorDepto[k].push(n);
-    });
+    (par[1]||[]).forEach(function(n){ addGrupo(mapaServPorDepto,k,n); });
   });
   (lists.responsaveisPorUnidade||[]).forEach(function(par){
     if(!par||!par[0])return;
     var k=normaliza(par[0]);
-    if(!mapaRespPorUnidade[k])mapaRespPorUnidade[k]=[];
-    (par[1]||[]).forEach(function(n){
-      if(mapaRespPorUnidade[k].indexOf(n)===-1)mapaRespPorUnidade[k].push(n);
-    });
+    (par[1]||[]).forEach(function(n){ addGrupo(mapaRespPorUnidade,k,n); });
   });
   (lists.objetivosPorDepartamento||[]).forEach(function(par){
     if(!par)return;
     var k=par[0]?normaliza(par[0]):'';
-    if(!mapaObjPorDepto[k])mapaObjPorDepto[k]=[];
-    (par[1]||[]).forEach(function(o){
-      if(mapaObjPorDepto[k].indexOf(o)===-1)mapaObjPorDepto[k].push(o);
-    });
+    (par[1]||[]).forEach(function(o){ addGrupo(mapaObjPorDepto,k,o); });
   });
+
+  /* RESERVA: monta os grupos a partir dos pares, se os agrupados não vierem */
+  if(!Object.keys(mapaServPorDepto).length){
+    (lists.paresServidor||[]).forEach(function(p){
+      if(p[0]&&p[1])addGrupo(mapaServPorDepto,normaliza(p[1]),p[0]);
+    });
+  }
+  if(!Object.keys(mapaRespPorUnidade).length){
+    (lists.paresUnidade||[]).forEach(function(p){
+      if(p[0]&&p[1])addGrupo(mapaRespPorUnidade,normaliza(p[0]),p[1]);
+    });
+  }
 
   var s='Carregados: '+Object.keys(mapaServPorDepto).length+' setor(es), '+
         Object.keys(mapaRespPorUnidade).length+' escola(s), '+
@@ -1408,7 +1438,7 @@ function montarMapas(){
   if(lbl)lbl.textContent=s;
 }
 
-/* ============ REGISTRAR LOCAL (reflete na hora) ============ */
+/* ============ REGISTRAR LOCAL ============ */
 function registrarLocal(servidor,departamento,unidade,responsavel){
   var mudou=false;
 
@@ -1418,7 +1448,6 @@ function registrarLocal(servidor,departamento,unidade,responsavel){
     arr.push(valor);
     return true;
   }
-
   function addPar(lista,a,b){
     if(!a||!b)return false;
     var existe=lista.some(function(p){
@@ -1428,7 +1457,6 @@ function registrarLocal(servidor,departamento,unidade,responsavel){
     lista.push([a,b]);
     return true;
   }
-
   function addGrupo(lista,chave,valor){
     if(!chave||!valor)return false;
     var k=normaliza(chave);
@@ -1570,9 +1598,7 @@ async function saveVisit(mode){
     pdfUrl:''
   };
 
-  var aprendidoServidor=false;
-  var aprendidoResp=false;
-  aprendidoServidor=registrarLocal(servidor,departamento,unidade,responsavel);
+  var aprendidoLocal=registrarLocal(servidor,departamento,unidade,responsavel);
 
   var btn=document.getElementById(mode==='signed'?'btnSaveSigned':'btnSavePending');
   var outroBtn=document.getElementById(mode==='signed'?'btnSavePending':'btnSaveSigned');
@@ -1595,8 +1621,8 @@ async function saveVisit(mode){
         if(json.pdfUrl)visit.pdfUrl=json.pdfUrl;
         if(json.codigo)visit.assinaturaCodigo=json.codigo;
         if(json.aviso)console.warn('Aviso do Apps Script:',json.aviso);
-        aprendidoResp=Array.isArray(json.aprendido)&&json.aprendido.length>0;
-        if(aprendidoServidor||aprendidoResp){
+        var aprendidoServidor=Array.isArray(json.aprendido)&&json.aprendido.length>0;
+        if(aprendidoLocal||aprendidoServidor){
           showToast('✅ Ficha salva. Nomes novos gravados na planilha.');
         }else{
           showToast('✅ Ficha salva na Planilha e PDF gerado no Drive!');
@@ -2293,12 +2319,7 @@ window.addEventListener('DOMContentLoaded',function(){
         ultimaUnidade=atual;
         autoState.resp=false;
         aplicarAutoResp();
-      });
-    }
-    var elResp=document.getElementById('fResponsavel');
-    if(elResp){
-      elResp.addEventListener('blur',function(){
-        aplicarAutoResp();
+        atualizarTodosCombos();
       });
     }
   });
