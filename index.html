@@ -1660,7 +1660,6 @@ function initAccessMode(){
     return;
   }
 
-  /* ?modo=ficha eh gatilho de entrada: grava a intencao e limpa a URL */
   if(isProfessorMode){
     setModoSalvo('ficha');
     limparParametrosModo();
@@ -1671,7 +1670,6 @@ function initAccessMode(){
   var modo=getModoSalvo();
   var autenticado=estaAutenticado();
 
-  /* Coordenador autenticado tem prioridade: dashboard */
   if(autenticado && modo!=='ficha'){
     document.body.classList.remove('prof');
     switchView('dashboard');
@@ -1725,7 +1723,7 @@ function copyProfessorLink(){
   });
 }
 
-/* ============ FICHA EM ABERTO (persistência) ============ */
+/* ============ FICHA EM ABERTO ============ */
 const CHAVE_ABERTA='cemtec_ficha_aberta_v2';
 
 function salvarFichaAberta(protocolo,codigo){
@@ -2009,6 +2007,20 @@ async function assinarViaLink(){
   }
 }
 
+/* ============ RÓTULO DO BOTÃO SALVAR ============ */
+function atualizarRotuloSalvar(){
+  var btn=document.getElementById('btnSaveChegada');
+  if(!btn)return;
+  var temSaida=!!String(document.getElementById('fSaida').value||'').trim();
+  var emAndamento=!!(fichaAtual&&fichaAtual.protocolo);
+
+  if(temSaida){
+    btn.textContent=emAndamento?'💾 Salvar Saída':'📥 Salvar Chegada';
+  }else{
+    btn.textContent=emAndamento?'💾 Salvar (ainda sem saída)':'📥 Salvar Chegada';
+  }
+}
+
 /* ============ LINK PARA O RESPONSÁVEL ============ */
 function atualizarBtnLink(){
   var btn=document.getElementById('btnLinkResp');
@@ -2121,10 +2133,10 @@ function continuarFicha(v){
   aplicarFiltroServidor();
   atualizarTodosCombos();
   atualizarBtnLink();
+  atualizarRotuloSalvar();
 
   document.getElementById('bannerContinuar').style.display='block';
   document.getElementById('bannerProtocolo').textContent=v.protocolo;
-  document.getElementById('btnSaveChegada').textContent='💾 Salvar (ainda sem saída)';
 
   switchView('new');
   setTimeout(function(){
@@ -2147,7 +2159,7 @@ function cancelarContinuar(){
   atualizarContadorObjetivo();
   document.getElementById('fData').value=todayISO();
   setNowTime('fEntrada');
-  document.getElementById('btnSaveChegada').textContent='📥 Salvar Chegada';
+  atualizarRotuloSalvar();
   if(padUnit)padUnit.clear();
   esconderHint('hintDepto');
   esconderHint('hintServ');
@@ -2304,7 +2316,7 @@ async function saveVisit(modo){
   enviando=true;
   btn.disabled=true;
   outroBtn.disabled=true;
-  btn.textContent=assinada?'⏳ Assinando e gerando PDF...':'⏳ Salvando chegada...';
+  btn.textContent=assinada?'⏳ Assinando e gerando PDF...':'⏳ Salvando...';
 
   var falhou=false;
 
@@ -2328,7 +2340,7 @@ async function saveVisit(modo){
 
         showToast(assinada
           ?'✅ Ficha finalizada, assinada e PDF gerado no Drive!'
-          :'📥 Chegada gravada na planilha.');
+          :(saida?'📥 Saída gravada. Gere o link para o responsável assinar.':'📥 Chegada gravada na planilha.'));
       }else{
         falhou=true;
         visit._local=true;
@@ -2367,12 +2379,14 @@ async function saveVisit(modo){
     salvarFichaAberta(visit.protocolo,fichaAtual.codigo);
     document.getElementById('bannerContinuar').style.display='block';
     document.getElementById('bannerProtocolo').textContent=visit.protocolo;
-    document.getElementById('btnSaveChegada').textContent='💾 Salvar (ainda sem saída)';
     renderDashboard();
     renderReportsTable();
     atualizarBtnLink();
+    atualizarRotuloSalvar();
     if(!falhou){
-      showToast('📥 Chegada salva. Volte ao sair, preencha a saída e finalize.');
+      showToast(saida
+        ?'📥 Saída gravada. Clique em 🔗 Link p/ Responsável.'
+        :'📥 Chegada salva. Volte ao sair, preencha a saída e finalize.');
     }
   }
 }
@@ -2402,9 +2416,9 @@ function resetFormularioCompleto(){
   limparTodosErros();
   populateDatalists();
   atualizarTodosCombos();
+  atualizarRotuloSalvar();
   document.getElementById('bannerContinuar').style.display='none';
   document.getElementById('bannerProtocolo').textContent='';
-  document.getElementById('btnSaveChegada').textContent='📥 Salvar Chegada';
 }
 
 /* ============ SINCRONIZAÇÃO ============ */
@@ -2415,7 +2429,7 @@ function csvParaLinhas(texto){
       var out=[],cur='',dentro=false;
       for(var i=0;i<r.length;i++){
         var ch=r[i];
-        if(ch==='"'){
+        if(ch==='"'0){
           if(dentro&&r[i+1]==='"'){cur+='"';i++;}
           else dentro=!dentro;
         }else if(ch===','&&!dentro){out.push(cur.trim());cur='';}
@@ -2546,7 +2560,6 @@ async function syncTudo(silent){
           }
         }
 
-        /* MERGE: preserva fichas que ainda estao so no aparelho */
         if(Array.isArray(json.visits)){
           var doServidor=json.visits.map(function(v){
             return Object.assign({},v,{
@@ -2948,6 +2961,7 @@ function setNowTime(id){
     el.value=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
     el.classList.remove('err');
   }
+  if(id==='fSaida')atualizarRotuloSalvar();
 }
 function calcDurationMinutes(a,b){
   var ta=formatTimeClean(a),tb=formatTimeClean(b);
@@ -3094,6 +3108,11 @@ window.addEventListener('DOMContentLoaded',function(){
         aplicarAutoResp(false);
       });
     }
+    var elSaida=document.getElementById('fSaida');
+    if(elSaida){
+      elSaida.addEventListener('input',atualizarRotuloSalvar);
+      elSaida.addEventListener('change',atualizarRotuloSalvar);
+    }
   });
 
   tentar('manual-tracking',function(){
@@ -3126,12 +3145,12 @@ window.addEventListener('DOMContentLoaded',function(){
   tentar('relatorios',renderReportsTable);
   tentar('acesso',initAccessMode);
   tentar('btnlink',atualizarBtnLink);
+  tentar('rotuloSalvar',atualizarRotuloSalvar);
 
   if(!modoAssinar){
     tentar('sync',function(){syncTudo(true);});
   }
 
-  /* Recupera a ficha aberta — apenas no modo professor e sem login de coordenador */
   if(!modoAssinar && !estaAutenticado() && getModoSalvo()==='ficha'){
     setTimeout(function(){tentar('restaurar',restaurarFichaAberta);},700);
   }
