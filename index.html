@@ -473,7 +473,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 
 <section class="vs" id="view-lists">
   <div class="ph">
-    <div class="pt"><h1>Planilha, Drive &amp; Links de Acesso</h1><p>Link dos professores, painel individual de cada servidor e integração com o Drive.</p></div>
+    <div class="pt"><h1>Planilha, Drive &amp; Links de Acesso</h1><p>Link único do painel dos servidores, link dos professores e integração com o Drive.</p></div>
     <div class="hacts"><button class="btn bdx" onclick="sairSistema()">🚪 Sair</button></div>
   </div>
   <div class="card">
@@ -486,14 +486,18 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 
   <div class="card">
     <div class="ch">
-      <div class="ct">📊 Painel individual por servidor</div>
+      <div class="ct">📊 Link único do painel dos servidores</div>
       <button class="btn bo sm" onclick="syncTudo()">🔄 Atualizar lista</button>
     </div>
     <p style="font-size:12px;color:var(--mt);margin-bottom:12px;line-height:1.55">
-      Cada servidor recebe um link próprio e entra com o <strong>PIN</strong> da coluna <strong>SENHA</strong> da aba Servidores.
-      Ele vê somente as visitas dele — o servidor filtra os dados, não o navegador.
+      Envie este link no grupo. O servidor escolhe o próprio nome e digita o PIN de 4 dígitos.
+      Um link serve para todos — 8 ou 200 servidores. O Apps Script entrega apenas as visitas dele.
     </p>
-    <div id="linksServidores"><div class="dica">Sincronize as listas para ver os servidores.</div></div>
+    <div class="ir" style="margin-bottom:10px">
+      <input type="text" id="linkPainelUnico" readonly />
+      <button class="btn bp" onclick="copiarLinkPainelUnico()">📋 Copiar</button>
+    </div>
+    <div id="linksServidores"><div class="dica">Sincronize as listas para ver os servidores cadastrados.</div></div>
   </div>
 
   <div class="card">
@@ -513,7 +517,12 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <div class="pin-card">
       <img class="dlogo" alt="CEMTEC" />
       <h2>Painel do Servidor</h2>
-      <p>Digite seu PIN de 4 dígitos para ver suas visitas.</p>
+      <p>Escolha seu nome na lista e digite o PIN de 4 dígitos.</p>
+      <div id="painelBlocoNome" style="margin-bottom:10px">
+        <select id="painelNomeSel" style="font-size:14px;padding:12px 13px">
+          <option value="">Carregando nomes...</option>
+        </select>
+      </div>
       <input type="password" id="painelPin" class="pin-input" maxlength="4" inputmode="numeric" placeholder="••••" onkeydown="if(event.key==='Enter')entrarPainel()" />
       <div class="pin-err" id="painelErro"></div>
       <button class="btn bp" style="width:100%" onclick="entrarPainel()">🔓 Entrar</button>
@@ -1713,6 +1722,9 @@ function initAccessMode(){
   var profLink=document.getElementById('profLinkDisplay');
   if(profLink)profLink.value=baseUrl+'?modo=ficha';
 
+  var lp=document.getElementById('linkPainelUnico');
+  if(lp)lp.value=baseUrl+'?painel=1';
+
   if(modoPainel){
     iniciarPainel();
     return;
@@ -1779,11 +1791,23 @@ function requestCoordinatorAccess(){
 }
 function copyProfessorLink(){
   var link=document.getElementById('profLinkDisplay').value;
+  if(!link)link=window.location.href.split('?')[0]+'?modo=ficha';
   navigator.clipboard.writeText(link).then(function(){
     showToast('Link dos Professores copiado!');
   }).catch(function(){
     showToast('Link: '+link);
   });
+}
+function copiarLinkPainelUnico(){
+  var el=document.getElementById('linkPainelUnico');
+  var link=(el&&el.value)||(window.location.href.split('?')[0]+'?painel=1');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link).then(function(){
+      showToast('Link do painel copiado. Um link serve para todos.');
+    }).catch(function(){showToast('Link: '+link);});
+  }else{
+    showToast('Link: '+link);
+  }
 }
 
 /* ============ PAINEL DO SERVIDOR ============ */
@@ -1804,40 +1828,96 @@ function limparSessaoPainel(){
   try{sessionStorage.removeItem('cemtec_servidor_auth');}catch(e){}
 }
 
+function painelGenerico(){
+  var k=String(modoPainel||'').trim().toLowerCase();
+  return !k||k==='1'||k==='painel'||k==='servidor';
+}
+
+function preencherNomesPainel(lista){
+  var sel=document.getElementById('painelNomeSel');
+  if(!sel||!Array.isArray(lista)||!lista.length)return;
+  var nomes=lista.slice().sort(function(a,b){
+    return String(a).localeCompare(String(b),'pt-BR');
+  });
+  sel.innerHTML='<option value="">Selecione seu nome...</option>'+nomes.map(function(n){
+    return '<option value="'+esc(n)+'">'+esc(n)+'</option>';
+  }).join('');
+}
+
+async function carregarNomesPainel(){
+  var sel=document.getElementById('painelNomeSel');
+  if(!sel)return;
+  if(sel.options.length>1)return;
+
+  preencherNomesPainel(lists.servidores||[]);
+  if(sel.options.length>1)return;
+
+  try{
+    var url=APPS_SCRIPT_URL+'?so_listas=1&t='+Date.now();
+    var res=await fetch(url,{redirect:'follow'});
+    var json=await res.json();
+    if(json&&json.status==='ok'&&json.listas&&Array.isArray(json.listas.servidores)){
+      preencherNomesPainel(json.listas.servidores);
+    }
+  }catch(e){}
+}
+
 function iniciarPainel(){
   document.body.classList.add('painel');
   switchView('painel');
 
-  var nome=decodeURIComponent(modoPainel||'');
+  var gen=painelGenerico();
+  var nome=gen?'':decodeURIComponent(modoPainel||'');
+
   var elNome=document.getElementById('painelNome');
-  if(elNome)elNome.textContent=nome;
+  if(elNome)elNome.textContent=nome||'Painel do Servidor';
+
+  var bloco=document.getElementById('painelBlocoNome');
+  if(bloco)bloco.style.display=gen?'':'none';
 
   var gate=document.getElementById('painelGate');
   var conteudo=document.getElementById('painelConteudo');
   var sess=sessaoPainel();
 
-  if(sess && normaliza(sess.servidor)===normaliza(nome) && sess.senha){
+  var sessOk=!!(sess&&sess.senha)&&(gen?true:normaliza(sess.servidor)===normaliza(nome));
+
+  if(sessOk){
     if(gate)gate.classList.remove('open');
     if(conteudo)conteudo.style.display='block';
     carregarPainel(true);
-  }else{
-    if(gate)gate.classList.add('open');
-    if(conteudo)conteudo.style.display='none';
-    setTimeout(function(){
-      var i=document.getElementById('painelPin');
-      if(i)i.focus();
-    },150);
+    return;
   }
+
+  if(gate)gate.classList.add('open');
+  if(conteudo)conteudo.style.display='none';
+
+  if(gen){
+    carregarNomesPainel();
+    var s=document.getElementById('painelNomeSel');
+    if(s)s.value='';
+  }
+
+  setTimeout(function(){
+    var alvo=gen?document.getElementById('painelNomeSel'):document.getElementById('painelPin');
+    if(alvo)alvo.focus();
+  },200);
 }
 
 async function entrarPainel(){
   if(enviando)return;
-  var nome=decodeURIComponent(modoPainel||'');
+
+  var gen=painelGenerico();
+  var selEl=document.getElementById('painelNomeSel');
+  var nome=gen?String(selEl?selEl.value:'').trim():decodeURIComponent(modoPainel||'');
   var el=document.getElementById('painelPin');
   var senha=(el?el.value:'').trim();
   var erro=document.getElementById('painelErro');
   if(erro)erro.textContent='';
 
+  if(!nome){
+    if(erro)erro.textContent='Escolha seu nome na lista.';
+    return;
+  }
   if(!/^\d{4}$/.test(senha)){
     if(erro)erro.textContent='Digite os 4 dígitos do PIN.';
     return;
@@ -1881,7 +1961,7 @@ async function entrarPainel(){
 
 async function carregarPainel(silent){
   var sess=sessaoPainel();
-  if(!sess||!sess.senha){ iniciarPainel(); return; }
+  if(!sess||!sess.senha){iniciarPainel();return;}
 
   try{
     var res=await fetch(APPS_SCRIPT_URL,{
@@ -1908,9 +1988,9 @@ async function carregarPainel(silent){
 
 function renderPainel(d){
   var r=d.resumo||{};
-  var nome=d.servidor||decodeURIComponent(modoPainel||'');
+  var nome=d.servidor||(painelGenerico()?'Painel do Servidor':decodeURIComponent(modoPainel||''));
   var elNome=document.getElementById('painelNome');
-  if(elNome)elNome.textContent=nome;
+  if(elNome)elNome.textContent=nome||'Painel do Servidor';
 
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   set('pTotal',r.total||0);
@@ -1960,10 +2040,12 @@ function sairPainel(){
   if(el)el.value='';
   var erro=document.getElementById('painelErro');
   if(erro)erro.textContent='';
+  var sel=document.getElementById('painelNomeSel');
+  if(sel&&painelGenerico())sel.value='';
   setTimeout(function(){if(el)el.focus();},150);
 }
 
-/* ============ LINKS POR SERVIDOR ============ */
+/* ============ LISTA DE SERVIDORES (coordenação) ============ */
 function renderLinksServidores(){
   var box=document.getElementById('linksServidores');
   if(!box)return;
@@ -1973,35 +2055,18 @@ function renderLinksServidores(){
     return String(a).localeCompare(String(b),'pt-BR');
   });
 
+  var elUnico=document.getElementById('linkPainelUnico');
+  if(elUnico)elUnico.value=base+'?painel=1';
+
   if(!lista.length){
-    box.innerHTML='<div class="dica">Sincronize as listas para ver os servidores.</div>';
+    box.innerHTML='<div class="dica">Sincronize as listas para ver os servidores cadastrados.</div>';
     return;
   }
 
-  window._linksProf=lista.map(function(nome){
-    return {nome:nome, link:base+'?painel='+encodeURIComponent(nome)};
-  });
-
-  box.innerHTML=window._linksProf.map(function(o,i){
-    return '<div class="lnkrow">'+
-      '<div class="nm">'+esc(o.nome)+'</div>'+
-      '<button class="btn bo sm" onclick="copiarLinkPainel('+i+')">📋 Copiar link</button>'+
-    '</div>';
-  }).join('');
-}
-
-function copiarLinkPainel(i){
-  var o=(window._linksProf||[])[i];
-  if(!o)return;
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(o.link).then(function(){
-      showToast('Link de '+o.nome+' copiado.');
-    }).catch(function(){
-      showToast('Link: '+o.link);
-    });
-  }else{
-    showToast('Link: '+o.link);
-  }
+  box.innerHTML='<div class="dica" style="margin-bottom:6px"><strong>'+lista.length+'</strong> servidor(es) na lista — todos usam o mesmo link acima.</div>'+
+    lista.map(function(n){
+      return '<div class="lnkrow"><div class="nm">'+esc(n)+'</div></div>';
+    }).join('');
 }
 
 /* ============ FICHA EM ABERTO ============ */
@@ -2710,7 +2775,7 @@ function csvParaLinhas(texto){
       var out=[],cur='',dentro=false;
       for(var i=0;i<r.length;i++){
         var ch=r[i];
-        if(ch==='"'){
+        if(ch==='"')){
           if(dentro&&r[i+1]==='"'){cur+='"';i++;}
           else dentro=!dentro;
         }else if(ch===','&&!dentro){out.push(cur.trim());cur='';}
