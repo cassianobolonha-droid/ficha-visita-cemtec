@@ -55,7 +55,7 @@ body.assinar .main{max-width:760px;padding:16px}
 .bw{background:var(--wn);color:#fff}.bdx{background:#fee2e2;color:var(--dg);border-color:#fecaca}
 .bo{background:#fff;color:var(--tx);border-color:var(--br)}
 .sm{padding:6px 10px;font-size:12px;border-radius:8px}
-.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 .vs{display:none}.vs.active{display:block}
 .card{background:#fff;border:1px solid var(--br);border-radius:var(--rd);padding:20px;box-shadow:0 4px 20px rgba(15,23,42,.06);margin-bottom:18px}
 .ch{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
@@ -420,7 +420,8 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
         <canvas id="sigCanvasUnit" class="sigcv"></canvas>
         <div class="sigguide">Assine acima desta linha</div>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;margin-top:18px">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:18px">
+        <button type="button" class="btn ba" id="btnLinkResp" onclick="enviarLinkResponsavel()" disabled title="Disponível após salvar a chegada na planilha">🔗 Link p/ Responsável</button>
         <button type="button" class="btn bw" id="btnSaveChegada" onclick="saveVisit('chegada')">📥 Salvar Chegada</button>
         <button type="button" class="btn bs" id="btnSaveFinalizar" onclick="saveVisit('finalizar')">✅ Finalizar e Assinar</button>
       </div>
@@ -430,7 +431,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 
 <section class="vs" id="view-reports">
   <div class="ph">
-    <div class="pt"><h1>Relatórios &amp; PDFs no Drive</h1><p>Fichas pendentes têm botão <strong>Continuar</strong> e <strong>Link</strong>. Fichas marcadas <strong>📴 Local</strong> ainda não subiram para a planilha.</p></div>
+    <div class="pt"><h1>Relatórios &amp; PDFs no Drive</h1><p>Fichas pendentes têm <strong>Continuar</strong> e <strong>Link</strong>. Fichas com <strong>📴 Local</strong> ainda não subiram para a planilha.</p></div>
     <div class="hacts">
       <button class="btn bo" onclick="syncVisitsFromCloud()">🔄 Atualizar</button>
       <button class="btn bp" onclick="exportCSV()">📥 Exportar CSV</button>
@@ -554,6 +555,25 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
   </div>
 </div>
 
+<div class="mbk" id="linkModal">
+  <div class="mcard" style="max-width:560px">
+    <div class="mhead2">
+      <strong style="color:var(--bd)">🔗 Link para o Responsável assinar</strong>
+      <button class="btn bo sm" onclick="document.getElementById('linkModal').classList.remove('open')">Fechar ✕</button>
+    </div>
+    <div class="mbody">
+      <div class="sigav" style="margin-bottom:14px">
+        Envie ao responsável pela escola <strong id="linkProtocolo"></strong>. Ele abre o resumo, confere os dados e assina no celular — sem senha.
+      </div>
+      <input type="text" id="linkValor" readonly onclick="this.select()" style="font-size:12px" />
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px">
+        <button type="button" class="btn bp" onclick="copiarLinkTexto()">📋 Copiar link</button>
+        <a id="linkWhats" href="#" target="_blank" class="btn bs">💬 Enviar no WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="fsig" id="fsSigModal">
   <div class="fstop">
     <strong>Assinatura Digital (Tela Cheia)</strong>
@@ -614,6 +634,7 @@ let ultimaUnidade='';
 let fichaAtual=null;
 let fichaAssinar=null;
 let padFsAlvo='unit';
+let codigoFichaAtual='';
 
 const params=new URLSearchParams(window.location.search);
 const isProfessorMode=params.get('modo')==='ficha';
@@ -947,6 +968,21 @@ function getModoSalvo(){
 function setModoSalvo(m){
   try{sessionStorage.setItem('cemtec_modo',m);}catch(e){}
 }
+function estaAutenticado(){
+  try{return sessionStorage.getItem('cemtec_coord_auth')==='1';}catch(e){return false;}
+}
+function marcarAutenticado(){
+  try{sessionStorage.setItem('cemtec_coord_auth','1');}catch(e){}
+}
+
+/* Remove ?modo=ficha / ?t= da barra de endereco */
+function limparParametrosModo(){
+  try{
+    var limpa=window.location.pathname;
+    window.history.replaceState({},'',limpa);
+  }catch(e){}
+}
+
 function sairSistema(){
   try{
     sessionStorage.removeItem('cemtec_coord_auth');
@@ -1629,26 +1665,40 @@ function initAccessMode(){
     return;
   }
 
+  /* ?modo=ficha eh gatilho de entrada: grava a intencao e limpa a URL */
+  if(isProfessorMode){
+    setModoSalvo('ficha');
+    limparParametrosModo();
+  }else if(params.get('t')){
+    limparParametrosModo();
+  }
+
   var modo=getModoSalvo();
-  var autenticado=false;
-  try{autenticado=sessionStorage.getItem('cemtec_coord_auth')==='1';}catch(e){}
-  if(isProfessorMode||modo==='ficha'){
+  var autenticado=estaAutenticado();
+
+  /* Coordenador autenticado tem prioridade: dashboard */
+  if(autenticado && modo!=='ficha'){
+    document.body.classList.remove('prof');
+    switchView('dashboard');
+    return;
+  }
+
+  if(modo==='ficha'){
     document.body.classList.add('prof');
     switchView('new');
     return;
   }
-  if(!autenticado){
-    document.getElementById('pinGate').classList.add('open');
-    setTimeout(function(){document.getElementById('pinInput').focus();},100);
-  }else{
-    switchView('dashboard');
-  }
+
+  document.getElementById('pinGate').classList.add('open');
+  setTimeout(function(){document.getElementById('pinInput').focus();},100);
 }
+
 function verifyPin(){
   var val=document.getElementById('pinInput').value.trim();
   if(val===COORDINATOR_PIN){
-    try{sessionStorage.setItem('cemtec_coord_auth','1');}catch(e){}
+    marcarAutenticado();
     setModoSalvo('coordenador');
+    limparParametrosModo();
     document.getElementById('pinGate').classList.remove('open');
     document.body.classList.remove('prof');
     switchView('dashboard');
@@ -1660,6 +1710,7 @@ function verifyPin(){
 }
 function enterProfessorMode(){
   setModoSalvo('ficha');
+  limparParametrosModo();
   document.getElementById('pinGate').classList.remove('open');
   document.body.classList.add('prof');
   switchView('new');
@@ -1836,7 +1887,7 @@ function renderResumoAssinar(){
     ['Data',esc(f.dataBR||formatDateBR(f.data))],
     ['Entrada',esc(formatTimeClean(f.entrada)||'—')],
     ['Saída',esc(formatTimeClean(f.saida)||'—')],
-    ['Duração',esc(f.duracao||'—')]
+    ['Duração',esc(f.duracao||calcDurationMinutes(f.entrada,f.saida)||'—')]
   ];
 
   var html='<div class="ct" style="margin-bottom:12px">Resumo da Ficha</div><div class="resumo">';
@@ -1944,10 +1995,84 @@ async function assinarViaLink(){
   }
 }
 
+/* ============ LINK PARA O RESPONSÁVEL ============ */
+function atualizarBtnLink(){
+  var btn=document.getElementById('btnLinkResp');
+  if(!btn)return;
+  var cod=codigoFichaAtual||(fichaAtual&&fichaAtual.codigo)||'';
+  btn.disabled=!cod;
+  btn.title=cod
+    ?'Gerar link para o responsável assinar'
+    :'Disponível após salvar a chegada na planilha';
+}
+
+function faltandoParaLink(){
+  var faltas=[];
+  if(!document.getElementById('fDepartamento').value.trim())faltas.push('Departamento');
+  if(!document.getElementById('fServidor').value.trim())faltas.push('Servidor');
+  if(!document.getElementById('fUnidade').value.trim())faltas.push('Unidade / Escola');
+  if(!document.getElementById('fResponsavel').value.trim())faltas.push('Responsável');
+  if(!document.getElementById('fData').value)faltas.push('Data');
+  if(!document.getElementById('fEntrada').value)faltas.push('Entrada');
+  if(!document.getElementById('fSaida').value)faltas.push('Saída');
+  if(!montarObjetivoFinal().trim())faltas.push('Objetivo');
+  return faltas;
+}
+
+function enviarLinkResponsavel(){
+  var faltas=faltandoParaLink();
+  if(faltas.length){
+    var aviso='Falta preencher: '+faltas.join(', ');
+    if(faltas.indexOf('Saída')>-1)aviso+=' — a saída é necessária para calcular a duração.';
+    showToast(aviso);
+    return;
+  }
+
+  var cod=codigoFichaAtual||(fichaAtual&&fichaAtual.codigo)||'';
+  if(!cod){
+    showToast('Salve a chegada na planilha primeiro — o link só existe depois disso.');
+    return;
+  }
+  var protocolo=(fichaAtual&&fichaAtual.protocolo)||'';
+  if(!protocolo){
+    showToast('Protocolo não identificado. Salve a chegada novamente.');
+    return;
+  }
+
+  var base=window.location.href.split('?')[0];
+  var link=base+'?assinar='+encodeURIComponent(protocolo)+'&c='+encodeURIComponent(cod);
+
+  document.getElementById('linkValor').value=link;
+  document.getElementById('linkProtocolo').textContent=protocolo;
+  document.getElementById('linkWhats').href='https://wa.me/?text='+encodeURIComponent(
+    'Ficha de visita '+protocolo+' para assinatura:\n'+link
+  );
+  document.getElementById('linkModal').classList.add('open');
+  setTimeout(function(){
+    var i=document.getElementById('linkValor');
+    try{i.focus();i.select();}catch(e){}
+  },150);
+}
+
+function copiarLinkTexto(){
+  var v=document.getElementById('linkValor');
+  if(!v)return;
+  v.select();
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(v.value).then(function(){
+      showToast('Link copiado.');
+      document.getElementById('linkModal').classList.remove('open');
+    }).catch(function(){showToast('Copie manualmente o texto selecionado.');});
+  }else{
+    showToast('Copie manualmente o texto selecionado.');
+  }
+}
+
 /* ============ CONTINUAR FICHA ============ */
 function continuarFicha(v){
   if(!v)return;
   fichaAtual={protocolo:v.protocolo,codigo:v.assinaturaCodigo||v.codigo||''};
+  codigoFichaAtual=fichaAtual.codigo;
   salvarFichaAberta(v.protocolo,fichaAtual.codigo);
 
   autoState.depto=true;autoState.serv=true;autoState.unidade=true;autoState.resp=true;
@@ -1981,6 +2106,7 @@ function continuarFicha(v){
   atualizarContadorObjetivo();
   aplicarFiltroServidor();
   atualizarTodosCombos();
+  atualizarBtnLink();
 
   document.getElementById('bannerContinuar').style.display='block';
   document.getElementById('bannerProtocolo').textContent=v.protocolo;
@@ -1996,6 +2122,8 @@ function continuarFicha(v){
 function cancelarContinuar(){
   limparFichaAberta();
   fichaAtual=null;
+  codigoFichaAtual='';
+  atualizarBtnLink();
   document.getElementById('bannerContinuar').style.display='none';
   document.getElementById('bannerProtocolo').textContent='';
   document.getElementById('visitForm').reset();
@@ -2015,7 +2143,7 @@ function cancelarContinuar(){
   atualizarTodosCombos();
 }
 
-/* ============ LINK DE ASSINATURA ============ */
+/* ============ LINK DE ASSINATURA (tabela) ============ */
 function linkAssinatura(v){
   if(!v)return '';
   var base=window.location.href.split('?')[0];
@@ -2026,7 +2154,7 @@ function linkAssinatura(v){
 function copiarLinkAssinatura(v){
   if(!v)return;
   if(!(v.assinaturaCodigo||v.codigo)){
-    showToast('Ficha ainda sem código. Envie para a planilha primeiro (botão ☁️ Enviar).');
+    showToast('Ficha ainda sem código. Envie para a planilha primeiro (☁️ Enviar).');
     return;
   }
   var link=linkAssinatura(v);
@@ -2064,6 +2192,7 @@ async function reenviarFicha(v){
       if(i>=0){
         visits[i]._local=false;
         if(json.codigo)visits[i].assinaturaCodigo=json.codigo;
+        if(json.duracao)visits[i].duracao=json.duracao;
         if(json.pdfUrl)visits[i].pdfUrl=json.pdfUrl;
       }
       localStorage.setItem('cemtec_visits_v5',JSON.stringify(visits));
@@ -2081,7 +2210,6 @@ async function reenviarFicha(v){
 }
 
 /* ============ SALVAR ============ */
-/* Protocolo com 6 digitos */
 function gerarProtocoloLocal(){
   return 'SEMED-'+new Date().getFullYear()+'-'+String(Math.floor(100000+Math.random()*900000));
 }
@@ -2145,7 +2273,7 @@ async function saveVisit(modo){
     _local:false
   };
 
-  var aprendidoLocal=registrarLocal(servidor,departamento,unidade,responsavel);
+  registrarLocal(servidor,departamento,unidade,responsavel);
 
   var btnId=assinada?'btnSaveFinalizar':'btnSaveChegada';
   var outroId=assinada?'btnSaveChegada':'btnSaveFinalizar';
@@ -2172,14 +2300,15 @@ async function saveVisit(modo){
       if(json.status==='ok'){
         if(json.pdfUrl)visit.pdfUrl=json.pdfUrl;
         if(json.codigo)visit.assinaturaCodigo=json.codigo;
+        if(json.duracao)visit.duracao=json.duracao;
         if(json.aviso)console.warn('Aviso do Apps Script:',json.aviso);
         visit._local=false;
 
-        if(assinada){
-          showToast('✅ Ficha finalizada, assinada e PDF gerado no Drive!');
-        }else{
-          showToast('📥 Chegada gravada na planilha.');
-        }
+        if(json.codigo)codigoFichaAtual=json.codigo;
+
+        showToast(assinada
+          ?'✅ Ficha finalizada, assinada e PDF gerado no Drive!'
+          :'📥 Chegada gravada na planilha.');
       }else{
         falhou=true;
         visit._local=true;
@@ -2213,13 +2342,15 @@ async function saveVisit(modo){
     renderReportsTable();
     openA4Modal(visit);
   }else{
-    fichaAtual={protocolo:visit.protocolo,codigo:visit.assinaturaCodigo||''};
-    salvarFichaAberta(visit.protocolo,visit.assinaturaCodigo||codigoAtual);
+    fichaAtual={protocolo:visit.protocolo,codigo:visit.assinaturaCodigo||codigoAtual};
+    codigoFichaAtual=fichaAtual.codigo;
+    salvarFichaAberta(visit.protocolo,fichaAtual.codigo);
     document.getElementById('bannerContinuar').style.display='block';
     document.getElementById('bannerProtocolo').textContent=visit.protocolo;
     document.getElementById('btnSaveChegada').textContent='💾 Salvar (ainda sem saída)';
     renderDashboard();
     renderReportsTable();
+    atualizarBtnLink();
     if(!falhou){
       showToast('📥 Chegada salva. Volte ao sair, preencha o horário e finalize.');
     }
@@ -2229,6 +2360,8 @@ async function saveVisit(modo){
 function resetFormularioCompleto(){
   limparFichaAberta();
   fichaAtual=null;
+  codigoFichaAtual='';
+  atualizarBtnLink();
   document.getElementById('visitForm').reset();
   autoState.depto=false;
   autoState.serv=false;
@@ -2393,7 +2526,7 @@ async function syncTudo(silent){
           }
         }
 
-        /* MERGE: nao apaga fichas que ainda estao so no aparelho */
+        /* MERGE: preserva fichas que ainda estao so no aparelho */
         if(Array.isArray(json.visits)){
           var doServidor=json.visits.map(function(v){
             return Object.assign({},v,{
@@ -2417,7 +2550,7 @@ async function syncTudo(silent){
           lbl.textContent='Conectada — '+visits.length+' ficha(s) | '+
             visits.filter(function(v){return v.status!=='signed';}).length+' pendente(s) | '+
             (lists.unidades||[]).length+' unidade(s)'+
-            (pendLocais?' | '+pendLocais+' so no aparelho':'');
+            (pendLocais?' | '+pendLocais+' só no aparelho':'');
         }
       }else{
         if(lbl)lbl.textContent='Erro: '+(json.message||'desconhecido');
@@ -2500,6 +2633,12 @@ function respCell(nome){
 }
 
 /* ============ AÇÕES DAS TABELAS ============ */
+function statusCell(v){
+  var local=v._local?'<span class="sp l" title="Somente neste aparelho">📴 Local</span> ':'';
+  var st=v.status==='signed'?'<span class="sp s">✅ Assinada</span>':'<span class="sp p">⏳ Pendente</span>';
+  return local+st;
+}
+
 function acoesCell(v,listaNome,idx){
   var h='';
   if(v._local){
@@ -2515,12 +2654,6 @@ function acoesCell(v,listaNome,idx){
     h+='<button class="btn bo sm" onclick="openA4Modal(window.'+listaNome+'['+idx+'])">📄 A4</button>';
   }
   return h||'—';
-}
-
-function statusCell(v){
-  var local=v._local?'<span class="sp l" title="Somente neste aparelho">📴 Local</span> ':'';
-  var st=v.status==='signed'?'<span class="sp s">✅ Assinada</span>':'<span class="sp p">⏳ Pendente</span>';
-  return local+st;
 }
 
 /* ============ DASHBOARD ============ */
@@ -2544,6 +2677,7 @@ function renderDashboard(){
   set('kpiAvgTime',formatMinutes(avg));
   var badge=document.getElementById('navPendingBadge');
   if(badge)badge.textContent=pending;
+
   var countBy=function(k){
     var m={};
     visits.forEach(function(v){m[v[k]]=(m[v[k]]||0)+1;});
@@ -2572,6 +2706,7 @@ function renderDashboard(){
     data:{labels:dD.map(function(x){return String(x[0]).split('—')[0];}),datasets:[{data:dD.map(function(x){return x[1];}),backgroundColor:'#009FE3',borderRadius:6}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
   });
+
   var recentes=visits.slice(0,6);
   window._dashList=recentes;
   var tb=document.getElementById('recentVisitsBody');
@@ -2710,6 +2845,7 @@ function openA4Modal(v){
   var y=partes[0]||'----',m=partes[1]||'--',d=partes[2]||'--';
   var ent=formatTimeClean(v.entrada)||'—';
   var sai=formatTimeClean(v.saida)||'—';
+  var dur=v.duracao||formatMinutes(calcDurationMinutes(v.entrada,v.saida))||'—';
   var sigHtml=v.sigUnit
     ?'<img src="'+v.sigUnit+'" />'+sigetHTML(v,true)
     :(v.status==='signed'
@@ -2731,7 +2867,7 @@ function openA4Modal(v){
       '<div class="a4f"><span>Data da Visita:</span><span class="a4v">'+d+'/'+m+'/'+y+'</span></div>'+
       '<div style="font-size:14px;font-weight:600;margin-top:10px">Objetivo da Visita:</div>'+
       '<div class="a4obj">'+esc(v.objetivo)+'</div>'+
-      '<div style="margin-bottom:20px;font-size:14px">Horário de Entrada: <strong>'+esc(ent)+'</strong> &nbsp;|&nbsp; Horário de Saída: <strong>'+esc(sai)+'</strong> &nbsp;|&nbsp; Duração: <strong>'+esc(v.duracao||'—')+'</strong></div>'+
+      '<div style="margin-bottom:20px;font-size:14px">Horário de Entrada: <strong>'+esc(ent)+'</strong> &nbsp;|&nbsp; Horário de Saída: <strong>'+esc(sai)+'</strong> &nbsp;|&nbsp; Duração: <strong>'+esc(dur)+'</strong></div>'+
       '<div class="a4sig">'+sigHtml+
         '<div class="a4line">Assinatura do Responsável pela Unidade'+(v.responsavel?'<br/><small>'+esc(v.responsavel)+'</small>':'')+'</div>'+
       '</div>'+
@@ -2798,11 +2934,15 @@ function calcDurationMinutes(a,b){
   if(!ta||!tb||ta.indexOf(':')===-1||tb.indexOf(':')===-1)return null;
   var p1=ta.split(':').map(Number),p2=tb.split(':').map(Number);
   var diff=(p2[0]*60+p2[1])-(p1[0]*60+p1[1]);
+  if(diff<0)diff+=24*60;
   return (!isNaN(diff)&&diff>=0)?diff:null;
 }
 function formatMinutes(m){
-  if(m===null||m===undefined)return '—';
-  return m<60?m+' min':Math.floor(m/60)+'h '+(m%60)+'min';
+  if(m===null||m===undefined)return '';
+  if(m<60)return m+' min';
+  var h=Math.floor(m/60);
+  var r=m%60;
+  return r?(h+'h '+r+'min'):(h+'h');
 }
 function esc(s){
   return String(s===undefined||s===null?'':s).replace(/[&<>"']/g,function(m){
@@ -2965,13 +3105,14 @@ window.addEventListener('DOMContentLoaded',function(){
   tentar('contador',atualizarContadorObjetivo);
   tentar('relatorios',renderReportsTable);
   tentar('acesso',initAccessMode);
+  tentar('btnlink',atualizarBtnLink);
 
   if(!modoAssinar){
     tentar('sync',function(){syncTudo(true);});
   }
 
-  /* RECUPERA A FICHA QUE ESTAVA EM ABERTO AO RECARREGAR */
-  if(!modoAssinar && (isProfessorMode || getModoSalvo()==='ficha')){
+  /* Recupera a ficha que estava aberta — apenas no modo professor */
+  if(!modoAssinar && !estaAutenticado() && getModoSalvo()==='ficha'){
     setTimeout(function(){tentar('restaurar',restaurarFichaAberta);},700);
   }
 
