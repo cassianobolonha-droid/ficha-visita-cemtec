@@ -4,13 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Ficha de Visita Digital — CEMTEC | SEMED Sorriso</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-:root{--bd:#003580;--bm:#0056b3;--bl:#009FE3;--yl:#FBC02D;--bg:#f1f5f9;--tx:#0f172a;--mt:#64748b;--br:#e2e8f0;--ok:#16a34a;--wn:#d97706;--dg:#dc2626;--rd:14px}
+:root{--bd:#003580;--bl:#009FE3;--yl:#FBC02D;--bg:#f1f5f9;--tx:#0f172a;--mt:#64748b;--br:#e2e8f0;--ok:#16a34a;--wn:#d97706;--dg:#dc2626;--rd:14px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column}
 .tri{display:flex;height:5px;width:100%}
@@ -87,9 +85,7 @@ textarea{min-height:92px;resize:vertical}
 .combo{position:relative;width:100%}
 .combo>input{padding-right:70px}
 .cset{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:#94a3b8;font-size:14px;cursor:pointer;border-radius:8px;line-height:1}
-.cset:active{background:#f1f5f9}
 .clim{position:absolute;right:38px;top:50%;transform:translateY(-50%);width:26px;height:26px;display:none;align-items:center;justify-content:center;border:none;background:#e2e8f0;color:#475569;font-size:16px;font-weight:700;line-height:1;cursor:pointer;border-radius:50%;padding:0}
-.clim:active{background:#cbd5e1}
 .combo.tem .clim{display:flex}
 .cpan{position:fixed;display:none;z-index:300;background:#fff;border:1px solid var(--br);border-radius:12px;box-shadow:0 14px 36px rgba(15,23,42,.22);overflow-y:auto;overflow-x:hidden;padding:6px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .cpan.open{display:block}
@@ -100,7 +96,6 @@ textarea{min-height:92px;resize:vertical}
 .cvazio{padding:14px;font-size:12px;color:var(--mt);text-align:center}
 .crod{border-top:1px solid var(--br);margin-top:6px;padding-top:6px}
 .cbtnl{width:100%;padding:9px;border:none;border-radius:8px;background:#fff;color:var(--dg);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
-.cbtnl:active{background:#fef2f2}
 .objm{position:relative}
 .objmb{width:100%;display:flex;align-items:center;gap:8px;padding:11px 13px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-size:14px;font-family:inherit;cursor:pointer;text-align:left;color:#475569}
 .objmb .oc{margin-left:auto;color:#94a3b8}
@@ -719,17 +714,13 @@ function chave(s){
 /* ============ TOQUE x ROLAGEM ============ */
 function ligarItem(el,aoEscolher){
   var y0=0,x0=0,t0=0,arrastou=false;
-
   el.addEventListener('pointerdown',function(e){
     y0=e.clientY;x0=e.clientX;t0=Date.now();arrastou=false;
   },{passive:true});
-
   el.addEventListener('pointermove',function(e){
     if(Math.abs(e.clientY-y0)>8||Math.abs(e.clientX-x0)>8)arrastou=true;
   },{passive:true});
-
   el.addEventListener('pointercancel',function(){arrastou=true;},{passive:true});
-
   el.addEventListener('pointerup',function(e){
     if(arrastou)return;
     if(Date.now()-t0>1500)return;
@@ -776,7 +767,6 @@ function criarCombo(id){
   limpar.type='button';
   limpar.className='clim';
   limpar.tabIndex=-1;
-  limpar.setAttribute('aria-label','Limpar campo');
   limpar.title='Limpar e escolher de novo';
   limpar.textContent='×';
   wrap.appendChild(limpar);
@@ -785,7 +775,6 @@ function criarCombo(id){
   seta.type='button';
   seta.className='cset';
   seta.tabIndex=-1;
-  seta.setAttribute('aria-label','Abrir lista');
   seta.textContent='▾';
   wrap.appendChild(seta);
 
@@ -864,7 +853,7 @@ function criarCombo(id){
 
     let html='';
     if(txt&&!temIgual){
-      html+='<div class="citem novo" data-novo="1">➕ Usar "'+esc(txt)+'" — será salvo na lista</div>';
+      html+='<div class="citem novo">➕ Usar "'+esc(txt)+'" — será salvo na lista</div>';
     }
 
     if(!st.itens.length){
@@ -2045,7 +2034,7 @@ function sairPainel(){
   setTimeout(function(){if(el)el.focus();},150);
 }
 
-/* ============ LISTA DE SERVIDORES (coordenação) ============ */
+/* ============ LISTA DE SERVIDORES ============ */
 function renderLinksServidores(){
   var box=document.getElementById('linksServidores');
   if(!box)return;
@@ -2125,7 +2114,7 @@ async function restaurarFichaAberta(){
   return false;
 }
 
-/* ============ MODO ASSINAR (LINK) ============ */
+/* ============ MODO ASSINAR ============ */
 async function lerFichaRemota(protocolo,codigo){
   try{
     var r=await fetch(APPS_SCRIPT_URL,{
@@ -2353,13 +2342,12 @@ async function assinarViaLink(){
   }
 }
 
-/* ============ RÓTULO DO BOTÃO SALVAR ============ */
+/* ============ RÓTULO DO BOTÃO ============ */
 function atualizarRotuloSalvar(){
   var btn=document.getElementById('btnSaveChegada');
   if(!btn)return;
   var temSaida=!!String(document.getElementById('fSaida').value||'').trim();
   var emAndamento=!!(fichaAtual&&fichaAtual.protocolo);
-
   if(temSaida){
     btn.textContent=emAndamento?'💾 Salvar Saída':'📥 Salvar Chegada';
   }else{
@@ -2367,7 +2355,6 @@ function atualizarRotuloSalvar(){
   }
 }
 
-/* ============ LINK PARA O RESPONSÁVEL ============ */
 function atualizarBtnLink(){
   var btn=document.getElementById('btnLinkResp');
   if(!btn)return;
@@ -2547,7 +2534,7 @@ function copiarLinkAssinatura(v){
   }
 }
 
-/* ============ REENVIAR FICHA GUARDADA ============ */
+/* ============ REENVIAR FICHA ============ */
 async function reenviarFicha(v){
   if(!v||!v.protocolo){showToast('Ficha inválida.');return;}
   if(enviando){showToast('Aguarde o envio em andamento.');return;}
@@ -2775,7 +2762,7 @@ function csvParaLinhas(texto){
       var out=[],cur='',dentro=false;
       for(var i=0;i<r.length;i++){
         var ch=r[i];
-        if(ch==='"')){
+        if(ch==='"'){
           if(dentro&&r[i+1]==='"'){cur+='"';i++;}
           else dentro=!dentro;
         }else if(ch===','&&!dentro){out.push(cur.trim());cur='';}
