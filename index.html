@@ -139,6 +139,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 .sp{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:700}
 .sp.s{background:#dcfce7;color:#166534}
 .sp.p{background:#fef3c7;color:#92400e}
+.sp.l{background:#e2e8f0;color:#475569}
 .rc{font-size:12px;color:#334155}
 .rv{color:#94a3b8;font-style:italic}
 .fb{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px}
@@ -429,7 +430,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 
 <section class="vs" id="view-reports">
   <div class="ph">
-    <div class="pt"><h1>Relatórios &amp; PDFs no Drive</h1><p>Fichas pendentes têm botão <strong>Continuar</strong> e <strong>Link</strong> para envio ao responsável.</p></div>
+    <div class="pt"><h1>Relatórios &amp; PDFs no Drive</h1><p>Fichas pendentes têm botão <strong>Continuar</strong> e <strong>Link</strong>. Fichas marcadas <strong>📴 Local</strong> ainda não subiram para a planilha.</p></div>
     <div class="hacts">
       <button class="btn bo" onclick="syncVisitsFromCloud()">🔄 Atualizar</button>
       <button class="btn bp" onclick="exportCSV()">📥 Exportar CSV</button>
@@ -1678,9 +1679,63 @@ function copyProfessorLink(){
   });
 }
 
-/* ============ MODO ASSINAR (LINK) ============ */
+/* ============ FICHA EM ABERTO (persistência) ============ */
+const CHAVE_ABERTA='cemtec_ficha_aberta_v2';
 
-/* CORRECAO: leitura da ficha por POST, com reserva no GET */
+function salvarFichaAberta(protocolo,codigo){
+  try{
+    if(!protocolo){localStorage.removeItem(CHAVE_ABERTA);return;}
+    localStorage.setItem(CHAVE_ABERTA,JSON.stringify({
+      protocolo:String(protocolo),
+      codigo:String(codigo||''),
+      em:Date.now()
+    }));
+  }catch(e){}
+}
+function limparFichaAberta(){
+  try{localStorage.removeItem(CHAVE_ABERTA);}catch(e){}
+}
+function lerFichaAberta(){
+  try{
+    var raw=localStorage.getItem(CHAVE_ABERTA);
+    if(!raw)return null;
+    var o=JSON.parse(raw);
+    if(!o||!o.protocolo)return null;
+    if(Date.now()-(o.em||0)>259200000){localStorage.removeItem(CHAVE_ABERTA);return null;}
+    return o;
+  }catch(e){return null;}
+}
+
+async function restaurarFichaAberta(){
+  var aberta=lerFichaAberta();
+  if(!aberta)return false;
+
+  var local=visits.filter(function(v){return v&&v.protocolo===aberta.protocolo;})[0];
+  if(local){
+    if(local.status==='signed'){limparFichaAberta();return false;}
+    continuarFicha(Object.assign({},local,{
+      assinaturaCodigo:local.assinaturaCodigo||aberta.codigo||''
+    }));
+    showToast('📌 Ficha '+local.protocolo+' recuperada. Preencha a saída e finalize.');
+    return true;
+  }
+
+  try{
+    var json=await lerFichaRemota(aberta.protocolo,aberta.codigo);
+    if(json&&json.status==='ok'&&json.ficha){
+      continuarFicha(Object.assign({},json.ficha,{
+        assinaturaCodigo:json.ficha.codigo||aberta.codigo||''
+      }));
+      showToast('📌 Ficha '+json.ficha.protocolo+' recuperada. Preencha a saída e finalize.');
+      return true;
+    }
+  }catch(e){}
+
+  limparFichaAberta();
+  return false;
+}
+
+/* ============ MODO ASSINAR (LINK) ============ */
 async function lerFichaRemota(protocolo,codigo){
   try{
     var r=await fetch(APPS_SCRIPT_URL,{
@@ -1893,6 +1948,7 @@ async function assinarViaLink(){
 function continuarFicha(v){
   if(!v)return;
   fichaAtual={protocolo:v.protocolo,codigo:v.assinaturaCodigo||v.codigo||''};
+  salvarFichaAberta(v.protocolo,fichaAtual.codigo);
 
   autoState.depto=true;autoState.serv=true;autoState.unidade=true;autoState.resp=true;
   preencherAuto('fDepartamento',v.departamento||'','depto');
@@ -1938,6 +1994,7 @@ function continuarFicha(v){
 }
 
 function cancelarContinuar(){
+  limparFichaAberta();
   fichaAtual=null;
   document.getElementById('bannerContinuar').style.display='none';
   document.getElementById('bannerProtocolo').textContent='';
@@ -1969,7 +2026,7 @@ function linkAssinatura(v){
 function copiarLinkAssinatura(v){
   if(!v)return;
   if(!(v.assinaturaCodigo||v.codigo)){
-    showToast('Ficha sem código. Abra e salve a ficha novamente.');
+    showToast('Ficha ainda sem código. Envie para a planilha primeiro (botão ☁️ Enviar).');
     return;
   }
   var link=linkAssinatura(v);
@@ -1984,8 +2041,47 @@ function copiarLinkAssinatura(v){
   }
 }
 
+/* ============ REENVIAR FICHA GUARDADA ============ */
+async function reenviarFicha(v){
+  if(!v||!v.protocolo){showToast('Ficha inválida.');return;}
+  if(enviando){showToast('Aguarde o envio em andamento.');return;}
+
+  enviando=true;
+  var payload=Object.assign({},v);
+  delete payload._local;
+
+  try{
+    var res=await fetch(APPS_SCRIPT_URL,{
+      method:'POST',
+      redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(payload)
+    });
+    var json=await res.json();
+
+    if(json.status==='ok'){
+      var i=visits.findIndex(function(x){return x.protocolo===v.protocolo;});
+      if(i>=0){
+        visits[i]._local=false;
+        if(json.codigo)visits[i].assinaturaCodigo=json.codigo;
+        if(json.pdfUrl)visits[i].pdfUrl=json.pdfUrl;
+      }
+      localStorage.setItem('cemtec_visits_v5',JSON.stringify(visits));
+      renderDashboard();
+      renderReportsTable();
+      showToast('☁️ Ficha enviada para a planilha.');
+    }else{
+      showToast('⚠️ Ainda não foi: '+(json.message||'erro desconhecido'));
+    }
+  }catch(err){
+    showToast('⚠️ Sem conexão: '+err.message);
+  }finally{
+    enviando=false;
+  }
+}
+
 /* ============ SALVAR ============ */
-/* CORRECAO: protocolo com 6 digitos */
+/* Protocolo com 6 digitos */
 function gerarProtocoloLocal(){
   return 'SEMED-'+new Date().getFullYear()+'-'+String(Math.floor(100000+Math.random()*900000));
 }
@@ -2045,7 +2141,8 @@ async function saveVisit(modo){
     assinaturaArea:area,
     registradoEm:agora,
     status:assinada?'signed':'pending',
-    pdfUrl:''
+    pdfUrl:'',
+    _local:false
   };
 
   var aprendidoLocal=registrarLocal(servidor,departamento,unidade,responsavel);
@@ -2061,6 +2158,7 @@ async function saveVisit(modo){
   btn.textContent=assinada?'⏳ Assinando e gerando PDF...':'⏳ Salvando chegada...';
 
   var falhou=false;
+
   try{
     if(APPS_SCRIPT_URL){
       var res=await fetch(APPS_SCRIPT_URL,{
@@ -2070,24 +2168,28 @@ async function saveVisit(modo){
         body:JSON.stringify(visit)
       });
       var json=await res.json();
+
       if(json.status==='ok'){
         if(json.pdfUrl)visit.pdfUrl=json.pdfUrl;
         if(json.codigo)visit.assinaturaCodigo=json.codigo;
         if(json.aviso)console.warn('Aviso do Apps Script:',json.aviso);
+        visit._local=false;
 
         if(assinada){
           showToast('✅ Ficha finalizada, assinada e PDF gerado no Drive!');
         }else{
-          showToast('📥 Chegada salva. Ao sair, preencha a saída e finalize.');
+          showToast('📥 Chegada gravada na planilha.');
         }
       }else{
         falhou=true;
-        showToast('⚠️ Erro: '+(json.message||'tente novamente'));
+        visit._local=true;
+        showToast('⚠️ Não gravou na planilha: '+(json.message||'erro desconhecido'));
       }
     }
   }catch(err){
     falhou=true;
-    showToast('⚠️ Falha de conexão: '+err.message);
+    visit._local=true;
+    showToast('⚠️ Sem conexão com a planilha. Ficha guardada neste aparelho.');
   }finally{
     enviando=false;
     btn.disabled=false;
@@ -2112,6 +2214,7 @@ async function saveVisit(modo){
     openA4Modal(visit);
   }else{
     fichaAtual={protocolo:visit.protocolo,codigo:visit.assinaturaCodigo||''};
+    salvarFichaAberta(visit.protocolo,visit.assinaturaCodigo||codigoAtual);
     document.getElementById('bannerContinuar').style.display='block';
     document.getElementById('bannerProtocolo').textContent=visit.protocolo;
     document.getElementById('btnSaveChegada').textContent='💾 Salvar (ainda sem saída)';
@@ -2124,6 +2227,7 @@ async function saveVisit(modo){
 }
 
 function resetFormularioCompleto(){
+  limparFichaAberta();
   fichaAtual=null;
   document.getElementById('visitForm').reset();
   autoState.depto=false;
@@ -2288,24 +2392,38 @@ async function syncTudo(silent){
             lists.objetivosPorDepartamento=json.pares.objetivosPorDepartamento;okPares=true;
           }
         }
+
+        /* MERGE: nao apaga fichas que ainda estao so no aparelho */
         if(Array.isArray(json.visits)){
-          visits=json.visits.map(function(v){
+          var doServidor=json.visits.map(function(v){
             return Object.assign({},v,{
               entrada:formatTimeClean(v.entrada),
               saida:formatTimeClean(v.saida),
-              assinaturaCodigo:v.codigo||v.assinaturaCodigo||''
+              assinaturaCodigo:v.codigo||v.assinaturaCodigo||'',
+              _local:false
             });
           });
+          var noServidor={};
+          doServidor.forEach(function(v){ noServidor[v.protocolo]=true; });
+          var soLocal=visits.filter(function(v){
+            return v&&v.protocolo&&v._local&&!noServidor[v.protocolo];
+          });
+          visits=doServidor.concat(soLocal);
           localStorage.setItem('cemtec_visits_v5',JSON.stringify(visits));
         }
-        if(lbl)lbl.textContent='Conectada — '+visits.length+' ficha(s) | '+
-          visits.filter(function(v){return v.status!=='signed';}).length+' pendente(s) | '+
-          (lists.unidades||[]).length+' unidade(s)';
+
+        if(lbl){
+          var pendLocais=visits.filter(function(v){return v&&v._local;}).length;
+          lbl.textContent='Conectada — '+visits.length+' ficha(s) | '+
+            visits.filter(function(v){return v.status!=='signed';}).length+' pendente(s) | '+
+            (lists.unidades||[]).length+' unidade(s)'+
+            (pendLocais?' | '+pendLocais+' so no aparelho':'');
+        }
       }else{
         if(lbl)lbl.textContent='Erro: '+(json.message||'desconhecido');
       }
     }catch(e){
-      if(lbl)lbl.textContent='Falha ao conectar no Apps Script';
+      if(lbl)lbl.textContent='Falha ao conectar no Apps Script — fichas locais preservadas';
     }
   }
 
@@ -2384,6 +2502,9 @@ function respCell(nome){
 /* ============ AÇÕES DAS TABELAS ============ */
 function acoesCell(v,listaNome,idx){
   var h='';
+  if(v._local){
+    h+='<button class="btn bw sm" onclick="reenviarFicha(window.'+listaNome+'['+idx+'])">☁️ Enviar</button> ';
+  }
   if(v.pdfUrl){
     h+='<a href="'+v.pdfUrl+'" target="_blank" class="btn bs sm">📁 PDF</a> ';
   }
@@ -2394,6 +2515,12 @@ function acoesCell(v,listaNome,idx){
     h+='<button class="btn bo sm" onclick="openA4Modal(window.'+listaNome+'['+idx+'])">📄 A4</button>';
   }
   return h||'—';
+}
+
+function statusCell(v){
+  var local=v._local?'<span class="sp l" title="Somente neste aparelho">📴 Local</span> ':'';
+  var st=v.status==='signed'?'<span class="sp s">✅ Assinada</span>':'<span class="sp p">⏳ Pendente</span>';
+  return local+st;
 }
 
 /* ============ DASHBOARD ============ */
@@ -2455,7 +2582,7 @@ function renderDashboard(){
       '<td>'+esc(v.servidor)+'</td>'+
       '<td>'+esc(v.unidade)+'</td>'+
       '<td>'+respCell(v.responsavel)+'</td>'+
-      '<td>'+(v.status==='signed'?'<span class="sp s">✅ Assinada</span>':'<span class="sp p">⏳ Pendente</span>')+'</td>'+
+      '<td>'+statusCell(v)+'</td>'+
       '<td>'+acoesCell(v,'_dashList',i)+'</td>'+
     '</tr>';
   }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--mt);padding:20px">Nenhuma visita registrada ainda.</td></tr>';
@@ -2534,16 +2661,18 @@ function renderReportsTable(){
       '<td>'+esc(v.unidade)+'</td>'+
       '<td>'+respCell(v.responsavel)+'</td>'+
       '<td>'+esc(formatTimeClean(v.entrada))+(v.saida?' – '+esc(formatTimeClean(v.saida)):'')+'</td>'+
-      '<td>'+(v.status==='signed'?'<span class="sp s">✅ Assinada</span>':'<span class="sp p">⏳ Pendente</span>')+'</td>'+
+      '<td>'+statusCell(v)+'</td>'+
       '<td>'+acoesCell(v,'_reportList',i)+'</td>'+
     '</tr>';
   }).join('')||'<tr><td colspan="8" style="text-align:center;color:var(--mt);padding:20px">Nenhuma ficha encontrada com estes filtros.</td></tr>';
   var assinadas=list.filter(function(v){return v.status==='signed';}).length;
   var pendentes=list.length-assinadas;
+  var locais=list.filter(function(v){return v._local;}).length;
   var mins=list.map(function(v){return calcDurationMinutes(v.entrada,v.saida);}).filter(function(x){return x!==null;});
   var totalMin=mins.reduce(function(a,b){return a+b;},0);
   var txt='<strong>'+list.length+'</strong> ficha(s) · <strong>'+assinadas+'</strong> assinada(s) · '+
           '<strong>'+pendentes+'</strong> pendente(s)';
+  if(locais)txt+=' · <strong>'+locais+'</strong> só no aparelho';
   if(mins.length)txt+=' · '+formatMinutes(totalMin)+' de permanência';
   var resumo=document.getElementById('filtrosResumo');
   if(resumo)resumo.innerHTML=txt;
@@ -2839,6 +2968,11 @@ window.addEventListener('DOMContentLoaded',function(){
 
   if(!modoAssinar){
     tentar('sync',function(){syncTudo(true);});
+  }
+
+  /* RECUPERA A FICHA QUE ESTAVA EM ABERTO AO RECARREGAR */
+  if(!modoAssinar && (isProfessorMode || getModoSalvo()==='ficha')){
+    setTimeout(function(){tentar('restaurar',restaurarFichaAberta);},700);
   }
 
   setTimeout(function(){
