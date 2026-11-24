@@ -582,7 +582,6 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 </div>
 
 <div class="toast" id="toast"></div>
-
 <script>
 const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbwz9gWCzvMwFRUH_OoVZhIMxJGi9OBvUvgKHCI05HLX75jzQOXPg5ajv-B9KlNg6g0wzg/exec';
 const SHEET_ID='1Vueo04UFy3655Z45Wvm5G1LfEYvgAi9xoprCCCtgqqU';
@@ -1680,6 +1679,31 @@ function copyProfessorLink(){
 }
 
 /* ============ MODO ASSINAR (LINK) ============ */
+
+/* CORRECAO: leitura da ficha por POST, com reserva no GET */
+async function lerFichaRemota(protocolo,codigo){
+  try{
+    var r=await fetch(APPS_SCRIPT_URL,{
+      method:'POST',
+      redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({acao:'ler_ficha',protocolo:protocolo,codigo:codigo})
+    });
+    var j=await r.json();
+    if(j&&j.status)return j;
+  }catch(e){}
+
+  try{
+    var url=APPS_SCRIPT_URL+'?ficha='+encodeURIComponent(protocolo)+
+            '&c='+encodeURIComponent(codigo)+'&t='+Date.now();
+    var res=await fetch(url,{redirect:'follow'});
+    var json=await res.json();
+    return json;
+  }catch(e2){
+    return {status:'erro_rede',message:e2.message};
+  }
+}
+
 async function iniciarModoAssinar(){
   document.body.classList.add('assinar');
   switchView('assinar');
@@ -1688,10 +1712,7 @@ async function iniciarModoAssinar(){
   box.innerHTML='<div style="text-align:center;padding:24px;color:var(--mt);font-size:13px">Carregando ficha...</div>';
 
   try{
-    var url=APPS_SCRIPT_URL+'?ficha='+encodeURIComponent(modoAssinar)+
-            '&c='+encodeURIComponent(codigoAssinar)+'&t='+Date.now();
-    var res=await fetch(url,{redirect:'follow'});
-    var json=await res.json();
+    var json=await lerFichaRemota(modoAssinar,codigoAssinar);
 
     if(json.status==='ja_assinada'){
       fichaAssinar=json.ficha||null;
@@ -1704,11 +1725,35 @@ async function iniciarModoAssinar(){
       return;
     }
 
+    if(json.status==='erro_rede'){
+      box.innerHTML='<div style="text-align:center;padding:20px">'+
+        '<div style="font-size:40px;margin-bottom:8px">📡</div>'+
+        '<div style="font-size:15px;font-weight:800;color:#b91c1c;margin-bottom:6px">Sem conexão</div>'+
+        '<div style="font-size:13px;color:#64748b">Verifique a internet e recarregue o link.</div></div>';
+      return;
+    }
+
+    if(json.status==='negado'){
+      box.innerHTML='<div style="text-align:center;padding:20px">'+
+        '<div style="font-size:40px;margin-bottom:8px">🔒</div>'+
+        '<div style="font-size:15px;font-weight:800;color:#b91c1c;margin-bottom:6px">Link incompleto</div>'+
+        '<div style="font-size:13px;color:#64748b">Use o link completo enviado pela coordenação, com o código no final.</div></div>';
+      return;
+    }
+
+    if(json.status==='nao_encontrado'){
+      box.innerHTML='<div style="text-align:center;padding:20px">'+
+        '<div style="font-size:40px;margin-bottom:8px">🔍</div>'+
+        '<div style="font-size:15px;font-weight:800;color:#b91c1c;margin-bottom:6px">Ficha não encontrada</div>'+
+        '<div style="font-size:13px;color:#64748b">Protocolo <strong>'+esc(modoAssinar)+'</strong> não existe na planilha.</div></div>';
+      return;
+    }
+
     if(json.status!=='ok'){
       box.innerHTML='<div style="text-align:center;padding:20px">'+
         '<div style="font-size:40px;margin-bottom:8px">⚠️</div>'+
         '<div style="font-size:15px;font-weight:800;color:#b91c1c;margin-bottom:6px">Não foi possível abrir</div>'+
-        '<div style="font-size:13px;color:#64748b">'+esc(json.message||'Link inválido.')+'</div></div>';
+        '<div style="font-size:13px;color:#64748b">'+esc(json.message||'Erro desconhecido.')+'</div></div>';
       return;
     }
 
@@ -1717,9 +1762,9 @@ async function iniciarModoAssinar(){
 
   }catch(e){
     box.innerHTML='<div style="text-align:center;padding:20px">'+
-      '<div style="font-size:40px;margin-bottom:8px">📡</div>'+
-      '<div style="font-size:15px;font-weight:800;color:#b91c1c;margin-bottom:6px">Falha de conexão</div>'+
-      '<div style="font-size:13px;color:#64748b">Verifique a internet e recarregue o link.</div></div>';
+      '<div style="font-size:40px;margin-bottom:8px">⚠️</div>'+
+      '<div style="font-size:15px;font-weight:800;color:#b91c1c;margin-bottom:6px">Erro inesperado</div>'+
+      '<div style="font-size:13px;color:#64748b">'+esc(e.message||'')+'</div></div>';
   }
 }
 
@@ -1940,8 +1985,9 @@ function copiarLinkAssinatura(v){
 }
 
 /* ============ SALVAR ============ */
+/* CORRECAO: protocolo com 6 digitos */
 function gerarProtocoloLocal(){
-  return 'SEMED-'+new Date().getFullYear()+'-'+String(Math.floor(1000+Math.random()*9000));
+  return 'SEMED-'+new Date().getFullYear()+'-'+String(Math.floor(100000+Math.random()*900000));
 }
 
 async function saveVisit(modo){
