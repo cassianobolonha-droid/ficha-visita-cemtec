@@ -27,6 +27,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 body.prof .ptop{display:flex}
 body.prof .side,body.prof .mhead{display:none!important}
 body.prof .main{max-width:900px}
+body.assinar .side,body.assinar .mhead,body.assinar .ptop{display:none!important}
+body.assinar .main{max-width:760px;padding:16px}
 .pacoes{display:flex;gap:8px;flex-wrap:wrap}
 .shell{display:flex;flex:1;min-height:calc(100vh - 5px)}
 .side{width:270px;background:linear-gradient(180deg,#003580,#002359);color:#fff;display:flex;flex-direction:column;padding:20px 16px;position:sticky;top:0;height:calc(100vh - 5px);z-index:40;transition:transform .25s}
@@ -87,9 +89,9 @@ textarea{min-height:92px;resize:vertical}
 .clim{position:absolute;right:38px;top:50%;transform:translateY(-50%);width:26px;height:26px;display:none;align-items:center;justify-content:center;border:none;background:#e2e8f0;color:#475569;font-size:16px;font-weight:700;line-height:1;cursor:pointer;border-radius:50%;padding:0}
 .clim:active{background:#cbd5e1}
 .combo.tem .clim{display:flex}
-.cpan{position:fixed;display:none;z-index:300;background:#fff;border:1px solid var(--br);border-radius:12px;box-shadow:0 14px 36px rgba(15,23,42,.22);overflow-y:auto;overflow-x:hidden;padding:6px;-webkit-overflow-scrolling:touch}
+.cpan{position:fixed;display:none;z-index:300;background:#fff;border:1px solid var(--br);border-radius:12px;box-shadow:0 14px 36px rgba(15,23,42,.22);overflow-y:auto;overflow-x:hidden;padding:6px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .cpan.open{display:block}
-.citem{padding:10px 11px;font-size:13px;line-height:1.4;border-radius:8px;cursor:pointer;color:#334155;word-break:break-word}
+.citem{padding:10px 11px;font-size:13px;line-height:1.4;border-radius:8px;cursor:pointer;color:#334155;word-break:break-word;touch-action:pan-y}
 .citem:hover,.citem.ativo{background:#eff6ff;color:var(--bd);font-weight:600}
 .citem.atual{background:#e8f1fb;color:var(--bd);font-weight:700}
 .citem.novo{background:#f0fdf4;color:#166534;font-weight:700;border:1px dashed #86efac;margin-bottom:4px}
@@ -181,6 +183,13 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 .siget__meta{font-family:'Inter',sans-serif;font-size:10px;line-height:1.55;color:#5a6472;margin-top:4px}
 .siget__meta strong{color:#334155;font-weight:600}
 .siget__cod{font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.04em;background:rgba(0,0,0,.045);border:1px solid #d8dde2;border-radius:3px;padding:0 4px;color:#334155}
+.resumo{display:grid;grid-template-columns:1fr;gap:10px}
+.resumo .lr{display:flex;gap:10px;font-size:13.5px;border-bottom:1px dashed var(--br);padding-bottom:8px}
+.resumo .lr b{min-width:160px;color:#334155;font-weight:700}
+.resumo .lr span{flex:1;color:#0f172a}
+.resumo .lr.full{flex-direction:column;gap:4px}
+.resumo .lr.full b{min-width:0}
+.resumo .lr.full span{background:#fafafa;border:1px solid var(--br);border-radius:6px;padding:8px;white-space:pre-wrap;font-size:13px}
 @media(max-width:1100px){.kg{grid-template-columns:repeat(3,1fr)}.cg{grid-template-columns:1fr}}
 @media(max-width:860px){
 .mhead{display:flex}
@@ -195,6 +204,8 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 .patal{grid-column:1/-1}
 .patal .btn{flex:1 1 auto}
 .citem{padding:12px;font-size:14px}
+.resumo .lr{flex-direction:column;gap:3px}
+.resumo .lr b{min-width:0}
 }
 @media print{
 .tri,.side,.mhead,.ptop,.main,.mhead2,.no-print,.toast,.cpan{display:none!important}
@@ -299,9 +310,19 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
   <div class="ph">
     <div class="pt">
       <h1>Ficha de Visita Digital</h1>
-      <p>Escolha o <strong>Departamento</strong> primeiro. Todos os campos aceitam digitação.</p>
+      <p>Salve a chegada agora e finalize depois, ao sair — é quando o responsável assina.</p>
     </div>
   </div>
+
+  <div class="card" id="bannerContinuar" style="display:none;background:#eff6ff;border-color:#bfdbfe">
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">
+      <div style="font-size:13px;color:#003580;font-weight:700;line-height:1.5">
+        ▶ Continuando a ficha <span id="bannerProtocolo"></span> — preencha o horário de saída e finalize com a assinatura.
+      </div>
+      <button type="button" class="btn bo sm" onclick="cancelarContinuar()">✕ Cancelar</button>
+    </div>
+  </div>
+
   <form id="visitForm" onsubmit="return false" novalidate>
     <div class="card">
       <div class="ct" style="margin-bottom:14px">1. Dados da Visita</div>
@@ -340,7 +361,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
             </div>
           </div>
           <div class="gp">
-            <label>Horário de Saída <span class="ob">*</span></label>
+            <label>Horário de Saída <span id="lblSaida" style="font-weight:500;color:var(--mt);font-size:11px">preencha ao sair</span></label>
             <div class="ir">
               <input type="time" id="fSaida" />
               <button type="button" class="btn bo sm" onclick="setNowTime('fSaida')">Agora</button>
@@ -366,16 +387,17 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
           </div>
           <div class="pills" id="objPills"></div>
           <textarea id="fObjetivo" placeholder="Opcional — acrescente algum detalhe se precisar." oninput="atualizarContadorObjetivo()"></textarea>
-          <div class="dica">💡 Marque um objetivo na lista. Os detalhes abaixo são opcionais — use só se quiser acrescentar algo.</div>
+          <div class="dica">💡 Marque um objetivo na lista. Os detalhes abaixo são opcionais.</div>
         </div>
       </div>
     </div>
+
     <div class="card">
       <div class="ch">
-        <div class="ct">2. Assinatura do Responsável pela Unidade <span class="ob">*</span></div>
+        <div class="ct">2. Assinatura do Responsável <span style="font-weight:500;color:var(--mt);font-size:12px">— só ao finalizar</span></div>
         <button type="button" class="btn ba sm" onclick="openFullscreenSig()">📱 Assinar em Tela Cheia</button>
       </div>
-      <div class="sigav">Ao assinar, você concorda com o registro eletrônico desta ficha, incluindo data, hora e código de verificação.</div>
+      <div class="sigav">Deixe para o momento da saída: é quando o responsável assina. Ao assinar, concorda com o registro eletrônico desta ficha, incluindo data, hora e código de verificação.</div>
       <div class="sigbox" id="sigBox">
         <div class="sigtool">
           <div class="sigg">
@@ -398,8 +420,8 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
         <div class="sigguide">Assine acima desta linha</div>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;margin-top:18px">
-        <button type="button" class="btn bw" id="btnSavePending" onclick="saveVisit('pending')">⏳ Salvar Pendente</button>
-        <button type="button" class="btn bs" id="btnSaveSigned" onclick="saveVisit('signed')">✅ Enviar Ficha Assinada (PDF + Drive)</button>
+        <button type="button" class="btn bw" id="btnSaveChegada" onclick="saveVisit('chegada')">📥 Salvar Chegada</button>
+        <button type="button" class="btn bs" id="btnSaveFinalizar" onclick="saveVisit('finalizar')">✅ Finalizar e Assinar</button>
       </div>
     </div>
   </form>
@@ -407,7 +429,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 
 <section class="vs" id="view-reports">
   <div class="ph">
-    <div class="pt"><h1>Relatórios &amp; PDFs no Drive</h1><p>Todas as fichas sincronizadas com link direto para o PDF oficial.</p></div>
+    <div class="pt"><h1>Relatórios &amp; PDFs no Drive</h1><p>Fichas pendentes têm botão <strong>Continuar</strong> e <strong>Link</strong> para envio ao responsável.</p></div>
     <div class="hacts">
       <button class="btn bo" onclick="syncVisitsFromCloud()">🔄 Atualizar</button>
       <button class="btn bp" onclick="exportCSV()">📥 Exportar CSV</button>
@@ -461,6 +483,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     <p style="font-size:13px;color:var(--mt);margin-bottom:12px">Preenchimentos automáticos: <strong id="autoFillLabel">Verificando...</strong></p>
     <p style="font-size:12px;color:var(--mt);margin-bottom:12px;line-height:1.55">
       Listas lidas das abas <strong>Servidores</strong>, <strong>Unidades</strong> e <strong>Objetivos</strong> (A = Objetivo, B = Departamento).
+      O PDF é gerado somente ao finalizar assinada.
     </p>
     <div style="display:flex;flex-wrap:wrap;gap:10px">
       <button class="btn bp" onclick="syncTudo()">🔄 Sincronizar Listas &amp; Fichas</button>
@@ -468,6 +491,50 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
       <a href="https://drive.google.com/drive/folders/1WyXDmpA_PBzXrrHUxr5yOByyq0ofLmlK" target="_blank" class="btn bo">Abrir Pasta de PDFs no Drive ↗</a>
     </div>
   </div>
+</section>
+
+<section class="vs" id="view-assinar">
+  <div class="ph">
+    <div class="pt">
+      <h1>Assinatura da Ficha</h1>
+      <p>Confira os dados abaixo. A assinatura só é liberada depois da sua confirmação.</p>
+    </div>
+  </div>
+  <div class="card" id="assinarResumo">
+    <div style="text-align:center;padding:24px;color:var(--mt);font-size:13px">Carregando ficha...</div>
+  </div>
+  <div class="card" id="assinarPadCard" style="display:none">
+    <div class="ch">
+      <div class="ct">Assinatura do Responsável</div>
+      <button type="button" class="btn ba sm" onclick="openFullscreenSigLink()">📱 Assinar em Tela Cheia</button>
+    </div>
+    <div class="sigav">Ao assinar você concorda com o registro eletrônico desta ficha, incluindo data, hora e código de verificação.</div>
+    <div class="sigbox" id="sigBoxLink">
+      <div class="sigtool">
+        <div class="sigg">
+          <span class="sigl">Cor</span>
+          <button type="button" class="cdot" style="background:#003580" title="Azul" onclick="setPenColor('#003580',this,'link')"></button>
+          <button type="button" class="cdot active" style="background:#000000" title="Preto" onclick="setPenColor('#000000',this,'link')"></button>
+        </div>
+        <div class="sigg">
+          <span class="sigl">Ponta</span>
+          <button type="button" class="pbtn active" onclick="setPenWidth(2,this,'link')"><span class="pbar" style="height:1px"></span>Fina</button>
+          <button type="button" class="pbtn" onclick="setPenWidth(3.5,this,'link')"><span class="pbar" style="height:3px"></span>Média</button>
+          <button type="button" class="pbtn" onclick="setPenWidth(6,this,'link')"><span class="pbar" style="height:5px"></span>Grossa</button>
+        </div>
+        <div class="sigg">
+          <button type="button" class="btn bo sm" onclick="padLink.undo()">↩ Desfazer</button>
+          <button type="button" class="btn bo sm" onclick="padLink.clear()">🗑 Limpar</button>
+        </div>
+      </div>
+      <canvas id="sigCanvasLink" class="sigcv"></canvas>
+      <div class="sigguide">Assine acima desta linha</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:18px">
+      <button type="button" class="btn bs" id="btnAssinarLink" onclick="assinarViaLink()">✅ Confirmar Assinatura</button>
+    </div>
+  </div>
+  <div class="card" id="assinarDone" style="display:none"></div>
 </section>
 </main>
 </div>
@@ -489,7 +556,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 <div class="fsig" id="fsSigModal">
   <div class="fstop">
     <strong>Assinatura Digital (Tela Cheia)</strong>
-    <button class="btn bo sm" onclick="document.getElementById('fsSigModal').classList.remove('open')">Cancelar</button>
+    <button class="btn bo sm" onclick="fecharFullscreenSig()">Cancelar</button>
   </div>
   <div class="fstools">
     <div class="sigg">
@@ -524,7 +591,7 @@ const DRIVE_LOGO_ID='1Wr0oaQn3PFDETlL2jskRZJlaZdeVxRCW';
 const LOGO_URL='https://lh3.googleusercontent.com/d/'+DRIVE_LOGO_ID;
 const OBJETIVO_MIN_CHARS=25;
 const AREA_MINIMA_ASSINATURA=0.02;
-const EXIGIR_TUDO_NO_PENDENTE=true;
+
 const DEFAULT_LISTS={servidores:[],departamentos:[],unidades:[],objetivos:[],responsaveis:[],
   paresServidor:[],paresUnidade:[],servidoresPorDepartamento:[],responsaveisPorUnidade:[],objetivosPorDepartamento:[]};
 
@@ -541,11 +608,17 @@ let mapaServPorDepto={};
 let mapaRespPorUnidade={};
 let mapaObjPorDepto={};
 let selectedObjetivos=[];
-let padUnit,padFs,charts={};
+let padUnit,padFs,padLink,charts={};
 let enviando=false;
 let ultimaUnidade='';
+let fichaAtual=null;
+let fichaAssinar=null;
+let padFsAlvo='unit';
+
 const params=new URLSearchParams(window.location.search);
 const isProfessorMode=params.get('modo')==='ficha';
+const modoAssinar=params.get('assinar')||'';
+const codigoAssinar=params.get('c')||'';
 const autoState={depto:false,serv:false,unidade:false,resp:false,prog:false};
 
 function normaliza(s){
@@ -553,6 +626,29 @@ function normaliza(s){
 }
 function chave(s){
   return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+}
+
+/* ============ TOQUE x ROLAGEM ============ */
+function ligarItem(el,aoEscolher){
+  var y0=0,x0=0,t0=0,arrastou=false;
+
+  el.addEventListener('pointerdown',function(e){
+    y0=e.clientY;x0=e.clientX;t0=Date.now();arrastou=false;
+  },{passive:true});
+
+  el.addEventListener('pointermove',function(e){
+    if(Math.abs(e.clientY-y0)>8||Math.abs(e.clientX-x0)>8)arrastou=true;
+  },{passive:true});
+
+  el.addEventListener('pointercancel',function(){arrastou=true;},{passive:true});
+
+  el.addEventListener('pointerup',function(e){
+    if(arrastou)return;
+    if(Date.now()-t0>1500)return;
+    e.preventDefault();
+    e.stopPropagation();
+    aoEscolher();
+  });
 }
 
 /* ============ COMBO ============ */
@@ -660,8 +756,7 @@ function criarCombo(id){
   function ligarNovo(){
     const elNovo=panel.querySelector('.citem.novo');
     if(!elNovo)return;
-    elNovo.addEventListener('pointerdown',function(e){
-      e.preventDefault();e.stopPropagation();
+    ligarItem(elNovo,function(){
       fechar();
       travar(800);
       atualizarLimpar();
@@ -703,18 +798,14 @@ function criarCombo(id){
     panel.innerHTML=html;
 
     panel.querySelectorAll('.citem:not(.novo)').forEach(function(el){
-      el.addEventListener('pointerdown',function(e){
-        e.preventDefault();e.stopPropagation();
+      ligarItem(el,function(){
         escolher(Number(el.getAttribute('data-i')));
       });
     });
 
     const bLimpar=panel.querySelector('.cbtnl');
     if(bLimpar){
-      bLimpar.addEventListener('pointerdown',function(e){
-        e.preventDefault();e.stopPropagation();
-        limparCampo();
-      });
+      ligarItem(bLimpar,function(){ limparCampo(); });
     }
     ligarNovo();
   }
@@ -815,7 +906,11 @@ function criarCombo(id){
     if(wrap.contains(e.target)||panel.contains(e.target))return;
     fechar();
   });
-  window.addEventListener('scroll',function(){if(st.aberto)posicionar();},true);
+  window.addEventListener('scroll',function(e){
+    if(!st.aberto)return;
+    if(panel.contains(e.target))return;
+    posicionar();
+  },true);
   window.addEventListener('resize',function(){if(st.aberto)posicionar();});
   window.addEventListener('orientationchange',function(){
     setTimeout(function(){if(st.aberto)posicionar();},300);
@@ -925,7 +1020,6 @@ class SignaturePad{
       if(!self.w||!self.h)self.resize();
       self.drawing=true;
       self.strokes.push({color:self.color,width:self.width,points:[self.pt(e)]});
-      limparErroAssinatura();
       self.redraw();
     });
     this.canvas.addEventListener('pointermove',function(e){
@@ -1058,29 +1152,43 @@ class SignaturePad{
 }
 
 function setPenColor(c,btn,which){
-  var pad=which==='fs'?padFs:padUnit;
+  var pad=which==='fs'?padFs:(which==='link'?padLink:padUnit);
   if(!pad)return;
   pad.color=c;
   btn.parentElement.querySelectorAll('.cdot').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
 }
 function setPenWidth(w,btn,which){
-  var pad=which==='fs'?padFs:padUnit;
+  var pad=which==='fs'?padFs:(which==='link'?padLink:padUnit);
   if(!pad)return;
   pad.width=w;
   btn.parentElement.querySelectorAll('.pbtn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
 }
+
 function openFullscreenSig(){
+  padFsAlvo='unit';
   document.getElementById('fsSigModal').classList.add('open');
   setTimeout(function(){if(padFs){padFs.resize();padFs.redraw();}},120);
 }
+function openFullscreenSigLink(){
+  padFsAlvo='link';
+  document.getElementById('fsSigModal').classList.add('open');
+  setTimeout(function(){if(padFs){padFs.resize();padFs.redraw();}},120);
+}
+function fecharFullscreenSig(){
+  document.getElementById('fsSigModal').classList.remove('open');
+}
 function confirmFullscreenSig(){
   if(!padFs||padFs.isEmpty()){showToast('Faça a assinatura primeiro.');return;}
-  padUnit.copyFrom(padFs);
+  if(padFsAlvo==='link'){
+    if(padLink){padLink.copyFrom(padFs);padLink.resize();padLink.redraw();}
+  }else{
+    padUnit.copyFrom(padFs);
+  }
   limparErroAssinatura();
   document.getElementById('fsSigModal').classList.remove('open');
-  showToast('Assinatura aplicada na ficha.');
+  showToast('Assinatura aplicada.');
 }
 
 /* ============ VALIDAÇÃO ============ */
@@ -1099,6 +1207,8 @@ function limparErro(id){
 function limparErroAssinatura(){
   var box=document.getElementById('sigBox');
   if(box)box.classList.remove('err');
+  var box2=document.getElementById('sigBoxLink');
+  if(box2)box2.classList.remove('err');
 }
 function limparTodosErros(){
   ['fDepartamento','fServidor','fUnidade','fResponsavel','fData','fEntrada','fSaida','fObjetivo'].forEach(limparErro);
@@ -1121,11 +1231,8 @@ function validarFicha(modo){
   if(!v.responsavel)return{id:'fResponsavel',msg:'Preencha o nome do Responsável pela Escola.'};
   if(!v.data)return{id:'fData',msg:'Preencha a Data da Visita.'};
   if(!v.entrada)return{id:'fEntrada',msg:'Preencha o Horário de Entrada.'};
-  if(!v.saida)return{id:'fSaida',msg:'Preencha o Horário de Saída.'};
   var hoje=todayISO();
   if(v.data>hoje)return{id:'fData',msg:'A data da visita não pode ser futura.'};
-  var minEnt=calcDurationMinutes(v.entrada,v.saida);
-  if(minEnt===null)return{id:'fSaida',msg:'O Horário de Saída deve ser igual ou posterior ao de Entrada.'};
 
   var temNaLista=selectedObjetivos.length>0;
   var livre=cleanObjetivo(document.getElementById('fObjetivo').value);
@@ -1137,8 +1244,11 @@ function validarFicha(modo){
     return{id:'fObjetivo',msg:'Marque um objetivo na lista, ou escreva pelo menos '+OBJETIVO_MIN_CHARS+' caracteres nos detalhes.'};
   }
 
-  if(modo==='signed'){
-    if(padUnit.isEmpty())return{id:'sigBox',msg:'Colha a assinatura na tela antes de enviar.'};
+  if(modo==='finalizar'){
+    if(!v.saida)return{id:'fSaida',msg:'Preencha o Horário de Saída para finalizar.'};
+    var minEnt=calcDurationMinutes(v.entrada,v.saida);
+    if(minEnt===null)return{id:'fSaida',msg:'O Horário de Saída deve ser igual ou posterior ao de Entrada.'};
+    if(padUnit.isEmpty())return{id:'sigBox',msg:'Colha a assinatura na tela antes de finalizar.'};
     if(padUnit.areaCoberta()<AREA_MINIMA_ASSINATURA)return{id:'sigBox',msg:'Assinatura muito simples. Assine novamente.'};
   }
   return null;
@@ -1513,6 +1623,12 @@ function initAccessMode(){
   var baseUrl=window.location.href.split('?')[0];
   var profLink=document.getElementById('profLinkDisplay');
   if(profLink)profLink.value=baseUrl+'?modo=ficha';
+
+  if(modoAssinar){
+    iniciarModoAssinar();
+    return;
+  }
+
   var modo=getModoSalvo();
   var autenticado=false;
   try{autenticado=sessionStorage.getItem('cemtec_coord_auth')==='1';}catch(e){}
@@ -1558,28 +1674,293 @@ function copyProfessorLink(){
   var link=document.getElementById('profLinkDisplay').value;
   navigator.clipboard.writeText(link).then(function(){
     showToast('Link dos Professores copiado!');
+  }).catch(function(){
+    showToast('Link: '+link);
   });
 }
 
+/* ============ MODO ASSINAR (LINK) ============ */
+async function iniciarModoAssinar(){
+  document.body.classList.add('assinar');
+  switchView('assinar');
+
+  var box=document.getElementById('assinarResumo');
+  box.innerHTML='<div style="text-align:center;padding:24px;color:var(--mt);font-size:13px">Carregando ficha...</div>';
+
+  try{
+    var url=APPS_SCRIPT_URL+'?ficha='+encodeURIComponent(modoAssinar)+
+            '&c='+encodeURIComponent(codigoAssinar)+'&t='+Date.now();
+    var res=await fetch(url,{redirect:'follow'});
+    var json=await res.json();
+
+    if(json.status==='ja_assinada'){
+      fichaAssinar=json.ficha||null;
+      box.innerHTML='<div style="text-align:center;padding:20px">'+
+        '<div style="font-size:40px;margin-bottom:8px">✅</div>'+
+        '<div style="font-size:16px;font-weight:800;color:#166534;margin-bottom:6px">Esta ficha já foi assinada</div>'+
+        '<div style="font-size:13px;color:#64748b;line-height:1.6">Protocolo <strong>'+esc(modoAssinar)+'</strong>'+
+        (fichaAssinar&&fichaAssinar.pdfUrl?'<br/><br/><a href="'+fichaAssinar.pdfUrl+'" target="_blank" class="btn bs sm">📁 Abrir PDF assinado</a>':'')+
+        '</div></div>';
+      return;
+    }
+
+    if(json.status!=='ok'){
+      box.innerHTML='<div style="text-align:center;padding:20px">'+
+        '<div style="font-size:40px;margin-bottom:8px">⚠️</div>'+
+        '<div style="font-size:15px;font-weight:800;color:#b91c1c;margin-bottom:6px">Não foi possível abrir</div>'+
+        '<div style="font-size:13px;color:#64748b">'+esc(json.message||'Link inválido.')+'</div></div>';
+      return;
+    }
+
+    fichaAssinar=json.ficha;
+    renderResumoAssinar();
+
+  }catch(e){
+    box.innerHTML='<div style="text-align:center;padding:20px">'+
+      '<div style="font-size:40px;margin-bottom:8px">📡</div>'+
+      '<div style="font-size:15px;font-weight:800;color:#b91c1c;margin-bottom:6px">Falha de conexão</div>'+
+      '<div style="font-size:13px;color:#64748b">Verifique a internet e recarregue o link.</div></div>';
+  }
+}
+
+function renderResumoAssinar(){
+  var f=fichaAssinar;
+  if(!f)return;
+
+  var linhas=[
+    ['Protocolo',esc(f.protocolo)],
+    ['Servidor',esc(f.servidor)],
+    ['Departamento',esc(f.departamento)],
+    ['Unidade / Escola',esc(f.unidade)],
+    ['Responsável',esc(f.responsavel)],
+    ['Data',esc(f.dataBR||formatDateBR(f.data))],
+    ['Entrada',esc(formatTimeClean(f.entrada)||'—')],
+    ['Saída',esc(formatTimeClean(f.saida)||'—')],
+    ['Duração',esc(f.duracao||'—')]
+  ];
+
+  var html='<div class="ct" style="margin-bottom:12px">Resumo da Ficha</div><div class="resumo">';
+  linhas.forEach(function(l){
+    html+='<div class="lr"><b>'+l[0]+'</b><span>'+l[1]+'</span></div>';
+  });
+  html+='<div class="lr full"><b>Objetivo da Visita</b><span>'+esc(f.objetivo||'—')+'</span></div>';
+  html+='</div>';
+
+  html+='<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:18px">'+
+        '<button type="button" class="btn bp" onclick="liberarAssinaturaLink()">✅ Confirmo os dados — assinar</button>'+
+        '</div>';
+
+  document.getElementById('assinarResumo').innerHTML=html;
+  document.getElementById('assinarPadCard').style.display='none';
+  document.getElementById('assinarDone').style.display='none';
+}
+
+function liberarAssinaturaLink(){
+  var card=document.getElementById('assinarPadCard');
+  card.style.display='block';
+  if(!padLink){
+    padLink=new SignaturePad(document.getElementById('sigCanvasLink'));
+  }
+  setTimeout(function(){
+    if(padLink){padLink.resize();padLink.redraw();}
+    try{card.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){}
+  },120);
+}
+
+async function assinarViaLink(){
+  if(!fichaAssinar){showToast('Ficha não carregada.');return;}
+  if(!padLink||padLink.isEmpty()){
+    document.getElementById('sigBoxLink').classList.add('err');
+    showToast('Faça a assinatura na tela antes de confirmar.');
+    return;
+  }
+  if(padLink.areaCoberta()<AREA_MINIMA_ASSINATURA){
+    document.getElementById('sigBoxLink').classList.add('err');
+    showToast('Assinatura muito simples. Assine novamente.');
+    return;
+  }
+
+  var btn=document.getElementById('btnAssinarLink');
+  var orig=btn.textContent;
+  enviando=true;
+  btn.disabled=true;
+  btn.textContent='⏳ Enviando assinatura...';
+
+  var agora=new Date().toISOString();
+  var payload={
+    protocolo:fichaAssinar.protocolo,
+    servidor:fichaAssinar.servidor,
+    departamento:fichaAssinar.departamento,
+    unidade:fichaAssinar.unidade,
+    responsavel:fichaAssinar.responsavel,
+    data:fichaAssinar.data,
+    dataBR:fichaAssinar.dataBR,
+    entrada:formatTimeClean(fichaAssinar.entrada),
+    saida:formatTimeClean(fichaAssinar.saida),
+    duracao:fichaAssinar.duracao,
+    objetivo:fichaAssinar.objetivo,
+    sigUnit:padLink.toDataURL(),
+    assinaturaEm:agora,
+    assinaturaCodigo:fichaAssinar.codigo||codigoAssinar,
+    assinaturaTracos:padLink.strokes.length,
+    assinaturaPontos:padLink.totalPontos(),
+    assinaturaArea:Number(padLink.areaCoberta().toFixed(4)),
+    registradoEm:fichaAssinar.assinaturaem||agora,
+    status:'signed'
+  };
+
+  try{
+    var res=await fetch(APPS_SCRIPT_URL,{
+      method:'POST',
+      redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(payload)
+    });
+    var json=await res.json();
+
+    if(json.status==='ok'){
+      document.getElementById('assinarPadCard').style.display='none';
+      var done=document.getElementById('assinarDone');
+      done.style.display='block';
+      done.innerHTML='<div style="text-align:center;padding:10px">'+
+        '<div style="font-size:44px;margin-bottom:8px">✅</div>'+
+        '<div style="font-size:17px;font-weight:800;color:#166534;margin-bottom:6px">Ficha assinada com sucesso</div>'+
+        '<div style="font-size:13px;color:#64748b;line-height:1.7;margin-bottom:14px">'+
+          'Protocolo <strong>'+esc(payload.protocolo)+'</strong><br/>'+
+          'Código de verificação: <strong>'+esc(json.codigo||payload.assinaturaCodigo)+'</strong>'+
+        '</div>'+
+        (json.pdfUrl?'<a href="'+json.pdfUrl+'" target="_blank" class="btn bs">📁 Abrir PDF assinado</a>':'')+
+        '</div>';
+      showToast('Assinatura registrada.');
+    }else{
+      showToast('⚠️ Erro: '+(json.message||'tente novamente'));
+    }
+  }catch(err){
+    showToast('⚠️ Falha de conexão: '+err.message);
+  }finally{
+    enviando=false;
+    btn.disabled=false;
+    btn.textContent=orig;
+  }
+}
+
+/* ============ CONTINUAR FICHA ============ */
+function continuarFicha(v){
+  if(!v)return;
+  fichaAtual={protocolo:v.protocolo,codigo:v.assinaturaCodigo||v.codigo||''};
+
+  autoState.depto=true;autoState.serv=true;autoState.unidade=true;autoState.resp=true;
+  preencherAuto('fDepartamento',v.departamento||'','depto');
+  preencherAuto('fServidor',v.servidor||'','serv');
+  preencherAuto('fUnidade',v.unidade||'','unidade');
+  preencherAuto('fResponsavel',v.responsavel||'','resp');
+  autoState.resp=false;
+
+  document.getElementById('fData').value=v.data||todayISO();
+  document.getElementById('fEntrada').value=formatTimeClean(v.entrada)||'';
+  document.getElementById('fSaida').value=formatTimeClean(v.saida)||'';
+
+  var todas=(lists.objetivos||[]);
+  var linhas=String(v.objetivo||'').replace(/^•\s*/gm,'').split('\n')
+    .map(function(s){return s.trim();}).filter(Boolean);
+  var livres=[];
+  selectedObjetivos=[];
+  linhas.forEach(function(l){
+    var achou=todas.filter(function(o){return normaliza(o)===normaliza(l);})[0];
+    if(achou){
+      if(selectedObjetivos.indexOf(achou)===-1)selectedObjetivos.push(achou);
+    }else{
+      livres.push(l);
+    }
+  });
+  document.getElementById('fObjetivo').value=livres.join('\n');
+
+  renderObjPills();
+  renderObjLista();
+  atualizarContadorObjetivo();
+  aplicarFiltroServidor();
+  atualizarTodosCombos();
+
+  document.getElementById('bannerContinuar').style.display='block';
+  document.getElementById('bannerProtocolo').textContent=v.protocolo;
+  document.getElementById('btnSaveChegada').textContent='💾 Salvar (ainda sem saída)';
+
+  switchView('new');
+  setTimeout(function(){
+    try{document.getElementById('fSaida').scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}
+    try{document.getElementById('fSaida').focus();}catch(e){}
+  },300);
+}
+
+function cancelarContinuar(){
+  fichaAtual=null;
+  document.getElementById('bannerContinuar').style.display='none';
+  document.getElementById('bannerProtocolo').textContent='';
+  document.getElementById('visitForm').reset();
+  selectedObjetivos=[];
+  renderObjPills();
+  renderObjLista();
+  atualizarContadorObjetivo();
+  document.getElementById('fData').value=todayISO();
+  setNowTime('fEntrada');
+  document.getElementById('btnSaveChegada').textContent='📥 Salvar Chegada';
+  if(padUnit)padUnit.clear();
+  esconderHint('hintDepto');
+  esconderHint('hintServ');
+  esconderHint('hintUnidade');
+  esconderHint('hintResp');
+  limparTodosErros();
+  atualizarTodosCombos();
+}
+
+/* ============ LINK DE ASSINATURA ============ */
+function linkAssinatura(v){
+  if(!v)return '';
+  var base=window.location.href.split('?')[0];
+  var cod=v.assinaturaCodigo||v.codigo||'';
+  return base+'?assinar='+encodeURIComponent(v.protocolo)+'&c='+encodeURIComponent(cod);
+}
+
+function copiarLinkAssinatura(v){
+  if(!v)return;
+  if(!(v.assinaturaCodigo||v.codigo)){
+    showToast('Ficha sem código. Abra e salve a ficha novamente.');
+    return;
+  }
+  var link=linkAssinatura(v);
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link).then(function(){
+      showToast('Link copiado. Envie ao responsável pela escola.');
+    }).catch(function(){
+      showToast('Link: '+link);
+    });
+  }else{
+    showToast('Link: '+link);
+  }
+}
+
 /* ============ SALVAR ============ */
-async function saveVisit(mode){
+function gerarProtocoloLocal(){
+  return 'SEMED-'+new Date().getFullYear()+'-'+String(Math.floor(1000+Math.random()*9000));
+}
+
+async function saveVisit(modo){
   if(enviando)return;
   fecharTodosCombos();
   limparTodosErros();
-  var exigeTudo=(mode==='signed')||EXIGIR_TUDO_NO_PENDENTE;
-  if(exigeTudo){
-    var problema=validarFicha(mode);
-    if(problema){
-      if(problema.id==='sigBox'){
-        document.getElementById('sigBox').classList.add('err');
-        try{document.getElementById('sigBox').scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}
-      }else{
-        marcarErro(problema.id);
-      }
-      showToast(problema.msg);
-      return;
+
+  var problema=validarFicha(modo);
+  if(problema){
+    if(problema.id==='sigBox'){
+      document.getElementById('sigBox').classList.add('err');
+      try{document.getElementById('sigBox').scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}
+    }else{
+      marcarErro(problema.id);
     }
+    showToast(problema.msg);
+    return;
   }
+
   var departamento=document.getElementById('fDepartamento').value.trim();
   var servidor=document.getElementById('fServidor').value.trim();
   var unidade=document.getElementById('fUnidade').value.trim();
@@ -1588,13 +1969,18 @@ async function saveVisit(mode){
   var entrada=document.getElementById('fEntrada').value;
   var saida=document.getElementById('fSaida').value;
   var objetivo=montarObjetivoFinal();
-  var sigUnit=padUnit.isEmpty()?'':padUnit.toDataURL();
+  var assinada=(modo==='finalizar');
+  var sigUnit=assinada&&!padUnit.isEmpty()?padUnit.toDataURL():'';
+
+  var protocolo=(fichaAtual&&fichaAtual.protocolo)?fichaAtual.protocolo:gerarProtocoloLocal();
+  var codigoAtual=(fichaAtual&&fichaAtual.codigo)?fichaAtual.codigo:'';
 
   var agora=new Date().toISOString();
-  var area=Number(padUnit.areaCoberta().toFixed(4));
+  var area=assinada?Number(padUnit.areaCoberta().toFixed(4)):0;
+
   var visit={
     id:'v_'+Date.now(),
-    protocolo:'SEMED-'+new Date().getFullYear()+'-'+String(Math.floor(1000+Math.random()*9000)),
+    protocolo:protocolo,
     servidor:servidor,
     departamento:departamento,
     unidade:unidade,
@@ -1605,27 +1991,30 @@ async function saveVisit(mode){
     saida:saida,
     duracao:formatMinutes(calcDurationMinutes(entrada,saida)),
     objetivo:objetivo,
-    sigUnit:mode==='signed'?sigUnit:'',
-    assinaturaEm:mode==='signed'?agora:'',
-    assinaturaCodigo:'',
-    assinaturaTracos:mode==='signed'?padUnit.strokes.length:'',
-    assinaturaPontos:mode==='signed'?padUnit.totalPontos():'',
-    assinaturaArea:mode==='signed'?area:'',
+    sigUnit:sigUnit,
+    assinaturaEm:assinada?agora:'',
+    assinaturaCodigo:codigoAtual,
+    assinaturaTracos:assinada?padUnit.strokes.length:'',
+    assinaturaPontos:assinada?padUnit.totalPontos():'',
+    assinaturaArea:area,
     registradoEm:agora,
-    status:mode==='signed'?'signed':'pending',
+    status:assinada?'signed':'pending',
     pdfUrl:''
   };
 
   var aprendidoLocal=registrarLocal(servidor,departamento,unidade,responsavel);
 
-  var btn=document.getElementById(mode==='signed'?'btnSaveSigned':'btnSavePending');
-  var outroBtn=document.getElementById(mode==='signed'?'btnSavePending':'btnSaveSigned');
+  var btnId=assinada?'btnSaveFinalizar':'btnSaveChegada';
+  var outroId=assinada?'btnSaveChegada':'btnSaveFinalizar';
+  var btn=document.getElementById(btnId);
+  var outroBtn=document.getElementById(outroId);
   var origText=btn.textContent;
   enviando=true;
   btn.disabled=true;
   outroBtn.disabled=true;
-  btn.textContent='⏳ Salvando e gerando PDF...';
+  btn.textContent=assinada?'⏳ Assinando e gerando PDF...':'⏳ Salvando chegada...';
 
+  var falhou=false;
   try{
     if(APPS_SCRIPT_URL){
       var res=await fetch(APPS_SCRIPT_URL,{
@@ -1639,17 +2028,19 @@ async function saveVisit(mode){
         if(json.pdfUrl)visit.pdfUrl=json.pdfUrl;
         if(json.codigo)visit.assinaturaCodigo=json.codigo;
         if(json.aviso)console.warn('Aviso do Apps Script:',json.aviso);
-        var aprendidoServidor=Array.isArray(json.aprendido)&&json.aprendido.length>0;
-        if(aprendidoLocal||aprendidoServidor){
-          showToast('✅ Ficha salva. Nomes novos gravados na planilha.');
+
+        if(assinada){
+          showToast('✅ Ficha finalizada, assinada e PDF gerado no Drive!');
         }else{
-          showToast('✅ Ficha salva na Planilha e PDF gerado no Drive!');
+          showToast('📥 Chegada salva. Ao sair, preencha a saída e finalize.');
         }
       }else{
+        falhou=true;
         showToast('⚠️ Erro: '+(json.message||'tente novamente'));
       }
     }
   }catch(err){
+    falhou=true;
     showToast('⚠️ Falha de conexão: '+err.message);
   }finally{
     enviando=false;
@@ -1658,13 +2049,36 @@ async function saveVisit(mode){
     btn.textContent=origText;
   }
 
-  if(!visit.assinaturaCodigo&&visit.status==='signed'){
+  if(!visit.assinaturaCodigo&&assinada){
     visit.assinaturaCodigo=sigetCodigo(visit.protocolo+'|'+visit.assinaturaEm);
   }
 
-  visits.unshift(visit);
+  var idx=visits.findIndex(function(x){return x.protocolo===visit.protocolo;});
+  if(idx>=0) visits[idx]=Object.assign(visits[idx],visit);
+  else visits.unshift(visit);
   localStorage.setItem('cemtec_visits_v5',JSON.stringify(visits));
 
+  if(assinada){
+    visit.assinaturaCodigo=visit.assinaturaCodigo||visit.codigo;
+    resetFormularioCompleto();
+    renderDashboard();
+    renderReportsTable();
+    openA4Modal(visit);
+  }else{
+    fichaAtual={protocolo:visit.protocolo,codigo:visit.assinaturaCodigo||''};
+    document.getElementById('bannerContinuar').style.display='block';
+    document.getElementById('bannerProtocolo').textContent=visit.protocolo;
+    document.getElementById('btnSaveChegada').textContent='💾 Salvar (ainda sem saída)';
+    renderDashboard();
+    renderReportsTable();
+    if(!falhou){
+      showToast('📥 Chegada salva. Volte ao sair, preencha o horário e finalize.');
+    }
+  }
+}
+
+function resetFormularioCompleto(){
+  fichaAtual=null;
   document.getElementById('visitForm').reset();
   autoState.depto=false;
   autoState.serv=false;
@@ -1680,15 +2094,14 @@ async function saveVisit(mode){
   renderObjLista();
   document.getElementById('fData').value=todayISO();
   setNowTime('fEntrada');
-  padUnit.clear();
+  if(padUnit)padUnit.clear();
   atualizarContadorObjetivo();
   limparTodosErros();
   populateDatalists();
   atualizarTodosCombos();
-
-  renderDashboard();
-  renderReportsTable();
-  openA4Modal(visit);
+  document.getElementById('bannerContinuar').style.display='none';
+  document.getElementById('bannerProtocolo').textContent='';
+  document.getElementById('btnSaveChegada').textContent='📥 Salvar Chegada';
 }
 
 /* ============ SINCRONIZAÇÃO ============ */
@@ -1840,7 +2253,7 @@ async function syncTudo(silent){
           localStorage.setItem('cemtec_visits_v5',JSON.stringify(visits));
         }
         if(lbl)lbl.textContent='Conectada — '+visits.length+' ficha(s) | '+
-          (lists.objetivos||[]).length+' objetivo(s) | '+
+          visits.filter(function(v){return v.status!=='signed';}).length+' pendente(s) | '+
           (lists.unidades||[]).length+' unidade(s)';
       }else{
         if(lbl)lbl.textContent='Erro: '+(json.message||'desconhecido');
@@ -1922,6 +2335,21 @@ function respCell(nome){
   return n?'<span class="rc">'+esc(n)+'</span>':'<span class="rc rv">não informado</span>';
 }
 
+/* ============ AÇÕES DAS TABELAS ============ */
+function acoesCell(v,listaNome,idx){
+  var h='';
+  if(v.pdfUrl){
+    h+='<a href="'+v.pdfUrl+'" target="_blank" class="btn bs sm">📁 PDF</a> ';
+  }
+  if(v.status!=='signed'){
+    h+='<button class="btn bp sm" onclick="continuarFicha(window.'+listaNome+'['+idx+'])">▶ Continuar</button> ';
+    h+='<button class="btn bo sm" onclick="copiarLinkAssinatura(window.'+listaNome+'['+idx+'])">🔗 Link</button>';
+  }else if(!v.pdfUrl){
+    h+='<button class="btn bo sm" onclick="openA4Modal(window.'+listaNome+'['+idx+'])">📄 A4</button>';
+  }
+  return h||'—';
+}
+
 /* ============ DASHBOARD ============ */
 function renderDashboard(){
   var today=todayISO();
@@ -1942,7 +2370,7 @@ function renderDashboard(){
   set('kpiPendingText',pending+' pendente(s)');
   set('kpiAvgTime',formatMinutes(avg));
   var badge=document.getElementById('navPendingBadge');
-  if(badge)badge.textContent=total;
+  if(badge)badge.textContent=pending;
   var countBy=function(k){
     var m={};
     visits.forEach(function(v){m[v[k]]=(m[v[k]]||0)+1;});
@@ -1982,9 +2410,7 @@ function renderDashboard(){
       '<td>'+esc(v.unidade)+'</td>'+
       '<td>'+respCell(v.responsavel)+'</td>'+
       '<td>'+(v.status==='signed'?'<span class="sp s">✅ Assinada</span>':'<span class="sp p">⏳ Pendente</span>')+'</td>'+
-      '<td>'+(v.pdfUrl
-        ?'<a href="'+v.pdfUrl+'" target="_blank" class="btn bs sm">📁 PDF Drive</a>'
-        :'<button class="btn bo sm" onclick="openA4Modal(window._dashList['+i+'])">📄 A4</button>')+'</td>'+
+      '<td>'+acoesCell(v,'_dashList',i)+'</td>'+
     '</tr>';
   }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--mt);padding:20px">Nenhuma visita registrada ainda.</td></tr>';
 }
@@ -2063,9 +2489,7 @@ function renderReportsTable(){
       '<td>'+respCell(v.responsavel)+'</td>'+
       '<td>'+esc(formatTimeClean(v.entrada))+(v.saida?' – '+esc(formatTimeClean(v.saida)):'')+'</td>'+
       '<td>'+(v.status==='signed'?'<span class="sp s">✅ Assinada</span>':'<span class="sp p">⏳ Pendente</span>')+'</td>'+
-      '<td>'+(v.pdfUrl
-        ?'<a href="'+v.pdfUrl+'" target="_blank" class="btn bs sm">📁 PDF Drive</a>'
-        :'<button class="btn bo sm" onclick="openA4Modal(window._reportList['+i+'])">📄 A4</button>')+'</td>'+
+      '<td>'+acoesCell(v,'_reportList',i)+'</td>'+
     '</tr>';
   }).join('')||'<tr><td colspan="8" style="text-align:center;color:var(--mt);padding:20px">Nenhuma ficha encontrada com estes filtros.</td></tr>';
   var assinadas=list.filter(function(v){return v.status==='signed';}).length;
@@ -2116,7 +2540,7 @@ function openA4Modal(v){
     :(v.status==='signed'
       ?(sigetHTML(v,false)||
         '<div style="height:40px;display:flex;align-items:center;justify-content:center;color:#16a34a;font-weight:700;font-family:Inter,sans-serif;font-size:12px">✔ Assinada digitalmente (ver PDF oficial no Drive)</div>')
-      :'<div style="height:40px;color:#d97706">[ Pendente ]</div>');
+      :'<div style="height:40px;color:#d97706">[ Pendente — sem assinatura ]</div>');
   document.getElementById('a4ModalBody').innerHTML=
     '<div class="a4">'+
       '<div class="a4h">'+
@@ -2271,11 +2695,13 @@ document.addEventListener('click',function(e){
 window.addEventListener('resize',function(){
   if(padUnit){padUnit.resize();padUnit.redraw();}
   if(padFs){padFs.resize();padFs.redraw();}
+  if(padLink){padLink.resize();padLink.redraw();}
 });
 window.addEventListener('orientationchange',function(){
   setTimeout(function(){
     if(padUnit){padUnit.resize();padUnit.redraw();}
     if(padFs){padFs.resize();padFs.redraw();}
+    if(padLink){padLink.resize();padLink.redraw();}
   },350);
 });
 
@@ -2364,7 +2790,10 @@ window.addEventListener('DOMContentLoaded',function(){
   tentar('contador',atualizarContadorObjetivo);
   tentar('relatorios',renderReportsTable);
   tentar('acesso',initAccessMode);
-  tentar('sync',function(){syncTudo(true);});
+
+  if(!modoAssinar){
+    tentar('sync',function(){syncTudo(true);});
+  }
 
   setTimeout(function(){
     tentar('resize',function(){if(padUnit){padUnit.resize();padUnit.redraw();}});
