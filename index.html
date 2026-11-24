@@ -362,7 +362,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
             </div>
           </div>
           <div class="gp">
-            <label>Horário de Saída <span id="lblSaida" style="font-weight:500;color:var(--mt);font-size:11px">preencha ao sair</span></label>
+            <label>Horário de Saída <span id="lblSaida" style="font-weight:500;color:var(--mt);font-size:11px">ao sair</span></label>
             <div class="ir">
               <input type="time" id="fSaida" />
               <button type="button" class="btn bo sm" onclick="setNowTime('fSaida')">Agora</button>
@@ -431,7 +431,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
 
 <section class="vs" id="view-reports">
   <div class="ph">
-    <div class="pt"><h1>Relatórios &amp; PDFs no Drive</h1><p>Fichas pendentes têm <strong>Continuar</strong> e <strong>Link</strong>. Fichas com <strong>📴 Local</strong> ainda não subiram para a planilha.</p></div>
+    <div class="pt"><h1>Relatórios &amp; PDFs no Drive</h1><p>Fichas pendentes têm <strong>Continuar</strong> e <strong>Link</strong>. O link só é liberado com a <strong>Saída</strong> preenchida.</p></div>
     <div class="hacts">
       <button class="btn bo" onclick="syncVisitsFromCloud()">🔄 Atualizar</button>
       <button class="btn bp" onclick="exportCSV()">📥 Exportar CSV</button>
@@ -563,7 +563,7 @@ th{background:#f8fafc;color:#475569;font-weight:700;font-size:11px;text-transfor
     </div>
     <div class="mbody">
       <div class="sigav" style="margin-bottom:14px">
-        Envie ao responsável pela escola <strong id="linkProtocolo"></strong>. Ele abre o resumo, confere os dados e assina no celular — sem senha.
+        Envie ao responsável pela escola <strong id="linkProtocolo"></strong>. Ele abre o resumo, confere os dados com <strong>saída e duração já preenchidas</strong> e assina no celular — sem senha.
       </div>
       <input type="text" id="linkValor" readonly onclick="this.select()" style="font-size:12px" />
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px">
@@ -974,13 +974,8 @@ function estaAutenticado(){
 function marcarAutenticado(){
   try{sessionStorage.setItem('cemtec_coord_auth','1');}catch(e){}
 }
-
-/* Remove ?modo=ficha / ?t= da barra de endereco */
 function limparParametrosModo(){
-  try{
-    var limpa=window.location.pathname;
-    window.history.replaceState({},'',limpa);
-  }catch(e){}
+  try{ window.history.replaceState({},'',window.location.pathname); }catch(e){}
 }
 
 function sairSistema(){
@@ -1281,7 +1276,7 @@ function validarFicha(modo){
   }
 
   if(modo==='finalizar'){
-    if(!v.saida)return{id:'fSaida',msg:'Preencha o Horário de Saída para finalizar.'};
+    if(!v.saida)return{id:'fSaida',msg:'Preencha o Horário de Saída para finalizar — a duração depende dele.'};
     var minEnt=calcDurationMinutes(v.entrada,v.saida);
     if(minEnt===null)return{id:'fSaida',msg:'O Horário de Saída deve ser igual ou posterior ao de Entrada.'};
     if(padUnit.isEmpty())return{id:'sigBox',msg:'Colha a assinatura na tela antes de finalizar.'};
@@ -1878,6 +1873,10 @@ function renderResumoAssinar(){
   var f=fichaAssinar;
   if(!f)return;
 
+  var saidaTxt=formatTimeClean(f.saida);
+  var durTxt=f.duracao||formatMinutes(calcDurationMinutes(f.entrada,f.saida));
+  var incompleta=!saidaTxt||!durTxt;
+
   var linhas=[
     ['Protocolo',esc(f.protocolo)],
     ['Servidor',esc(f.servidor)],
@@ -1886,8 +1885,8 @@ function renderResumoAssinar(){
     ['Responsável',esc(f.responsavel)],
     ['Data',esc(f.dataBR||formatDateBR(f.data))],
     ['Entrada',esc(formatTimeClean(f.entrada)||'—')],
-    ['Saída',esc(formatTimeClean(f.saida)||'—')],
-    ['Duração',esc(f.duracao||calcDurationMinutes(f.entrada,f.saida)||'—')]
+    ['Saída',esc(saidaTxt||'—')],
+    ['Duração',esc(durTxt||'—')]
   ];
 
   var html='<div class="ct" style="margin-bottom:12px">Resumo da Ficha</div><div class="resumo">';
@@ -1897,9 +1896,17 @@ function renderResumoAssinar(){
   html+='<div class="lr full"><b>Objetivo da Visita</b><span>'+esc(f.objetivo||'—')+'</span></div>';
   html+='</div>';
 
-  html+='<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:18px">'+
-        '<button type="button" class="btn bp" onclick="liberarAssinaturaLink()">✅ Confirmo os dados — assinar</button>'+
-        '</div>';
+  if(incompleta){
+    html+='<div style="margin-top:16px;padding:14px;border-radius:10px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;font-size:13px;line-height:1.6">'+
+      '<strong>Ficha incompleta — não assine ainda.</strong><br/>'+
+      'O horário de saída e a duração ainda não foram registrados pela coordenação. '+
+      'Peça para completarem e envie o link novamente.'+
+      '</div>';
+  }else{
+    html+='<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:18px">'+
+          '<button type="button" class="btn bp" onclick="liberarAssinaturaLink()">✅ Confirmo os dados — assinar</button>'+
+          '</div>';
+  }
 
   document.getElementById('assinarResumo').innerHTML=html;
   document.getElementById('assinarPadCard').style.display='none';
@@ -1920,6 +1927,12 @@ function liberarAssinaturaLink(){
 
 async function assinarViaLink(){
   if(!fichaAssinar){showToast('Ficha não carregada.');return;}
+
+  if(!formatTimeClean(fichaAssinar.saida)||!fichaAssinar.duracao){
+    showToast('Ficha incompleta — peça à coordenação para registrar a saída.');
+    return;
+  }
+
   if(!padLink||padLink.isEmpty()){
     document.getElementById('sigBoxLink').classList.add('err');
     showToast('Faça a assinatura na tela antes de confirmar.');
@@ -1978,13 +1991,14 @@ async function assinarViaLink(){
         '<div style="font-size:17px;font-weight:800;color:#166534;margin-bottom:6px">Ficha assinada com sucesso</div>'+
         '<div style="font-size:13px;color:#64748b;line-height:1.7;margin-bottom:14px">'+
           'Protocolo <strong>'+esc(payload.protocolo)+'</strong><br/>'+
+          'Saída <strong>'+esc(payload.saida)+'</strong> · Duração <strong>'+esc(json.duracao||payload.duracao)+'</strong><br/>'+
           'Código de verificação: <strong>'+esc(json.codigo||payload.assinaturaCodigo)+'</strong>'+
         '</div>'+
         (json.pdfUrl?'<a href="'+json.pdfUrl+'" target="_blank" class="btn bs">📁 Abrir PDF assinado</a>':'')+
         '</div>';
       showToast('Assinatura registrada.');
     }else{
-      showToast('⚠️ Erro: '+(json.message||'tente novamente'));
+      showToast('⚠️ '+(json.message||'Não foi possível assinar. Tente novamente.'));
     }
   }catch(err){
     showToast('⚠️ Falha de conexão: '+err.message);
@@ -2153,10 +2167,16 @@ function linkAssinatura(v){
 
 function copiarLinkAssinatura(v){
   if(!v)return;
+
   if(!(v.assinaturaCodigo||v.codigo)){
     showToast('Ficha ainda sem código. Envie para a planilha primeiro (☁️ Enviar).');
     return;
   }
+  if(!formatTimeClean(v.saida)){
+    showToast('Preencha a Saída antes de gerar o link — ela é necessária para a duração.');
+    return;
+  }
+
   var link=linkAssinatura(v);
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(link).then(function(){
@@ -2193,6 +2213,7 @@ async function reenviarFicha(v){
         visits[i]._local=false;
         if(json.codigo)visits[i].assinaturaCodigo=json.codigo;
         if(json.duracao)visits[i].duracao=json.duracao;
+        if(json.saida)visits[i].saida=json.saida;
         if(json.pdfUrl)visits[i].pdfUrl=json.pdfUrl;
       }
       localStorage.setItem('cemtec_visits_v5',JSON.stringify(visits));
@@ -2303,7 +2324,6 @@ async function saveVisit(modo){
         if(json.duracao)visit.duracao=json.duracao;
         if(json.aviso)console.warn('Aviso do Apps Script:',json.aviso);
         visit._local=false;
-
         if(json.codigo)codigoFichaAtual=json.codigo;
 
         showToast(assinada
@@ -2352,7 +2372,7 @@ async function saveVisit(modo){
     renderReportsTable();
     atualizarBtnLink();
     if(!falhou){
-      showToast('📥 Chegada salva. Volte ao sair, preencha o horário e finalize.');
+      showToast('📥 Chegada salva. Volte ao sair, preencha a saída e finalize.');
     }
   }
 }
@@ -2674,7 +2694,7 @@ function renderDashboard(){
   set('kpiUnits',new Set(visits.map(function(v){return v.unidade;})).size);
   set('kpiSignedRate',(total?Math.round(signed/total*100):0)+'%');
   set('kpiPendingText',pending+' pendente(s)');
-  set('kpiAvgTime',formatMinutes(avg));
+  set('kpiAvgTime',formatMinutes(avg)||'0 min');
   var badge=document.getElementById('navPendingBadge');
   if(badge)badge.textContent=pending;
 
@@ -3111,7 +3131,7 @@ window.addEventListener('DOMContentLoaded',function(){
     tentar('sync',function(){syncTudo(true);});
   }
 
-  /* Recupera a ficha que estava aberta — apenas no modo professor */
+  /* Recupera a ficha aberta — apenas no modo professor e sem login de coordenador */
   if(!modoAssinar && !estaAutenticado() && getModoSalvo()==='ficha'){
     setTimeout(function(){tentar('restaurar',restaurarFichaAberta);},700);
   }
